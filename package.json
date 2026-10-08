@@ -1,0 +1,19 @@
+{
+  "name": "ansorito-web-completo",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "node server/index.cjs",
+    "test": "node --test server/*.test.cjs",
+    "test:original": "node src/tests/run-tests.js",
+    "start:configured": "node --env-file=.env server/index.cjs"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "dependencies": {
+    "pdfmake": "0.3.9",
+    "xlsx": "0.18.5",
+    "xlsx-js-style": "1.2.0"
+  }
+}

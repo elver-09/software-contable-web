@@ -1,0 +1,1540 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com data:; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'self'; worker-src 'self' blob:;"
+    />
+    <title>Ansorito</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="./css/styles.css" />
+  <script src="/bridge.js"></script></head>
+  <body>
+    <aside class="sidebar">
+      <div class="sidebar-controls">
+        <button id="btn-theme-toggle" title="Cambiar tema" aria-label="Activar tema oscuro">
+          <i class="fa-solid fa-moon" aria-hidden="true"></i>
+        </button>
+        <button
+          id="sidebar-toggle"
+          title="Contraer o ampliar menú"
+          aria-label="Contraer o ampliar menú"
+        >
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
+      <div class="company-logo">
+        <img
+          id="sidebar-logo"
+          src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+          alt="Logo Empresa"
+        />
+      </div>
+      <h2 id="sidebar-title" class="menu-text">Ansorito</h2>
+
+      <button class="menu-btn active" data-target="view-dashboard" title="Dashboard">
+        <i class="fa-solid fa-house"></i> <span class="menu-text">Dashboard</span>
+      </button>
+      <button class="menu-btn" data-target="view-cartera" title="Cartera y Vencimientos">
+        <i class="fa-solid fa-wallet"></i> <span class="menu-text">Cartera y Vencimientos</span>
+      </button>
+      <div class="menu-group">
+        <button class="menu-btn has-submenu" title="Tablas">
+          <i class="fa-solid fa-table"></i> <span class="menu-text">Tablas ▾</span>
+        </button>
+        <div class="submenu">
+          <button class="submenu-item" data-target="view-plan-cuentas" title="Plan Contable">
+            <i class="fa-solid fa-book"></i> <span class="menu-text">Plan Contable</span>
+          </button>
+          <button
+            class="submenu-item"
+            data-target="view-tipos-documentos"
+            title="Tipos de Documentos"
+          >
+            <i class="fa-solid fa-file-invoice"></i>
+            <span class="menu-text">Tipos de Documentos</span>
+          </button>
+          <button class="submenu-item" data-target="view-entidades" title="Cliente / Proveedor">
+            <i class="fa-solid fa-users"></i> <span class="menu-text">Cliente / Proveedor</span>
+          </button>
+          <button class="submenu-item" data-target="view-monedas" title="Monedas y T.C.">
+            <i class="fa-solid fa-coins"></i> <span class="menu-text">Monedas y T.C.</span>
+          </button>
+          <button class="submenu-item" data-target="view-amarres" title="Amarres del Asistente">
+            <i class="fa-solid fa-link"></i> <span class="menu-text">Amarres del Asistente</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="menu-group">
+        <button class="menu-btn has-submenu" title="Contabilidad">
+          <i class="fa-solid fa-calculator"></i> <span class="menu-text">Contabilidad ▾</span>
+        </button>
+        <div class="submenu">
+          <button class="submenu-item" data-target="view-voucher" title="Voucher">
+            <i class="fa-solid fa-file-invoice-dollar"></i> <span class="menu-text">Voucher</span>
+          </button>
+          <button class="submenu-item" data-target="view-editar-registros" title="Editar Registros">
+            <i class="fa-solid fa-pen-to-square"></i>
+            <span class="menu-text">Editar Registros</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="menu-group">
+        <button class="menu-btn has-submenu" title="Reportes SUNAT">
+          <i class="fa-solid fa-chart-bar"></i> <span class="menu-text">Reportes SUNAT ▾</span>
+        </button>
+        <div class="submenu">
+          <button class="submenu-item" data-target="view-reportes" title="Libros Contables">
+            <i class="fa-solid fa-book-open"></i> <span class="menu-text">Libros</span>
+          </button>
+          <button
+            class="submenu-item"
+            data-target="view-estados-financieros"
+            title="Estados Financieros"
+          >
+            <i class="fa-solid fa-chart-line"></i>
+            <span class="menu-text">Estados Financieros</span>
+          </button>
+          <button class="submenu-item" data-target="view-config-eeff" title="Config. EEFF">
+            <i class="fa-solid fa-sliders"></i> <span class="menu-text">Config. EEFF</span>
+          </button>
+          <button class="submenu-item" data-target="view-config-er" title="Config. ER">
+            <i class="fa-solid fa-chart-line"></i> <span class="menu-text">Config. ER</span>
+          </button>
+        </div>
+      </div>
+
+      <button class="menu-btn" data-target="view-sire" title="SIRE">
+        <i class="fa-solid fa-file-shield"></i> <span class="menu-text">SIRE</span>
+      </button>
+
+      <button class="menu-btn" data-target="view-empresa-gestion" title="Mi Empresa">
+        <i class="fa-solid fa-building"></i> <span class="menu-text">Mi Empresa</span>
+      </button>
+    </aside>
+
+    <main class="main-content">
+      <!-- ══════════════════════════════════════════════════════════════
+      DASHBOARD — PORTADA PRINCIPAL
+      ══════════════════════════════════════════════════════════════ -->
+      <section id="view-dashboard" class="view-section active">
+        <!-- El contenido lo inyecta dashboard.js dinámicamente -->
+        <div id="dashboard-root" class="view-root"></div>
+      </section>
+
+      <section id="view-cartera" class="view-section">
+        <div id="cartera-root" class="view-root"></div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════════════════
+      MÓDULO: EDITAR REGISTROS (contenido dinámico)
+      ══════════════════════════════════════════════════════════════ -->
+      <section id="view-editar-registros" class="view-section">
+        <div id="editar-registros-root" class="view-root"></div>
+      </section>
+
+      <section id="view-empresa-gestion" class="view-section">
+        <div class="company-layout">
+          <!-- COLUMNA IZQUIERDA: Directorio de Empresas -->
+          <div class="card company-directory">
+            <div class="company-directory-header">
+              <h2>Mis Empresas</h2>
+              <button id="btnNuevaEmpresa" class="btn-primary">
+                <i class="fa-solid fa-plus"></i> Nueva
+              </button>
+            </div>
+            <div class="company-directory-label">
+              <p>Directorio (Doble clic para abrir)</p>
+            </div>
+            <div id="lista-empresas-items">
+              <!-- Lista dinámica de empresas -->
+            </div>
+          </div>
+
+          <!-- COLUMNA DERECHA: Perfil de la Empresa Activa (Estilo SaaS Premium) -->
+          <div class="company-profile">
+            <!-- HERO CARD -->
+            <div class="card company-summary">
+              <div class="company-summary-banner"></div>
+              <div class="company-summary-content">
+                <div class="company-avatar">
+                  <img
+                    id="main-profile-logo"
+                    src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                    alt="Logo de la empresa"
+                  />
+                  <i id="main-profile-icon" class="fa-solid fa-building"></i>
+                </div>
+                <div class="company-summary-details">
+                  <div class="company-summary-heading">
+                    <h2 id="emp_nombre">Sin Empresa</h2>
+                    <span id="emp_connection_state" class="badge-status" hidden
+                      ><i class="fa-solid fa-circle-check"></i> Conectada</span
+                    >
+                  </div>
+                  <span id="emp_ruc"><i class="fa-solid fa-hashtag text-muted"></i> RUC: --</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- WIDGETS DE INFORMACIÓN -->
+            <h3 class="company-contact-title">Información de Contacto</h3>
+            <div class="company-contact-grid">
+              <!-- Widget: Dirección -->
+              <div class="card profile-widget">
+                <div class="profile-icon profile-icon--address">
+                  <i class="fa-solid fa-location-dot"></i>
+                </div>
+                <div>
+                  <span class="profile-label">Dirección Fiscal</span>
+                  <strong id="emp_direccion" class="profile-value">--</strong>
+                </div>
+              </div>
+
+              <!-- Widget: Teléfono -->
+              <div class="card profile-widget">
+                <div class="profile-icon">
+                  <i class="fa-solid fa-phone"></i>
+                </div>
+                <div>
+                  <span class="profile-label">Teléfono</span>
+                  <strong id="emp_telefono" class="profile-value">--</strong>
+                </div>
+              </div>
+
+              <!-- Widget: Correo -->
+              <div class="card profile-widget">
+                <div class="profile-icon">
+                  <i class="fa-solid fa-envelope"></i>
+                </div>
+                <div>
+                  <span class="profile-label">Correo Electrónico</span>
+                  <strong id="emp_correo" class="profile-value">--</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal para editar empresa -->
+        <div id="modalEditarEmpresa" class="modal-overlay">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modalEditarEmpresa-title"
+            class="modal-shell modal-shell--company"
+          >
+            <div class="modal-header modal-header--roomy">
+              <h3 class="modal-title modal-title--icon" id="modalEditarEmpresa-title">
+                <i class="fa-solid fa-building-circle-check"></i> Editar Empresa
+              </h3>
+              <button
+                type="button"
+                id="btnCerrarModalX"
+                aria-label="Cerrar ventana"
+                title="Cerrar"
+                class="modal-close"
+              >
+                <i class="fa-solid fa-times"></i>
+              </button>
+            </div>
+
+            <form id="formEditarEmpresa" class="modal-form modal-form--padded">
+              <div class="form-grid form-grid--2 form-grid--flush">
+                <div>
+                  <label class="field-label--company" for="edit_emp_nombre">Nombre Comercial</label>
+                  <input type="text" id="edit_emp_nombre" placeholder="Ej. Empresa SAC" required />
+                </div>
+                <div>
+                  <label class="field-label--company" for="edit_emp_ruc">RUC</label>
+                  <div class="field-with-action">
+                    <input
+                      type="text"
+                      id="edit_emp_ruc"
+                      placeholder="Ej. 20123456789"
+                      required
+                      class="flex-fill"
+                    />
+                    <button
+                      type="button"
+                      id="emp-btn-buscar-ruc"
+                      title="Buscar datos en SUNAT"
+                      class="btn-primary"
+                    >
+                      <i class="fa-solid fa-search"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="field-span-2">
+                  <label class="field-label--company" for="edit_emp_direccion"
+                    >Dirección Fiscal</label
+                  >
+                  <input type="text" id="edit_emp_direccion" placeholder="Av. Principal 123" />
+                </div>
+                <div>
+                  <label class="field-label--company" for="edit_emp_telefono">Teléfono</label>
+                  <input type="text" id="edit_emp_telefono" placeholder="(01) 123-4567" />
+                </div>
+                <div>
+                  <label class="field-label--company" for="edit_emp_correo"
+                    >Correo Electrónico</label
+                  >
+                  <input type="email" id="edit_emp_correo" placeholder="contacto@empresa.com" />
+                </div>
+              </div>
+
+              <div class="company-logo-upload">
+                <div class="company-logo-preview">
+                  <img
+                    id="preview-logo"
+                    src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                    alt="Vista previa"
+                  />
+                  <i id="preview-icon" class="fa-solid fa-image"></i>
+                </div>
+                <div class="flex-grow">
+                  <label class="company-logo-label" for="edit_emp_logo">Logo de la Empresa</label>
+                  <input type="file" id="edit_emp_logo" accept="image/*" />
+                </div>
+              </div>
+
+              <div class="button-row modal-footer modal-footer--company">
+                <button type="button" id="btnCerrarModal" class="btn-secondary modal-button">
+                  Cancelar
+                </button>
+                <button type="submit" class="btn-primary modal-button modal-button--icon">
+                  <i class="fa-solid fa-save"></i> Guardar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-entidades" class="view-section">
+        <div class="card catalog-panel">
+          <div class="catalog-toolbar">
+            <h2>Cliente / Proveedor</h2>
+            <div class="catalog-actions">
+              <div class="field-icon-wrap">
+                <i class="fa-solid fa-search field-search-icon"></i>
+                <input
+                  type="text"
+                  id="inputBuscarEnt"
+                  placeholder="Buscar..."
+                  class="catalog-search"
+                  aria-label="Buscar..."
+                />
+              </div>
+              <button id="btnExportarExcelEnt" class="btn-secondary">
+                <i class="fa-solid fa-file-export"></i> Exportar
+              </button>
+              <button id="btnImportarExcelEnt" class="btn-secondary">
+                <i class="fa-solid fa-file-excel"></i> Importar
+              </button>
+              <button id="btnEditarEnt" class="btn-secondary">
+                <i class="fa-solid fa-pencil"></i> Editar
+              </button>
+              <button id="btnEliminarEnt" class="btn-danger-soft">
+                <i class="fa-solid fa-trash"></i> Eliminar
+              </button>
+              <button id="btnNuevaEnt" class="btn-primary">
+                <i class="fa-solid fa-plus"></i> Nuevo
+              </button>
+            </div>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Código Tributario</th>
+                  <th>Tipo Doc.</th>
+                  <th>Razón Social</th>
+                  <th>Tipo</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-entidades">
+                <!-- Entidades dinámicas se cargarán aquí -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Modal para crear/editar Entidades -->
+        <div id="modalEnt" class="modal-overlay">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modalEntTitle"
+            class="modal-shell modal-shell--standard"
+          >
+            <div class="modal-header modal-header--compact">
+              <h3 id="modalEntTitle" class="modal-title modal-title--icon modal-title--compact">
+                <i class="fa-solid fa-address-card"></i> Nuevo Registro
+              </h3>
+            </div>
+            <div class="modal-body modal-body--catalog">
+              <form id="formEnt">
+                <input type="hidden" id="ent_is_edit" value="false" />
+                <input type="hidden" id="ent_old_codigo" value="" />
+                <div class="entity-document-grid">
+                  <div>
+                    <label class="field-label--small" for="ent_tipo_documento"
+                      >Tipo de Documento</label
+                    >
+                    <select id="ent_tipo_documento" required class="entity-input">
+                      <option value="" disabled selected>Seleccionar...</option>
+                      <option value="0">Otros</option>
+                      <option value="1">DNI</option>
+                      <option value="4">C.E.</option>
+                      <option value="6">RUC</option>
+                      <option value="7">Pasaporte</option>
+                    </select>
+                  </div>
+                  <div class="field-with-action field-with-action--bottom">
+                    <div class="flex-fill">
+                      <label class="field-label--small" for="ent_codigo">N° Documento</label>
+                      <input
+                        type="text"
+                        id="ent_codigo"
+                        placeholder="RUC o DNI"
+                        required
+                        class="entity-input"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      id="ent-btn-buscar-doc"
+                      title="Buscar en SUNAT/RENIEC"
+                      class="btn-primary"
+                    >
+                      <i class="fa-solid fa-search"></i> Buscar
+                    </button>
+                  </div>
+                </div>
+                <div class="entity-field">
+                  <label class="field-label--small" for="ent_razon_social"
+                    >Razón Social / Nombres</label
+                  >
+                  <input
+                    type="text"
+                    id="ent_razon_social"
+                    placeholder="Se llenará automáticamente al buscar"
+                    required
+                    class="entity-input"
+                  />
+                </div>
+                <div class="entity-field">
+                  <label class="field-label--small" for="ent_tipo">Tipo de Entidad</label>
+                  <select id="ent_tipo" required class="entity-input">
+                    <option value="" disabled selected>Seleccione...</option>
+                    <option value="Cliente">Cliente</option>
+                    <option value="Proveedor">Proveedor</option>
+                    <option value="Trabajador">Trabajador</option>
+                    <option value="Otros">Otros</option>
+                  </select>
+                </div>
+                <div id="ent-search-msg"></div>
+                <div class="button-row modal-footer modal-footer--catalog">
+                  <button
+                    type="button"
+                    id="btnCerrarModalEnt"
+                    class="btn-secondary modal-button modal-button--entity"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    class="btn-primary modal-button modal-button--entity modal-button--icon modal-button--entity-icon"
+                  >
+                    <i class="fa-solid fa-floppy-disk"></i> Guardar
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-plan-cuentas" class="view-section">
+        <div class="card catalog-panel">
+          <div class="catalog-toolbar">
+            <h2>Plan de Cuentas</h2>
+            <div class="catalog-actions">
+              <div class="field-icon-wrap">
+                <i class="fa-solid fa-search field-search-icon"></i>
+                <input
+                  type="text"
+                  id="inputBuscarCuenta"
+                  placeholder="Buscar cuenta..."
+                  class="catalog-search"
+                  aria-label="Buscar cuenta..."
+                />
+              </div>
+              <button id="btnExportarExcel" class="btn-secondary">
+                <i class="fa-solid fa-file-export"></i> Exportar
+              </button>
+              <button id="btnImportarExcel" class="btn-secondary">
+                <i class="fa-solid fa-file-excel"></i> Importar
+              </button>
+              <button id="btnEditarCuenta" class="btn-secondary">
+                <i class="fa-solid fa-pencil"></i> Editar
+              </button>
+              <button id="btnEliminarCuenta" class="btn-danger-soft">
+                <i class="fa-solid fa-trash"></i> Eliminar
+              </button>
+              <button id="btnNuevaCuenta" class="btn-primary">
+                <i class="fa-solid fa-plus"></i> Nueva
+              </button>
+            </div>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Cuenta</th>
+                  <th>Nombre de la cuenta</th>
+                  <th>Tipo</th>
+                  <th class="results-column">Estado Resultados</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-plan-cuentas">
+                <!-- Cuentas dinámicas se cargarán aquí -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Modal para crear/editar cuentas del Plan de Cuentas -->
+        <div id="modalCuenta" class="modal-overlay">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modalCuentaTitle"
+            class="modal-shell modal-shell--small"
+          >
+            <div class="modal-header modal-header--compact">
+              <h3 id="modalCuentaTitle" class="modal-title">Nueva Cuenta</h3>
+            </div>
+            <div class="modal-body modal-body--catalog">
+              <form id="formCuenta">
+                <input type="hidden" id="cuenta_is_edit" value="false" />
+                <input type="hidden" id="cuenta_old_codigo" value="" />
+                <div class="form-grid form-grid--1 form-grid--catalog">
+                  <input
+                    type="text"
+                    id="cuenta_codigo"
+                    aria-label="Cuenta"
+                    placeholder="Cuenta (ej. 1011)"
+                    required
+                  />
+                  <input
+                    type="text"
+                    id="cuenta_descripcion"
+                    aria-label="Nombre de la cuenta"
+                    placeholder="Nombre de la cuenta (ej. Caja y Bancos)"
+                    required
+                  />
+                  <select id="cuenta_tipo" aria-label="Tipo de cuenta" required>
+                    <option value="" disabled selected>Seleccione Tipo de Cuenta</option>
+                    <option value="Activo">Activo</option>
+                    <option value="Pasivo">Pasivo</option>
+                    <option value="Patrimonio">Patrimonio</option>
+                    <option value="Ingresos">Ingresos</option>
+                    <option value="Gastos">Gastos</option>
+                    <option value="Resultados">Resultados</option>
+                    <option value="Gestión">Gestión</option>
+                    <option value="Cuentas de Orden">Cuentas de Orden</option>
+                  </select>
+                </div>
+                <div class="button-row modal-footer modal-footer--catalog">
+                  <button type="submit" class="btn-primary modal-button modal-button--compact">
+                    Guardar
+                  </button>
+                  <button
+                    type="button"
+                    id="btnCerrarModalCuenta"
+                    class="btn-secondary modal-button modal-button--compact"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-tipos-documentos" class="view-section">
+        <div class="card catalog-panel">
+          <div class="catalog-toolbar">
+            <h2>Tipos de Documentos</h2>
+            <div class="catalog-actions">
+              <div class="field-icon-wrap">
+                <i class="fa-solid fa-search field-search-icon"></i>
+                <input
+                  type="text"
+                  id="inputBuscarDoc"
+                  placeholder="Buscar documento..."
+                  class="catalog-search"
+                  aria-label="Buscar documento..."
+                />
+              </div>
+              <button id="btnExportarExcelDoc" class="btn-secondary">
+                <i class="fa-solid fa-file-export"></i> Exportar
+              </button>
+              <button id="btnImportarExcelDoc" class="btn-secondary">
+                <i class="fa-solid fa-file-excel"></i> Importar
+              </button>
+              <button id="btnEditarDoc" class="btn-secondary">
+                <i class="fa-solid fa-pencil"></i> Editar
+              </button>
+              <button id="btnEliminarDoc" class="btn-danger-soft">
+                <i class="fa-solid fa-trash"></i> Eliminar
+              </button>
+              <button id="btnNuevaDoc" class="btn-primary">
+                <i class="fa-solid fa-plus"></i> Nuevo
+              </button>
+            </div>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Código</th>
+                  <th>Documento</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-tipos-documentos">
+                <!-- Documentos dinámicos se cargarán aquí -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Modal para crear/editar Tipos de Documentos -->
+        <div id="modalDoc" class="modal-overlay">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modalDocTitle"
+            class="modal-shell modal-shell--small"
+          >
+            <div class="modal-header modal-header--compact">
+              <h3 id="modalDocTitle" class="modal-title">Nuevo Documento</h3>
+            </div>
+            <div class="modal-body modal-body--catalog">
+              <form id="formDoc">
+                <input type="hidden" id="doc_is_edit" value="false" />
+                <input type="hidden" id="doc_old_codigo" value="" />
+                <div class="form-grid form-grid--1 form-grid--catalog">
+                  <input
+                    type="text"
+                    id="doc_codigo"
+                    aria-label="Código del documento"
+                    placeholder="Código (ej. 01)"
+                    required
+                  />
+                  <input
+                    type="text"
+                    id="doc_descripcion"
+                    aria-label="Nombre del documento"
+                    placeholder="Documento (ej. Factura)"
+                    required
+                  />
+                </div>
+                <div class="button-row modal-footer modal-footer--catalog">
+                  <button type="submit" class="btn-primary modal-button modal-button--compact">
+                    Guardar
+                  </button>
+                  <button
+                    type="button"
+                    id="btnCerrarModalDoc"
+                    class="btn-secondary modal-button modal-button--compact"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-amarres" class="view-section">
+        <div class="card catalog-panel">
+          <div class="catalog-toolbar catalog-toolbar--with-note">
+            <h2>Amarres del Asistente</h2>
+            <div class="catalog-actions">
+              <div class="field-icon-wrap">
+                <i class="fa-solid fa-search field-search-icon"></i>
+                <input
+                  type="text"
+                  id="inputBuscarAmarre"
+                  placeholder="Buscar amarre..."
+                  class="catalog-search"
+                  aria-label="Buscar amarre..."
+                />
+              </div>
+              <button id="btnEditarAmarre" class="btn-secondary">
+                <i class="fa-solid fa-pencil"></i> Editar
+              </button>
+              <button id="btnEliminarAmarre" class="btn-danger-soft">
+                <i class="fa-solid fa-trash"></i> Eliminar
+              </button>
+              <button id="btnNuevoAmarre" class="btn-primary">
+                <i class="fa-solid fa-plus"></i> Nuevo
+              </button>
+            </div>
+          </div>
+          <p class="catalog-note">
+            Define cómo el Asistente arma cada asiento. Cuando escribas una cuenta cuyo inicio
+            coincida con el
+            <b>prefijo</b>, se generarán las líneas según el <b>tipo</b>. La línea de IGV sólo se
+            crea si el switch "Aplicar IGV" está activado. Si varios amarres calzan, gana el de
+            prefijo más largo.
+          </p>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Tipo</th>
+                  <th>Prefijo</th>
+                  <th>Moneda</th>
+                  <th>IGV Gravado</th>
+                  <th>Cuenta Destino</th>
+                  <th class="text-center">Activo</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-amarres">
+                <!-- Amarres dinámicos se cargarán aquí -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Modal para crear/editar Amarres -->
+        <div id="modalAmarre" class="modal-overlay">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modalAmarreTitle"
+            class="modal-shell modal-shell--amarre"
+          >
+            <div class="modal-header modal-header--compact">
+              <h3 id="modalAmarreTitle" class="modal-title">Nuevo Amarre</h3>
+            </div>
+            <div class="modal-body modal-body--catalog">
+              <form id="formAmarre">
+                <input type="hidden" id="amarre_id" value="" />
+                <input type="hidden" id="amarre_is_edit" value="false" />
+                <div class="amarre-fields">
+                  <div>
+                    <label for="amarre_nombre" class="field-label--amarre">Nombre</label>
+                    <input
+                      type="text"
+                      id="amarre_nombre"
+                      placeholder="Ej. Compra de mercadería gravada"
+                      required
+                    />
+                  </div>
+                  <div class="amarre-type-grid">
+                    <div>
+                      <label for="amarre_tipo" class="field-label--amarre">Tipo</label>
+                      <select id="amarre_tipo" required>
+                        <option value="COMPRA">COMPRA</option>
+                        <option value="VENTA">VENTA</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label for="amarre_prefijo" class="field-label--amarre"
+                        >Prefijo de cuenta</label
+                      >
+                      <input
+                        type="text"
+                        id="amarre_prefijo"
+                        placeholder="Ej. 6"
+                        maxlength="8"
+                        inputmode="numeric"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label for="amarre_moneda" class="field-label--amarre">Moneda</label>
+                      <select id="amarre_moneda">
+                        <option value="PEN">PEN</option>
+                        <option value="USD">USD</option>
+                      </select>
+                    </div>
+                  </div>
+                  <select
+                    id="amarre_doc_tipo"
+                    class="initially-hidden"
+                    aria-label="Tipo de documento del amarre"
+                  >
+                    <option value="">—</option>
+                  </select>
+                  <div class="initially-hidden"></div>
+                  <div>
+                    <label for="amarre_cuenta_destino" class="field-label--amarre"
+                      >Cuenta Destino</label
+                    >
+                    <input
+                      type="text"
+                      id="amarre_cuenta_destino"
+                      placeholder="Ej. 4212 (por pagar) / 1212 (por cobrar)"
+                      maxlength="8"
+                      inputmode="numeric"
+                      required
+                    />
+                    <small id="amarre_cuenta_destino_nombre" class="field-caption"></small>
+                  </div>
+                  <div class="tax-accounts">
+                    <div class="tax-accounts-title">
+                      Cuentas de IGV por afectación
+                      <span class="field-optional">(todas opcionales)</span>
+                    </div>
+                    <div class="tax-accounts-grid">
+                      <div>
+                        <label for="amarre_cuenta_igv" class="field-label--secondary"
+                          >Gravado (18%)</label
+                        >
+                        <input
+                          type="text"
+                          id="amarre_cuenta_igv"
+                          placeholder="Ej. 40111"
+                          maxlength="8"
+                          inputmode="numeric"
+                        />
+                        <small id="amarre_cuenta_igv_nombre" class="field-caption"></small>
+                      </div>
+                      <div>
+                        <label for="amarre_cuenta_igv_exo" class="field-label--secondary"
+                          >Exonerado</label
+                        >
+                        <input
+                          type="text"
+                          id="amarre_cuenta_igv_exo"
+                          placeholder="(normalmente vacío)"
+                          maxlength="8"
+                          inputmode="numeric"
+                        />
+                        <small id="amarre_cuenta_igv_exo_nombre" class="field-caption"></small>
+                      </div>
+                      <div>
+                        <label for="amarre_cuenta_igv_ina" class="field-label--secondary"
+                          >Inafecto</label
+                        >
+                        <input
+                          type="text"
+                          id="amarre_cuenta_igv_ina"
+                          placeholder="(normalmente vacío)"
+                          maxlength="8"
+                          inputmode="numeric"
+                        />
+                        <small id="amarre_cuenta_igv_ina_nombre" class="field-caption"></small>
+                      </div>
+                    </div>
+                    <small class="tax-accounts-note"
+                      >Sólo "Gravado" calcula 18% y genera línea de IGV. Exonerado e inafecto van
+                      sin IGV.</small
+                    >
+                  </div>
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="amarre_activo" checked /> Activo
+                  </label>
+                </div>
+                <div class="button-row modal-footer modal-footer--catalog">
+                  <button type="submit" class="btn-primary modal-button modal-button--compact">
+                    Guardar
+                  </button>
+                  <button
+                    type="button"
+                    id="btnCerrarModalAmarre"
+                    class="btn-secondary modal-button modal-button--compact"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-monedas" class="view-section">
+        <div class="card catalog-panel">
+          <div class="catalog-toolbar">
+            <h2>Monedas y Tipos de Cambio</h2>
+            <div class="catalog-actions">
+              <div class="field-icon-wrap">
+                <i class="fa-solid fa-search field-search-icon"></i>
+                <input
+                  type="text"
+                  id="inputBuscarMoneda"
+                  placeholder="Buscar..."
+                  class="catalog-search"
+                  aria-label="Buscar..."
+                />
+              </div>
+              <button id="btnGetTC" class="btn-secondary">
+                <i class="fa-solid fa-download"></i> Obtener T.C.
+              </button>
+              <button id="btnEditarMoneda" class="btn-secondary">
+                <i class="fa-solid fa-pencil"></i> Editar
+              </button>
+              <button id="btnEliminarMoneda" class="btn-danger-soft">
+                <i class="fa-solid fa-trash"></i> Eliminar
+              </button>
+              <button id="btnNuevaMoneda" class="btn-primary">
+                <i class="fa-solid fa-plus"></i> Nueva
+              </button>
+            </div>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th class="text-left">Fecha</th>
+                  <th class="text-left">Moneda</th>
+                  <th class="text-right">Compra</th>
+                  <th class="text-right">Venta</th>
+                  <th class="text-right">T.C. (Contable)</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-monedas">
+                <!-- Monedas y T.C. se cargarán aquí -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Modal para crear/editar Monedas -->
+        <div id="modalMoneda" class="modal-overlay">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modalMonedaTitle"
+            class="modal-shell modal-shell--standard"
+          >
+            <!-- Cabecera del Modal -->
+            <div class="modal-header modal-header--roomy">
+              <h3 id="modalMonedaTitle" class="modal-title modal-title--icon">
+                <i class="fa-solid fa-coins"></i> Nueva Moneda
+              </h3>
+              <button
+                type="button"
+                id="btnCerrarModalMonedaX"
+                aria-label="Cerrar ventana"
+                title="Cerrar"
+                class="modal-close"
+              >
+                <i class="fa-solid fa-times"></i>
+              </button>
+            </div>
+
+            <!-- Formulario -->
+            <form id="formMoneda" class="modal-form modal-form--padded">
+              <input type="hidden" id="moneda_is_edit" value="false" />
+              <input type="hidden" id="moneda_old_codigo" value="" />
+
+              <div class="form-block">
+                <h4 class="form-block-ttl">
+                  <i class="fa-solid fa-pencil-ruler text-muted"></i> Datos del Tipo de Cambio
+                </h4>
+                <div class="form-grid form-grid--1 form-grid--flush">
+                  <div>
+                    <label for="moneda_fecha" class="field-label">Fecha</label>
+                    <input type="date" id="moneda_fecha" required="" />
+                  </div>
+                  <div>
+                    <label for="moneda_nombre" class="field-label">Moneda</label>
+                    <input type="text" id="moneda_nombre" placeholder="Ej. USD" required="" />
+                  </div>
+                  <div>
+                    <label for="moneda_tc" class="field-label">Tipo de Cambio (Venta)</label>
+                    <input
+                      type="number"
+                      step="0.001"
+                      id="moneda_tc"
+                      placeholder="Ej. 3.750"
+                      required=""
+                      class="input-amount"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div class="button-row modal-footer modal-footer--flush">
+                <button
+                  type="button"
+                  id="btnCancelarModalMoneda"
+                  class="btn-secondary modal-button"
+                >
+                  Cancelar
+                </button>
+                <button type="submit" class="btn-primary modal-button modal-button--icon">
+                  <i class="fa-solid fa-save"></i> Guardar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-voucher" class="view-section">
+        <div class="voucher-layout">
+          <!-- Tarjeta Superior: Título y Cabecera del Voucher -->
+          <div class="card voucher-header-panel">
+            <div class="voucher-heading">
+              <div class="voucher-title-group">
+                <div class="voucher-title-icon">
+                  <i class="fa-solid fa-file-invoice-dollar"></i>
+                </div>
+                <div>
+                  <h2>Registro de Voucher</h2>
+                </div>
+              </div>
+              <div class="voucher-period">
+                <i class="fa-solid fa-calendar-day text-secondary"></i>
+                <span id="voucher_mes_trabajo"></span>
+              </div>
+            </div>
+
+            <div id="formVoucherHeader" role="group" aria-label="Cabecera del voucher">
+              <div class="form-grid form-grid--3 form-grid--voucher-header">
+                <div>
+                  <label for="voucher_origen" class="field-label--voucher-header"
+                    >Origen del Asiento</label
+                  >
+                  <select id="voucher_origen" required>
+                    <option value="" disabled selected>Seleccione Origen</option>
+                    <option value="1">CAJA Y BANCOS</option>
+                    <option value="5">DIARIO</option>
+                    <option value="8">COMPRAS</option>
+                    <option value="14">VENTAS E INGRESOS</option>
+                    <option value="31">PLANILLAS</option>
+                    <option value="50">PROVISIONES</option>
+                    <option value="90">OTROS</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="voucher_numero" class="field-label--voucher-header">
+                    N° Voucher
+                  </label>
+                  <div class="field-icon-wrap">
+                    <input type="text" id="voucher_numero" value="---" readonly />
+                    <i class="fa-solid fa-hashtag voucher-number-icon"></i>
+                  </div>
+                </div>
+                <div>
+                  <label for="voucher_fecha" class="field-label--voucher-header"
+                    >Fecha Contable</label
+                  >
+                  <input type="date" id="voucher_fecha" required readonly />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tarjeta Inferior: Tabla de Detalles y Totales -->
+          <div class="card voucher-details">
+            <div class="table-container">
+              <table class="margin-bottom-none">
+                <thead>
+                  <tr>
+                    <th>Cuenta</th>
+                    <th>Nombre</th>
+                    <th>Debe</th>
+                    <th>Haber</th>
+                    <th>M</th>
+                    <th>T.C.</th>
+                    <th>Equivalente</th>
+                    <th>Doc</th>
+                    <th>Número</th>
+                    <th>Código (RUC)</th>
+                    <th>Razón Social</th>
+                    <th>Glosa</th>
+                    <th class="actions-column"></th>
+                  </tr>
+                </thead>
+                <tbody id="tabla-voucher-detalle">
+                  <!-- Detalles se cargarán aquí -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- FOOTER DEL VOUCHER -->
+            <div class="voucher-footer">
+              <div class="voucher-totals">
+                <div class="voucher-total-label">
+                  Debe: <span id="voucher_total_debe">0.00</span>
+                </div>
+                <div class="voucher-total-divider"></div>
+                <div class="voucher-total-label">
+                  Haber: <span id="voucher_total_haber">0.00</span>
+                </div>
+              </div>
+              <div class="voucher-actions">
+                <button
+                  id="btnVoucherAsistente"
+                  type="button"
+                  class="btn-action-voucher btn-secondary"
+                >
+                  <i class="fa-solid fa-wand-magic-sparkles"></i> Asistente
+                </button>
+                <button
+                  id="btnVoucherTributario"
+                  type="button"
+                  class="btn-action-voucher btn-warning-soft"
+                  hidden
+                >
+                  <i class="fa-solid fa-receipt"></i> Completar datos tributarios
+                </button>
+                <button
+                  id="btnVoucherAgregarLinea"
+                  type="button"
+                  class="btn-action-voucher btn-secondary"
+                >
+                  <i class="fa-solid fa-plus"></i> Agregar Línea
+                </button>
+                <button id="btnGuardarVoucher" type="button" class="btn-action-voucher btn-primary">
+                  <i class="fa-solid fa-save"></i> Guardar Asiento
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal para Agregar Línea de Voucher -->
+        <div id="modalVoucherLinea" class="modal-overlay">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modalVoucherLinea-title"
+            class="modal-shell modal-shell--voucher"
+          >
+            <!-- Cabecera -->
+            <div class="modal-header modal-header--voucher">
+              <h3 class="modal-title modal-title--icon" id="modalVoucherLinea-title">
+                <i class="fa-solid fa-plus-circle"></i> Agregar Asiento Individual
+              </h3>
+              <button
+                type="button"
+                id="btnCerrarModalLineaX"
+                aria-label="Cerrar ventana"
+                title="Cerrar"
+                class="modal-close"
+              >
+                <i class="fa-solid fa-times"></i>
+              </button>
+            </div>
+
+            <!-- Formulario completo -->
+            <form id="formVoucherLinea" class="modal-form modal-form--split">
+              <div class="modal-form-body">
+                <!-- Bloque 1: Cuenta -->
+                <div class="form-block">
+                  <h4 class="form-block-ttl">
+                    <i class="fa-solid fa-book text-muted"></i> 1. Cuenta y Montos
+                  </h4>
+                  <div class="form-grid form-grid--party form-grid--flush">
+                    <div>
+                      <label for="linea_cuenta" class="field-label">Cuenta</label>
+                      <input
+                        type="text"
+                        id="linea_cuenta"
+                        placeholder="Ej. 1212"
+                        maxlength="8"
+                        inputmode="numeric"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label for="linea_cuenta_nombre" class="field-label">Nombre Cuenta</label>
+                      <input type="text" id="linea_cuenta_nombre" readonly />
+                    </div>
+                    <div>
+                      <label for="linea_debe" class="field-label">Debe</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        id="linea_debe"
+                        value="0.00"
+                        required
+                        class="input-amount input-amount--debit"
+                      />
+                    </div>
+                    <div>
+                      <label for="linea_haber" class="field-label">Haber</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        id="linea_haber"
+                        value="0.00"
+                        required
+                        class="input-amount input-amount--credit"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Bloque 2: Comprobante y Entidad -->
+                <div class="form-block">
+                  <h4 class="form-block-ttl">
+                    <i class="fa-solid fa-file-invoice text-muted"></i> 2. Documento y Entidad
+                  </h4>
+
+                  <div class="form-grid form-grid--document form-grid--spaced">
+                    <div>
+                      <label for="linea_fecha_doc" class="field-label">Fecha Doc.</label>
+                      <input type="date" id="linea_fecha_doc" />
+                    </div>
+                    <div>
+                      <label for="linea_fecha_venc" class="field-label">Fecha Venc.</label>
+                      <input type="date" id="linea_fecha_venc" />
+                    </div>
+                    <div>
+                      <label for="linea_doc_tipo" class="field-label">Tipo Doc.</label>
+                      <select id="linea_doc_tipo"></select>
+                    </div>
+                    <div>
+                      <label for="linea_doc_numero" class="field-label">Número Doc.</label>
+                      <input type="text" id="linea_doc_numero" placeholder="Ej: F001-456" />
+                    </div>
+                  </div>
+
+                  <div class="form-grid form-grid--party form-grid--spaced">
+                    <div>
+                      <label for="linea_codigo" class="field-label">Código (RUC)</label>
+                      <input type="text" id="linea_codigo" placeholder="RUC/DNI" />
+                    </div>
+                    <div>
+                      <label for="linea_razon_social" class="field-label">Razón Social</label>
+                      <input type="text" id="linea_razon_social" readonly />
+                    </div>
+                    <div>
+                      <label for="linea_moneda" class="field-label">Moneda</label>
+                      <select id="linea_moneda">
+                        <option value="PEN">PEN</option>
+                        <option value="USD">USD</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label for="linea_tc" class="field-label">T/C</label>
+                      <input type="number" step="0.001" id="linea_tc" value="1.000" />
+                    </div>
+                  </div>
+
+                  <div class="margin-bottom-none">
+                    <label for="linea_glosa" class="field-label">Glosa</label>
+                    <input
+                      type="text"
+                      id="linea_glosa"
+                      placeholder="Glosa específica para este asiento..."
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Footer del form -->
+              <div class="modal-footer modal-footer--voucher">
+                <button type="button" id="btnCerrarModalLinea" class="btn-secondary modal-button">
+                  Cancelar
+                </button>
+                <button type="submit" class="btn-primary modal-button modal-button--icon">
+                  <i class="fa-solid fa-plus"></i> Agregar a Voucher
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Modal para el ASISTENTE -->
+        <div id="modalVoucherAsistente" class="modal-overlay">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modalVoucherAsistente-title"
+            class="modal-shell modal-shell--voucher"
+          >
+            <!-- Cabecera -->
+            <div class="modal-header modal-header--voucher">
+              <h3 class="modal-title modal-title--icon" id="modalVoucherAsistente-title">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Asistente de Asiento Automático
+              </h3>
+              <button
+                type="button"
+                id="btnCerrarModalAsistenteX"
+                aria-label="Cerrar ventana"
+                title="Cerrar"
+                class="modal-close"
+              >
+                <i class="fa-solid fa-times"></i>
+              </button>
+            </div>
+
+            <!-- Formulario completo -->
+            <form id="formVoucherAsistente" class="modal-form modal-form--split">
+              <div class="modal-form-body">
+                <!-- Bloque 1: Documento -->
+                <div class="form-block">
+                  <h4 class="form-block-ttl">
+                    <i class="fa-solid fa-file-invoice text-muted"></i> 1. Datos del Comprobante
+                  </h4>
+
+                  <div class="form-grid form-grid--document form-grid--spaced">
+                    <div>
+                      <label for="asistente_doc_tipo" class="field-label">Tipo Doc.</label>
+                      <select id="asistente_doc_tipo" required></select>
+                    </div>
+                    <div>
+                      <label for="asistente_doc_numero" class="field-label">Número</label>
+                      <input
+                        type="text"
+                        id="asistente_doc_numero"
+                        placeholder="Ej: F001-123"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label for="asistente_fecha_doc" class="field-label">Fecha Doc.</label>
+                      <input type="date" id="asistente_fecha_doc" required />
+                    </div>
+                    <div>
+                      <label for="asistente_fecha_venc" class="field-label">Fecha Venc.</label>
+                      <input type="date" id="asistente_fecha_venc" />
+                    </div>
+                  </div>
+
+                  <div class="form-grid form-grid--party form-grid--flush">
+                    <div>
+                      <label for="asistente_codigo" class="field-label">Código (RUC)</label>
+                      <input type="text" id="asistente_codigo" placeholder="RUC/DNI" required />
+                    </div>
+                    <div>
+                      <label for="asistente_razon_social" class="field-label">Razón Social</label>
+                      <input type="text" id="asistente_razon_social" placeholder="..." readonly />
+                    </div>
+                    <div>
+                      <label for="asistente_moneda" class="field-label">Moneda</label>
+                      <select id="asistente_moneda" required>
+                        <option value="PEN">PEN</option>
+                        <option value="USD">USD</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label for="asistente_tc" class="field-label">T/C</label>
+                      <input
+                        type="number"
+                        step="0.001"
+                        id="asistente_tc"
+                        placeholder="1.000"
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Bloque 2: Detalles Contables -->
+                <div class="form-block">
+                  <h4 class="form-block-ttl">
+                    <i class="fa-solid fa-calculator text-muted"></i> 2. Detalle Contable y Montos
+                  </h4>
+
+                  <div class="voucher-description-field">
+                    <label for="asistente_glosa" class="field-label">Glosa de la Operación</label>
+                    <input
+                      type="text"
+                      id="asistente_glosa"
+                      placeholder="Descripción de la operación..."
+                      required
+                    />
+                  </div>
+
+                  <!-- Afectación IGV -->
+                  <div class="tax-options">
+                    <span class="tax-option-label" id="asistente-afectacion-label"
+                      >Afectación IGV:</span
+                    >
+                    <select id="asistente_afectacion" aria-labelledby="asistente-afectacion-label">
+                      <option value="GRAVADO" selected>Gravado (18%)</option>
+                      <option value="EXONERADO">Exonerado</option>
+                      <option value="INAFECTO">Inafecto</option>
+                      <option value="EXPORTACION">Exportación</option>
+                    </select>
+                    <label for="asistente_tasa_igv" class="tax-rate-label">Tasa IGV %</label>
+                    <input
+                      type="number"
+                      id="asistente_tasa_igv"
+                      value="18"
+                      min="0"
+                      step="0.1"
+                      title="Use la tasa aplicable a la operación (p.ej. 18 o la tasa especial que corresponda)."
+                    />
+                  </div>
+
+                  <div class="form-grid form-grid--amounts form-grid--amounts-aligned">
+                    <div>
+                      <label for="asistente_cuenta" class="field-label">Cuenta</label>
+                      <input
+                        type="text"
+                        id="asistente_cuenta"
+                        placeholder="Ej. 6011"
+                        maxlength="8"
+                        inputmode="numeric"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label for="asistente_cuenta_nombre" class="field-label"
+                        >Nombre de Cuenta</label
+                      >
+                      <input type="text" id="asistente_cuenta_nombre" placeholder="..." readonly />
+                    </div>
+                    <div>
+                      <label for="asistente_base" class="field-label">Base Imponible</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        id="asistente_base"
+                        placeholder="0.00"
+                        required
+                        class="input-amount"
+                      />
+                    </div>
+                    <div>
+                      <label for="asistente_igv" class="field-label">I.G.V. (18%)</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        id="asistente_igv"
+                        placeholder="0.00"
+                        required
+                        class="input-amount"
+                      />
+                    </div>
+                    <div>
+                      <label for="asistente_total" class="field-label">Total</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        id="asistente_total"
+                        placeholder="0.00"
+                        required
+                        class="input-amount input-amount--debit"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Footer del form -->
+              <div class="modal-footer modal-footer--voucher">
+                <button
+                  type="button"
+                  id="btnCerrarModalAsistente"
+                  class="btn-secondary modal-button"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  class="btn-primary modal-button modal-button--icon modal-button--generate"
+                >
+                  <i class="fa-solid fa-wand-magic-sparkles"></i> Generar Asiento
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- Modal para Seleccionar Mes de Trabajo -->
+      <div id="modalSeleccionarMes" class="modal-overlay">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modalSeleccionarMes-title"
+          class="modal-shell modal-shell--period"
+        >
+          <div class="modal-header modal-header--roomy">
+            <h3 class="modal-title modal-title--icon" id="modalSeleccionarMes-title">
+              <i class="fa-solid fa-calendar-day"></i> Período de Trabajo
+            </h3>
+          </div>
+
+          <form id="formSeleccionarMes" class="modal-form">
+            <div class="modal-body modal-body--period">
+              <div class="form-grid form-grid--2 form-grid--flush">
+                <div>
+                  <label for="select_mes_trabajo" class="field-label">Mes</label>
+                  <select id="select_mes_trabajo" required>
+                    <option value="01">Enero</option>
+                    <option value="02">Febrero</option>
+                    <option value="03">Marzo</option>
+                    <option value="04">Abril</option>
+                    <option value="05">Mayo</option>
+                    <option value="06">Junio</option>
+                    <option value="07">Julio</option>
+                    <option value="08">Agosto</option>
+                    <option value="09">Septiembre</option>
+                    <option value="10">Octubre</option>
+                    <option value="11">Noviembre</option>
+                    <option value="12">Diciembre</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="select_ano_trabajo" class="field-label">Año</label>
+                  <input type="number" id="select_ano_trabajo" required />
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer modal-footer--period">
+              <button
+                type="submit"
+                class="btn-primary modal-button modal-button--icon modal-button--continue"
+              >
+                <i class="fa-solid fa-arrow-right"></i> Continuar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════════════
+       MÓDULO: REPORTES — LIBRO DIARIO
+       ══════════════════════════════════════════════════════════════ -->
+      <section id="view-reportes" class="view-section">
+        <div id="reportes-root" class="view-root"></div>
+      </section>
+
+      <section id="view-estados-financieros" class="view-section">
+        <div id="estados-financieros-root" class="view-root"></div>
+      </section>
+
+      <section id="view-sire" class="view-section">
+        <div id="sire-root" class="view-root view-root--padded"></div>
+      </section>
+
+      <section id="view-config-er" class="view-section">
+        <div id="config-er-root" class="view-root view-root--padded"></div>
+      </section>
+
+      <section id="view-config-eeff" class="view-section">
+        <div id="config-eeff-root" class="view-root view-root--padded"></div>
+      </section>
+    </main>
+
+    <script src="./js/theme.js"></script>
+    <script type="module" src="./js/app.js"></script>
+  </body>
+</html>

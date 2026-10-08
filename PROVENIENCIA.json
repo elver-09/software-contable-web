@@ -1,0 +1,425 @@
+{
+  "origen": "/Volumes/Elver-DSC/ELVER/Software-Contable",
+  "archivos": [
+    {
+      "archivo": "src/preload.js",
+      "sha256_escritorio": "eeec2cf76ddf6778d861dbb4bf750616442e16ef119b78d5635f06702520cbed",
+      "sha256_web": "eeec2cf76ddf6778d861dbb4bf750616442e16ef119b78d5635f06702520cbed",
+      "identico": true
+    },
+    {
+      "archivo": "src/renderer/index.html",
+      "sha256_escritorio": "00c520f1ca0dae2357267d2d97b05e8de2350f61c537e97cf6a2ecf8d46a155b",
+      "sha256_web": "3d4a04628206d3e3f618e7ff4c404a64a1c1a8bce3f863d7a18b1c5658be68dc",
+      "identico": false
+    },
+    {
+      "archivo": "src/tests/planCuentasLookup.test.js",
+      "sha256_escritorio": "aa67caaede6d07906f086daa300368881b1c9588ee324e7de36dc3213c530638",
+      "sha256_web": "aa67caaede6d07906f086daa300368881b1c9588ee324e7de36dc3213c530638",
+      "identico": true
+    },
+    {
+      "archivo": "src/tests/staticContracts.test.js",
+      "sha256_escritorio": "d31846a576a90d00c71cff79037927166505c3423428974731ad6a41400fd59a",
+      "sha256_web": "d31846a576a90d00c71cff79037927166505c3423428974731ad6a41400fd59a",
+      "identico": true
+    },
+    {
+      "archivo": "src/tests/responsiveTheme.test.js",
+      "sha256_escritorio": "099e56a8d03a14e2f5a2862f4746f9b40aacbca055dad5f0963a16027b1a382f",
+      "sha256_web": "099e56a8d03a14e2f5a2862f4746f9b40aacbca055dad5f0963a16027b1a382f",
+      "identico": true
+    },
+    {
+      "archivo": "src/tests/dashboard-layout.test.js",
+      "sha256_escritorio": "bd4fb24885bb37ddf35e6970d56e87a15a4436080a0573b33023fb0a3fae08a3",
+      "sha256_web": "bd4fb24885bb37ddf35e6970d56e87a15a4436080a0573b33023fb0a3fae08a3",
+      "identico": true
+    },
+    {
+      "archivo": "src/tests/globalMigrations.test.js",
+      "sha256_escritorio": "11e8f69b6681ded11d90ae8d60666a50963f9bedfa672f997cd4305c7507d56d",
+      "sha256_web": "11e8f69b6681ded11d90ae8d60666a50963f9bedfa672f997cd4305c7507d56d",
+      "identico": true
+    },
+    {
+      "archivo": "src/tests/estadoResultados.test.js",
+      "sha256_escritorio": "bdc19f8a056b695f057f501afa22fc436954c8ce58ddff1dd3931b0459034001",
+      "sha256_web": "bdc19f8a056b695f057f501afa22fc436954c8ce58ddff1dd3931b0459034001",
+      "identico": true
+    },
+    {
+      "archivo": "src/tests/catalogos.test.js",
+      "sha256_escritorio": "f5c542544da06e520acaa9035b77aabcd5b22abf23f68b636298c316734a02ea",
+      "sha256_web": "f5c542544da06e520acaa9035b77aabcd5b22abf23f68b636298c316734a02ea",
+      "identico": true
+    },
+    {
+      "archivo": "src/tests/README.md",
+      "sha256_escritorio": "6b5702686c0f810e6fc53b716669bae08e8554ffbcac647aa09007852fca00e0",
+      "sha256_web": "6b5702686c0f810e6fc53b716669bae08e8554ffbcac647aa09007852fca00e0",
+      "identico": true
+    },
+    {
+      "archivo": "src/tests/monedas.test.js",
+      "sha256_escritorio": "1309215d149111598dc678badb804741a3bf2520353a5ba1ee36a2e6a8976dc0",
+      "sha256_web": "1309215d149111598dc678badb804741a3bf2520353a5ba1ee36a2e6a8976dc0",
+      "identico": true
+    },
+    {
+      "archivo": "src/tests/empresaMigrations.test.js",
+      "sha256_escritorio": "fa919883e5a454474b36a7eab408cc19e8b8dbd7ce25e21233eb2557ecf42a8c",
+      "sha256_web": "fa919883e5a454474b36a7eab408cc19e8b8dbd7ce25e21233eb2557ecf42a8c",
+      "identico": true
+    },
+    {
+      "archivo": "src/tests/sunatSecurity.test.js",
+      "sha256_escritorio": "686ade0c4ed739d522cfc174d62a0e7a0951d7315856c563841aa4a57a6a8560",
+      "sha256_web": "686ade0c4ed739d522cfc174d62a0e7a0951d7315856c563841aa4a57a6a8560",
+      "identico": true
+    },
+    {
+      "archivo": "src/tests/voucherValidation.test.js",
+      "sha256_escritorio": "c1647fda98af56974a4cfdf6f2c3355655b36d598e2599287f5688d6b14419e7",
+      "sha256_web": "c1647fda98af56974a4cfdf6f2c3355655b36d598e2599287f5688d6b14419e7",
+      "identico": true
+    },
+    {
+      "archivo": "src/tests/planCuentasUiState.test.js",
+      "sha256_escritorio": "c8c331299f081ada6734242f04707f859e69aa62044a51e3f743ec29cedbc47c",
+      "sha256_web": "c8c331299f081ada6734242f04707f859e69aa62044a51e3f743ec29cedbc47c",
+      "identico": true
+    },
+    {
+      "archivo": "src/tests/tributario.test.js",
+      "sha256_escritorio": "41c527cc5e4e23c77d481fd10b159188d639607e4976763ac67d6636675d9562",
+      "sha256_web": "41c527cc5e4e23c77d481fd10b159188d639607e4976763ac67d6636675d9562",
+      "identico": true
+    },
+    {
+      "archivo": "src/tests/cartera.test.js",
+      "sha256_escritorio": "0429c3dbc30194e94bb198f564b8888cc0c53b2bb50098f3e51b038591b73a89",
+      "sha256_web": "0429c3dbc30194e94bb198f564b8888cc0c53b2bb50098f3e51b038591b73a89",
+      "identico": true
+    },
+    {
+      "archivo": "src/tests/run-tests.js",
+      "sha256_escritorio": "b645e91fbe7b44257f61419bd1c8dcf884b9f17d0a1fae07084cc340c173e9d1",
+      "sha256_web": "b645e91fbe7b44257f61419bd1c8dcf884b9f17d0a1fae07084cc340c173e9d1",
+      "identico": true
+    },
+    {
+      "archivo": "src/tests/migrationRunner.test.js",
+      "sha256_escritorio": "ab7767a97dbdd371d35c046796c0fa84f45e1481e8b79cef137a460ad7b52d9e",
+      "sha256_web": "ab7767a97dbdd371d35c046796c0fa84f45e1481e8b79cef137a460ad7b52d9e",
+      "identico": true
+    },
+    {
+      "archivo": "src/main/main.js",
+      "sha256_escritorio": "92a906edaacd930f9999167edb8c3796d021bac5615fca5cfd02562d5b610f1c",
+      "sha256_web": "20776bdc846d5cd2814bbbd5d6fefc66a7e5f0ad1a56bcc28f61fa740f1d8141",
+      "identico": false
+    },
+    {
+      "archivo": "src/main/database/migrationRunner.js",
+      "sha256_escritorio": "d13372e7d260f6fb0c2298f966cd25a5260a9ea040d1bc5f4a5d350ff92e12be",
+      "sha256_web": "d13372e7d260f6fb0c2298f966cd25a5260a9ea040d1bc5f4a5d350ff92e12be",
+      "identico": true
+    },
+    {
+      "archivo": "src/main/database/db.js",
+      "sha256_escritorio": "2c51a761eab7b7fcdd7b373af8e883439e6e35b28ffc25a444620471a2955361",
+      "sha256_web": "2566e40256b4646e3f9a5faf58f3964b8cdeb42362df49809620816a7be25097",
+      "identico": false
+    },
+    {
+      "archivo": "src/main/config/settings.js",
+      "sha256_escritorio": "a3303bf2150724778d26df67be7edddb8d41b836de35ff38bb0d2960cfd593f4",
+      "sha256_web": "1b163b34898c5024041f9729017786280a798e9f89e1ce83935a47c9ddd0e463",
+      "identico": false
+    },
+    {
+      "archivo": "src/main/controllers/carteraController.js",
+      "sha256_escritorio": "1f509b715773eacc1448ee4b924c906ebc577d92e46fcff207d6a985f88a4eff",
+      "sha256_web": "1f509b715773eacc1448ee4b924c906ebc577d92e46fcff207d6a985f88a4eff",
+      "identico": true
+    },
+    {
+      "archivo": "src/main/controllers/entidadesController.js",
+      "sha256_escritorio": "0ce54134bd1e9bf22f4854bd81ddc6bf11af4135ef2e5d80b1ee4a7713151b12",
+      "sha256_web": "0ce54134bd1e9bf22f4854bd81ddc6bf11af4135ef2e5d80b1ee4a7713151b12",
+      "identico": true
+    },
+    {
+      "archivo": "src/main/controllers/tributarioController.js",
+      "sha256_escritorio": "9d5417b90c225d80b4014ef2f1db4a6cf3e81d52ad95ca3d3ffe0a26a2255ad7",
+      "sha256_web": "9d5417b90c225d80b4014ef2f1db4a6cf3e81d52ad95ca3d3ffe0a26a2255ad7",
+      "identico": true
+    },
+    {
+      "archivo": "src/main/controllers/dashboardController.js",
+      "sha256_escritorio": "810fedb13944fad7c86067fa11c9b64a516c0bf044d262abb57622517090c158",
+      "sha256_web": "810fedb13944fad7c86067fa11c9b64a516c0bf044d262abb57622517090c158",
+      "identico": true
+    },
+    {
+      "archivo": "src/main/controllers/tiposDocumentosController.js",
+      "sha256_escritorio": "3274e2ffb051c079fc5f2cf89b819a33245d823327888ef81ce5ff2dad39eefe",
+      "sha256_web": "3274e2ffb051c079fc5f2cf89b819a33245d823327888ef81ce5ff2dad39eefe",
+      "identico": true
+    },
+    {
+      "archivo": "src/main/controllers/monedasController.js",
+      "sha256_escritorio": "84bd5c84fbfa9d67df9df585c220ce12142a453bcab303911e08e202179e8d27",
+      "sha256_web": "84bd5c84fbfa9d67df9df585c220ce12142a453bcab303911e08e202179e8d27",
+      "identico": true
+    },
+    {
+      "archivo": "src/main/controllers/estadoResultadosController.js",
+      "sha256_escritorio": "95d7e23bca5efd521ace403e9ba8e1df1a0133fa4d7d2d06ffeee1c98cf099f2",
+      "sha256_web": "95d7e23bca5efd521ace403e9ba8e1df1a0133fa4d7d2d06ffeee1c98cf099f2",
+      "identico": true
+    },
+    {
+      "archivo": "src/main/controllers/amarresController.js",
+      "sha256_escritorio": "ccde21d38272d5eb97dd6d36d088c66a453c90f74d2bab6b1e2ecbf36862e2ca",
+      "sha256_web": "ccde21d38272d5eb97dd6d36d088c66a453c90f74d2bab6b1e2ecbf36862e2ca",
+      "identico": true
+    },
+    {
+      "archivo": "src/main/controllers/voucherController.js",
+      "sha256_escritorio": "876995c19a7680ec967d51c8a532323ed6eb2b7a8445e09243cb35edc6bdce3d",
+      "sha256_web": "876995c19a7680ec967d51c8a532323ed6eb2b7a8445e09243cb35edc6bdce3d",
+      "identico": true
+    },
+    {
+      "archivo": "src/main/controllers/sireConfigController.js",
+      "sha256_escritorio": "506505bc7b4b7a26d22e1c882766ebb3a06b033e8ac979475c4f4bc26c2aac58",
+      "sha256_web": "506505bc7b4b7a26d22e1c882766ebb3a06b033e8ac979475c4f4bc26c2aac58",
+      "identico": true
+    },
+    {
+      "archivo": "src/main/controllers/sireController.js",
+      "sha256_escritorio": "cac12551f7305da66db802396bf2830dac0e79f3cfe0e9908bf98dc05d9c16c6",
+      "sha256_web": "a9f2932c9d0aa6cfcb2037b08b2e86119dfc765be2c7177c52755518367a1ebb",
+      "identico": false
+    },
+    {
+      "archivo": "src/main/controllers/empresaController.js",
+      "sha256_escritorio": "80096d9846d58bcff84e5a51d94f28626d4ff3261cd32c6e5f6796eb49b42876",
+      "sha256_web": "80096d9846d58bcff84e5a51d94f28626d4ff3261cd32c6e5f6796eb49b42876",
+      "identico": true
+    },
+    {
+      "archivo": "src/main/controllers/sireSunatController.js",
+      "sha256_escritorio": "150ade8e6a212c6229e9fc2bc9dae5e1bc328e97dd4e2f4b4c66df226fad5edf",
+      "sha256_web": "d7a2804430805061ec96dad69e8306af389d11bd621af180faa3e475c5706864",
+      "identico": false
+    },
+    {
+      "archivo": "src/main/controllers/planCuentasController.js",
+      "sha256_escritorio": "0d766d4827a99158674ca955656030164f7e4df683cf7cc92637ac9504ea3e57",
+      "sha256_web": "0d766d4827a99158674ca955656030164f7e4df683cf7cc92637ac9504ea3e57",
+      "identico": true
+    },
+    {
+      "archivo": "src/main/controllers/reportesController.js",
+      "sha256_escritorio": "f7ec063063545b4eb2061c4ec91957f1be1b4f4f9655e46ea89ef247e09bb90a",
+      "sha256_web": "f6693d7838e95752cf02e6aec8cd3b74bc85e12c61bac6968ad5ffac37ecb97e",
+      "identico": false
+    },
+    {
+      "archivo": "src/main/domain/cartera.js",
+      "sha256_escritorio": "e6506ad3b14db8fd312c84768272ff5e4b7d2c1f16dabc88595b4f0f6e91df41",
+      "sha256_web": "e6506ad3b14db8fd312c84768272ff5e4b7d2c1f16dabc88595b4f0f6e91df41",
+      "identico": true
+    },
+    {
+      "archivo": "src/main/domain/voucherValidation.js",
+      "sha256_escritorio": "99bb8b4caf22b0b9d802787230fd64effe6465fd3953d1d54b099ccc4473a2a7",
+      "sha256_web": "99bb8b4caf22b0b9d802787230fd64effe6465fd3953d1d54b099ccc4473a2a7",
+      "identico": true
+    },
+    {
+      "archivo": "src/main/domain/estadoResultados.js",
+      "sha256_escritorio": "7f64482cd55d201427184750a830f27689bffeddedf72e3604090d8c76592ff4",
+      "sha256_web": "7f64482cd55d201427184750a830f27689bffeddedf72e3604090d8c76592ff4",
+      "identico": true
+    },
+    {
+      "archivo": "src/main/services/sunat/sireApiClient.js",
+      "sha256_escritorio": "3335f2bbc095322b07d6a472862ebe91134535aec077aa1b50068ce454ddab0e",
+      "sha256_web": "3335f2bbc095322b07d6a472862ebe91134535aec077aa1b50068ce454ddab0e",
+      "identico": true
+    },
+    {
+      "archivo": "src/main/services/sunat/sunatAuthService.js",
+      "sha256_escritorio": "affa287b1d1f2bd78e26da5b38b372b619080991d4836d9773169882ee27f494",
+      "sha256_web": "affa287b1d1f2bd78e26da5b38b372b619080991d4836d9773169882ee27f494",
+      "identico": true
+    },
+    {
+      "archivo": "src/main/services/sunat/sireVentasService.js",
+      "sha256_escritorio": "f5d069d5fb7ab3e878b2f73b4ff9ff5d07529651612a352a603d56ad86f94201",
+      "sha256_web": "f5d069d5fb7ab3e878b2f73b4ff9ff5d07529651612a352a603d56ad86f94201",
+      "identico": true
+    },
+    {
+      "archivo": "src/main/services/sunat/sireComprasService.js",
+      "sha256_escritorio": "445ebc458454b5bd4d405dfa4ac3754c0540a3aea1df3b78719bab2095d4ba83",
+      "sha256_web": "445ebc458454b5bd4d405dfa4ac3754c0540a3aea1df3b78719bab2095d4ba83",
+      "identico": true
+    },
+    {
+      "archivo": "src/main/services/sunat/sireTicketService.js",
+      "sha256_escritorio": "f55f2b34aaa7ce34f38a6c7f9037122a6bf1c3b33b818291cce6f67232578ff6",
+      "sha256_web": "f55f2b34aaa7ce34f38a6c7f9037122a6bf1c3b33b818291cce6f67232578ff6",
+      "identico": true
+    },
+    {
+      "archivo": "src/main/services/sunat/sunatSecurityConfig.js",
+      "sha256_escritorio": "2b89366ca39732de75b11e2e57bfb3aca228beb18e7a7aa7d6d550e2947c97ba",
+      "sha256_web": "2b89366ca39732de75b11e2e57bfb3aca228beb18e7a7aa7d6d550e2947c97ba",
+      "identico": true
+    },
+    {
+      "archivo": "src/main/services/sunat/sireCryptoService.js",
+      "sha256_escritorio": "2245a05d3ebb626aa84b39173001f11fb9cb078f0cb474fe23d9750bfb81ce97",
+      "sha256_web": "c271f9636597750fb9e08e468f4b6a78551574f257b30575fc059cb09a73cc27",
+      "identico": false
+    },
+    {
+      "archivo": "src/main/services/catalogos/planCuentasLookup.js",
+      "sha256_escritorio": "0045955cb33c271ed92d1a36b5725fd1b17b18d060af08c46ff700873d2732eb",
+      "sha256_web": "0045955cb33c271ed92d1a36b5725fd1b17b18d060af08c46ff700873d2732eb",
+      "identico": true
+    },
+    {
+      "archivo": "src/main/services/catalogos/catalogoScope.js",
+      "sha256_escritorio": "65d1d49a2ce9e5708707b36ff77c2154a76c306dbd102651e42987a139d14989",
+      "sha256_web": "65d1d49a2ce9e5708707b36ff77c2154a76c306dbd102651e42987a139d14989",
+      "identico": true
+    },
+    {
+      "archivo": "src/main/database/migrations/global.js",
+      "sha256_escritorio": "6921dd5cf5a222899bac8498e8c60ab1418085e8efee1d9caeecee6ff43620da",
+      "sha256_web": "6921dd5cf5a222899bac8498e8c60ab1418085e8efee1d9caeecee6ff43620da",
+      "identico": true
+    },
+    {
+      "archivo": "src/main/database/migrations/empresa.js",
+      "sha256_escritorio": "b528916ffbaadf1e4fc53ee961cc8cc1b986d63b2636ef4032250a0fa137cfed",
+      "sha256_web": "b528916ffbaadf1e4fc53ee961cc8cc1b986d63b2636ef4032250a0fa137cfed",
+      "identico": true
+    },
+    {
+      "archivo": "src/tests/helpers/testDb.js",
+      "sha256_escritorio": "48c8070ba3f1cbb656461635de5bbb7d44b46bee135d2547a2d9864b4cfc14f7",
+      "sha256_web": "48c8070ba3f1cbb656461635de5bbb7d44b46bee135d2547a2d9864b4cfc14f7",
+      "identico": true
+    },
+    {
+      "archivo": "src/renderer/css/styles.css",
+      "sha256_escritorio": "e0c878bb5c177866682add84f10a9ecfacd2a4c57a7e3ee52f56721b4e32181b",
+      "sha256_web": "e0c878bb5c177866682add84f10a9ecfacd2a4c57a7e3ee52f56721b4e32181b",
+      "identico": true
+    },
+    {
+      "archivo": "src/renderer/js/theme.js",
+      "sha256_escritorio": "7055fd13195f94522f73ba232e56e322463025cd8763b607161013de9ec0180f",
+      "sha256_web": "7055fd13195f94522f73ba232e56e322463025cd8763b607161013de9ec0180f",
+      "identico": true
+    },
+    {
+      "archivo": "src/renderer/js/router.js",
+      "sha256_escritorio": "2fd60a266f50f18f1ec4253bb17ef7f388067f15ca086233fa9f16927adba03d",
+      "sha256_web": "2fd60a266f50f18f1ec4253bb17ef7f388067f15ca086233fa9f16927adba03d",
+      "identico": true
+    },
+    {
+      "archivo": "src/renderer/js/app.js",
+      "sha256_escritorio": "676a49efaeb326b9e5c96dd714fa29a340f00194dc562ed9bf341b993577e6f1",
+      "sha256_web": "a36949858c2fb4e47ef230208e8af1e64ed14f9904cd73efd671a3eba4e488f3",
+      "identico": false
+    },
+    {
+      "archivo": "src/renderer/js/utils/security.js",
+      "sha256_escritorio": "9cde66094187db34723332e397becdbc0fd915ccdba374f1fedadb6ae6b4cef7",
+      "sha256_web": "9cde66094187db34723332e397becdbc0fd915ccdba374f1fedadb6ae6b4cef7",
+      "identico": true
+    },
+    {
+      "archivo": "src/renderer/js/modules/reportes.js",
+      "sha256_escritorio": "23ca5af9e99ef305a7f26c872ecb4d81a5eb9c243e5139442f5e0cc98c0385b1",
+      "sha256_web": "23ca5af9e99ef305a7f26c872ecb4d81a5eb9c243e5139442f5e0cc98c0385b1",
+      "identico": true
+    },
+    {
+      "archivo": "src/renderer/js/modules/cartera.js",
+      "sha256_escritorio": "9bdc6355641c36821fd52ec378784ce165bde38cb7323416124eaa86201d3ba9",
+      "sha256_web": "9bdc6355641c36821fd52ec378784ce165bde38cb7323416124eaa86201d3ba9",
+      "identico": true
+    },
+    {
+      "archivo": "src/renderer/js/modules/configEEFF.js",
+      "sha256_escritorio": "d1a0e354d0b50e8019a4891e66a8709f05f0df49858c589f3130408878c6b80d",
+      "sha256_web": "d1a0e354d0b50e8019a4891e66a8709f05f0df49858c589f3130408878c6b80d",
+      "identico": true
+    },
+    {
+      "archivo": "src/renderer/js/modules/amarres.js",
+      "sha256_escritorio": "fefa03ddd5a2db480853945dc22f383a6ccb54d8c8e7c85083124b082e59c59b",
+      "sha256_web": "fefa03ddd5a2db480853945dc22f383a6ccb54d8c8e7c85083124b082e59c59b",
+      "identico": true
+    },
+    {
+      "archivo": "src/renderer/js/modules/voucher.js",
+      "sha256_escritorio": "7ca2b8f0c7e4546fd4f2cf5c9929f3874b87d04f491f1f75e4cfb9e5b92b5e13",
+      "sha256_web": "7ca2b8f0c7e4546fd4f2cf5c9929f3874b87d04f491f1f75e4cfb9e5b92b5e13",
+      "identico": true
+    },
+    {
+      "archivo": "src/renderer/js/modules/editarRegistros.js",
+      "sha256_escritorio": "2a3dbb9e53303ad4d5bf49f88d68c4a08875bf941fecec775f2681398b8dcc10",
+      "sha256_web": "2a3dbb9e53303ad4d5bf49f88d68c4a08875bf941fecec775f2681398b8dcc10",
+      "identico": true
+    },
+    {
+      "archivo": "src/renderer/js/modules/entidades.js",
+      "sha256_escritorio": "6cad8dac6fb605aca248b608ca05e3d0fc26ea8c8c1e561d787fdac4f5265550",
+      "sha256_web": "6cad8dac6fb605aca248b608ca05e3d0fc26ea8c8c1e561d787fdac4f5265550",
+      "identico": true
+    },
+    {
+      "archivo": "src/renderer/js/modules/dashboard.js",
+      "sha256_escritorio": "8ecc33024741bf6e9416ae796886e09470ec9f35f9577490324e719e4214ad8b",
+      "sha256_web": "8ecc33024741bf6e9416ae796886e09470ec9f35f9577490324e719e4214ad8b",
+      "identico": true
+    },
+    {
+      "archivo": "src/renderer/js/modules/tiposDocumentos.js",
+      "sha256_escritorio": "59102fff585bbd7b09cffb5f65c210137af86ccba8be552d9d9d17a139d1364f",
+      "sha256_web": "59102fff585bbd7b09cffb5f65c210137af86ccba8be552d9d9d17a139d1364f",
+      "identico": true
+    },
+    {
+      "archivo": "src/renderer/js/modules/sire.js",
+      "sha256_escritorio": "8ced2f411ab236a5d566bc0d58ddf2ae79b8d7066447b35f3d5091f641452f9f",
+      "sha256_web": "8ced2f411ab236a5d566bc0d58ddf2ae79b8d7066447b35f3d5091f641452f9f",
+      "identico": true
+    },
+    {
+      "archivo": "src/renderer/js/modules/planCuentas.js",
+      "sha256_escritorio": "1b0fee80501bd5c237ea98b13170e68f6e137fb7e088625141115acdcc0e9cb1",
+      "sha256_web": "1b0fee80501bd5c237ea98b13170e68f6e137fb7e088625141115acdcc0e9cb1",
+      "identico": true
+    },
+    {
+      "archivo": "src/renderer/js/modules/monedas.js",
+      "sha256_escritorio": "3e9b423b0d540d0e313fe52c74f3935fef903be0ac598e244f4f314b4f5e0429",
+      "sha256_web": "3e9b423b0d540d0e313fe52c74f3935fef903be0ac598e244f4f314b4f5e0429",
+      "identico": true
+    }
+  ]
+}
