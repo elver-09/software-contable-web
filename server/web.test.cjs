@@ -26,3 +26,44 @@ test('Respaldos consistentes se reimportan sin modificar la empresa de origen',a
 test('Importación rechaza archivos falsos y catálogo global sobre datos existentes',async()=>{for(const input of [{name:'Mal',base64:Buffer.from('mal').toString('base64')},{name:'Mal',kind:'global',base64:fs.readFileSync(path.join(process.env.ANSORITO_DATA_DIR,'revision-local','companies',company,'contable.db')).toString('base64')}]){const r=await fetch(base+'/rpc',{method:'POST',headers:{Cookie:cookie},body:JSON.stringify({channel:'web:import-database',companyId:company,args:[input]})});assert.equal(r.status,400);}});
 test('Catálogo global se comparte entre empresas del mismo espacio y se aísla de otro usuario',async()=>{assert.equal((await rpc('plan-cuentas:add',[{codigo:'99991',descripcion:'Global prueba'}],{companyId:null})).value.success,true);assert.ok((await rpc('plan-cuentas:get',[],{companyId:second})).value.some(x=>x.codigo==='99991'));const workspace=path.join(process.env.ANSORITO_DATA_DIR,'otro-usuario');fs.mkdirSync(workspace);const rows=storage.run({workspace,companyId:null},()=>require('../src/main/controllers/planCuentasController').getPlanCuentas());assert.equal(rows.some(x=>x.codigo==='99991'),false);});
 test('Carga Excel en los tres catálogos y preserva ámbito Local/Global',async()=>{const XLSX=require('xlsx');for(const [channel,rows,getter,codigo]of [['plan-cuentas:import-excel',[['CODIGO','DESCRIPCION'],['10555','Cuenta importada']],'plan-cuentas:get','10555'],['documentos:import-excel',[['CODIGO','DESCRIPCION'],['01','Factura']],'documentos:get','01'],['entidades:import-excel',[['RUC','RAZON SOCIAL','TIPO'],['20999999999','Entidad importada','Proveedor']],'entidades:get','20999999999']]){const book=XLSX.utils.book_new();XLSX.utils.book_append_sheet(book,XLSX.utils.aoa_to_sheet(rows),'Catalogo');const base64=XLSX.write(book,{type:'base64',bookType:'xlsx'});const value=(await rpc(channel,[],{scope:'Local',upload:{name:'catalogo.xlsx',base64}})).value;assert.equal(value.success,true,value.error);assert.equal(value.count,1);assert.ok((await rpc(getter)).value.some(x=>x.codigo===codigo));assert.equal((await rpc(getter,[],{companyId:second})).value.some(x=>x.codigo===codigo),false);}});
+
+
+test('Compras distingue proveedores y tipos, y rechaza duplicados al editar', async()=>{
+ const base=structuredClone(voucher); base.origen='8';
+ base.detalles=base.detalles.map(d=>({...d,doc_tipo:'01',doc_numero:'F901-900',codigo:'20111111111'}));
+ const first=(await rpc('voucher:add',[base])).value;assert.equal(first.success,true,first.error);
+ const other=structuredClone(base);other.detalles.forEach(d=>d.codigo='20222222222');
+ const second=(await rpc('voucher:add',[other])).value;assert.equal(second.success,true,second.error);
+ assert.equal((await rpc('voucher:add',[base])).value.success,false);
+ const otherType=structuredClone(base);otherType.detalles.forEach(d=>d.doc_tipo='03');
+ assert.equal((await rpc('voucher:add',[otherType])).value.success,true);
+ const found=(await rpc('voucher:buscar',[{id:second.id}])).value;
+ const detalles=found.detalles.map(d=>({...d,codigo:'20111111111'}));
+ const edited=(await rpc('voucher:update-completo',[{voucher_id:second.id,detalles,webVersion:found.webVersion}])).value;
+ assert.equal(edited.success,false);assert.match(edited.error,/DUPLICADO/);
+});
+
+
+test('Ficha tributaria inconsistente rechaza el guardado completo sin crear asientos',async()=>{
+ const data=structuredClone(voucher);data.origen='14';
+ data.detalles=data.detalles.map(d=>({...d,doc_tipo:'01',doc_numero:'F908-900',codigo:'20111111111'}));
+ data.tributario={tipo_registro:'VENTA',venta:{base_gravada:50,igv:18,importe_total:118}};
+ const result=(await rpc('voucher:add',[data])).value;assert.equal(result.success,false);assert.match(result.error,/suma del detalle/i);
+ data.tributario.venta.base_gravada=100;
+ const saved=(await rpc('voucher:add',[data])).value;assert.equal(saved.success,true,saved.error);
+ const found=(await rpc('voucher:buscar',[{id:saved.id}])).value;
+ assert.equal(found.tributario.venta.base_gravada,100);
+});
+
+ test('La búsqueda por período/factura usa la misma versión que la edición y rechaza reutilizarla',async()=>{
+ const direct=(await rpc('voucher:buscar',[{id:1}])).value;
+ for(const docNumero of ['',direct.detalles[0].doc_numero]) {
+  const found=(await rpc('voucher:buscar-factura',[{periodo:direct.cabecera.periodo,docNumero,origen:direct.cabecera.origen}])).value;
+  assert.equal(found.success,true);
+  const canonical=(await rpc('voucher:buscar',[{id:found.cabecera.id}])).value;
+  assert.equal(found.webVersion,canonical.webVersion);
+ }
+ const params={voucher_id:direct.cabecera.id,detalles:direct.detalles.map(d=>({...d,glosa:'Prueba versión de búsqueda'})),webVersion:direct.webVersion};
+ assert.equal((await rpc('voucher:update-completo',[params])).value.success,true);
+ assert.equal((await rpc('voucher:update-completo',[params])).value.success,false);
+ });

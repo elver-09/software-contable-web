@@ -1,3 +1,4 @@
+import { evaluarDetalleTributario, resumirTributarioAsistente, sincronizarTributarioLineas } from '../utils/tributario.mjs';
 import { escapeHTML, escapeAttr } from '../utils/security.js';
 // src/renderer/js/modules/editarRegistros.js
 'use strict';
@@ -20,6 +21,9 @@ let _voucherActual = null;      // Borrador editable en memoria
 let _voucherOriginal = null;    // Copia exacta de lo último persistido en SQLite
 let _cambiosPendientes = new Set();
 let _tributarioModificado = false;
+let _tributarioManual = false;
+let _tributarioAviso = null;
+let _tributarioExpandido = false;
 
 const CAMPOS_EDITABLES = [
   'cuenta','nombre_cuenta','debe','haber','moneda','tc','doc_tipo','doc_numero',
@@ -35,6 +39,9 @@ function _iniciarEdicionVoucher(resultado) {
   _voucherOriginal = _clonar(resultado);
   _cambiosPendientes.clear();
   _tributarioModificado = false;
+  _tributarioManual = false;
+  _tributarioAviso = null;
+  _tributarioExpandido = false;
 }
 
 function _limpiarEdicion() {
@@ -42,6 +49,9 @@ function _limpiarEdicion() {
   _voucherOriginal = null;
   _cambiosPendientes.clear();
   _tributarioModificado = false;
+  _tributarioManual = false;
+  _tributarioAviso = null;
+  _tributarioExpandido = false;
 }
 
 function _hayCambiosPendientes() {
@@ -375,17 +385,14 @@ function _nTrib(v) { const n = Number.parseFloat(v); return Number.isFinite(n) ?
 
 function _evaluarTributarioEditor(t = _voucherActual?.tributario) {
   if (!t) return { estado:'PENDIENTE', ok:true, texto:'Datos tributarios pendientes de completar' };
-  const tipo=String(t.tipo_registro||'').toUpperCase();
-  const datos=tipo==='VENTA' ? (t.venta||{}) : (t.compra||{});
-  const campos=tipo==='VENTA'
-    ? ['valor_exportacion','base_gravada','descuento_base','igv','descuento_igv','importe_exonerado','importe_inafecto','isc','base_ivap','ivap','icbper','otros_tributos']
-    : ['g1_base','g1_igv','g2_base','g2_igv','g3_base','g3_igv','valor_no_gravado','isc','icbper','otros_tributos'];
-  const tieneClasificacion=campos.some(k=>Math.abs(_nTrib(datos[k]))>0.009);
-  const totalTrib=_nTrib(datos.importe_total);
-  const tot=_calcularTotales(_voucherActual?.detalles||[]);
-  const totalAsiento=Math.max(Math.abs(tot.debe),Math.abs(tot.haber));
-  if(!tieneClasificacion && Math.abs(totalTrib)>0.009) return {estado:'INCOMPLETO',ok:false,texto:'Falta clasificar base, importe o impuesto'};
-  if(totalAsiento>0.009 && Math.abs(Math.abs(totalTrib)-totalAsiento)>0.01) return {estado:'DIFERENCIA',ok:false,texto:'El total tributario no coincide con el asiento'};
+  if (_tributarioAviso && !_tributarioManual) return {estado:"REVISION",ok:false,texto:_tributarioAviso};
+  const detalle = evaluarDetalleTributario(t);
+  if (!detalle.ok) return detalle;
+  const datos = t.tipo_registro === 'VENTA' ? t.venta : t.compra;
+  const totalTrib = Number(datos.importe_total);
+  const tot = _calcularTotales(_voucherActual?.detalles||[]);
+  const totalAsiento = Math.max(Math.abs(tot.debe),Math.abs(tot.haber));
+  if (Math.abs(Math.abs(totalTrib) - totalAsiento) > 0.010001) return { estado:'DIFERENCIA', ok:false, texto:'El total del comprobante no coincide con el asiento', totalTrib };
   if(Number(t.comprobante?.requiere_revision||0)===1) return {estado:'REVISION',ok:true,texto:'Datos completados, pendientes de revisión'};
   return {estado:'LISTO',ok:true,texto:'Datos tributarios completos'};
 }
@@ -413,6 +420,8 @@ function _tributarioEditorHTML() {
         ['g3_base','G3 Base','Destinada a operaciones no gravadas, sin derecho a crédito fiscal.'],['g3_igv','G3 IGV','IGV correspondiente a G3.'],['valor_no_gravado','No gravado','Valor de adquisiciones no gravadas.'],['isc','ISC','Impuesto Selectivo al Consumo.'],
         ['icbper','ICBPER','Impuesto al consumo de bolsas plásticas.'],['otros_tributos','Otros tributos','Otros tributos o cargos.'],['importe_total','Importe total','Debe coincidir en valor absoluto con el total del asiento.']
       ];
+  const simple = resumirTributarioAsistente(t);
+  const automatico = !_tributarioManual && sincronizarTributarioLineas(_voucherOriginal?.tributario, _voucherOriginal?.detalles || [], _voucherActual.detalles).ok;
   const fuente = t.comprobante?.fuente || 'MANUAL';
   const rev = Number(t.comprobante?.requiere_revision || 0) === 1;
   const comp = t.comprobante || {};
@@ -428,10 +437,17 @@ function _tributarioEditorHTML() {
         <span class="er-taxpill">Fuente: ${escapeHTML(fuente)}</span>${estadoPill}
       </div>
     </div>
-    <div style="padding:8px 12px 0;font-size:9.5px;color:var(--tx3);line-height:1.45;"><i class="fa-solid fa-circle-info"></i> Esta sección describe cómo tributa el comprobante. No cambia las cuentas ni los importes Debe/Haber del asiento.</div>
+    <div style="padding:12px;font-size:12px;line-height:1.6;">
+      ${simple ? `<b>${tipo==='COMPRA'&&simple.afectacion==='GRAVADO'?simple.grupo+' · ':''}${escapeHTML(simple.afectacion)}</b> · Base / valor: S/ ${fmt(simple.base)} · IGV: S/ ${fmt(simple.igv)} · <b>Total: S/ ${fmt(datos.importe_total)}</b><br>` : '<b>Distribución especial del comprobante.</b><br>'}
+      ${automatico ? 'Los importes se actualizan al editar las líneas. Se conserva la clasificación tributaria.' : 'La distribución requiere revisión manual si cambia los importes o las cuentas.'}
+      ${!estadoTrib.ok ? `<div role="alert" style="color:var(--warn);">${escapeHTML(estadoTrib.texto)}</div>` : ''}
+    </div>
+    <details id="er-tax-especiales" ${_tributarioExpandido||!estadoTrib.ok?'open':''}>
+    <summary style="cursor:pointer;padding:10px 12px;font-weight:700;">Datos especiales y clasificación tributaria</summary>
+    <label style="display:block;padding:10px 12px;font-size:11px;"><input id="er-tax-manual" type="checkbox" ${_tributarioManual?'checked':''}> Editar manualmente la distribución de importes</label>
     ${tipo==='COMPRA'?'<div style="margin:8px 12px 0;padding:7px 9px;background:rgba(var(--accent-rgb),.07);border:1px solid rgba(var(--accent-rgb),.18);border-radius:5px;font-size:9px;color:var(--tx2);line-height:1.45;"><b>G1:</b> operaciones con derecho a crédito fiscal destinadas a gravadas/exportación · <b>G2:</b> destino conjunto a gravadas y no gravadas · <b>G3:</b> destino a no gravadas, sin derecho a crédito fiscal.</div>':''}
     <div class="er-taxgrid">
-      ${campos.map(([k,l,ayuda])=>`<label title="${ayuda}"><span>${l} <i class="fa-regular fa-circle-question" style="opacity:.65"></i></span><input class="er-tax-input" data-tax-field="${k}" type="number" step="0.01" value="${Number(datos[k]||0)}"></label>`).join('')}
+      ${campos.map(([k,l,ayuda])=>`<label title="${ayuda}"><span>${l} <i class="fa-regular fa-circle-question" style="opacity:.65"></i></span><input class="er-tax-input" data-tax-field="${k}" type="number" step="0.01" ${_tributarioManual?'':'disabled'} value="${Number(datos[k]||0)}"></label>`).join('')}
     </div>
     <div style="padding:0 12px 10px;">
       <div style="font-size:9px;text-transform:uppercase;color:var(--tx3);font-weight:800;margin:2px 0 6px;">Documento modificado / referencia</div>
@@ -449,11 +465,24 @@ function _tributarioEditorHTML() {
       </div>`:''}
     </div>
     <label style="margin:0 12px 10px;display:flex;gap:7px;align-items:flex-start;font-size:9.5px;color:var(--tx2);line-height:1.4;"><input id="er-tax-revision" type="checkbox" ${rev?'checked':''} style="margin-top:2px;"><span><b>Dejar pendiente de revisión tributaria</b><br><span style="color:var(--tx3);">Puede guardar los datos y mantener esta marca hasta que sean verificados.</span></span></label>
+    </details>
     <div class="er-taxnote"><i class="fa-solid fa-circle-info"></i> Los cambios tributarios quedan en el mismo borrador y se guardan junto con el asiento en una sola transacción.</div>
   </div>`;
 }
 
 function _bindTributarioEditor() {
+  document.getElementById('er-tax-especiales')?.addEventListener('toggle', ev => { _tributarioExpandido = ev.target.open; });
+  document.getElementById('er-tax-manual')?.addEventListener('change', ev => {
+    _tributarioManual = ev.target.checked;
+    _tributarioExpandido = true;
+    if (_tributarioManual) {
+      _tributarioAviso = null;
+      _voucherActual.tributario.comprobante ||= {};
+      _voucherActual.tributario.comprobante.requiere_revision = 1;
+    } else { _sincronizarTributarioEditor(); }
+    _tributarioModificado = JSON.stringify(_voucherActual.tributario) !== JSON.stringify(_voucherOriginal.tributario);
+    _renderResultado(_voucherActual.cabecera, _voucherActual.detalles);
+  });
   document.getElementById('er-btn-crear-tributario')?.addEventListener('click', () => {
     const origen=String(_voucherActual?.cabecera?.origen||'');
     const total=_calcularTotales(_voucherActual?.detalles||[]).debe;
@@ -533,17 +562,22 @@ function _renderResultado(cab, det) {
       <span style="font-weight:400;color:var(--tx3);font-size:10px;margin-left:auto;">Doble clic o <i class="fa-solid fa-pencil"></i> para editar</span>
     </div>
     <div style="overflow-x:auto;">
-      <table class="er-table">
+      <table class="er-table er-lines-table">
+        <colgroup>
+          <col style="width:3%"><col style="width:7%"><col style="width:24%">
+          <col style="width:9%"><col style="width:9%"><col style="width:5%">
+          <col style="width:10%"><col style="width:29%"><col style="width:4%">
+        </colgroup>
         <thead><tr>
-          <th style="width:30px">#</th>
-          <th style="width:60px">Cuenta</th>
+          <th>#</th>
+          <th>Cuenta</th>
           <th>Denominación</th>
-          <th style="width:80px;text-align:right">Debe</th>
-          <th style="width:80px;text-align:right">Haber</th>
-          <th style="width:50px">Mon.</th>
-          <th style="width:70px">N° Doc.</th>
-          <th style="width:90px">Glosa</th>
-          <th style="width:42px"></th>
+          <th style="text-align:right">Debe</th>
+          <th style="text-align:right">Haber</th>
+          <th>Mon.</th>
+          <th>N° Doc.</th>
+          <th>Glosa</th>
+          <th></th>
         </tr></thead>
         <tbody>
           ${det.map((d,i) => { const mod = _cambiosPendientes.has(Number(d.id)); return `
@@ -648,6 +682,7 @@ function _guardar() {
   };
 
   _actualizarEstadoLinea(id);
+  _sincronizarTributarioEditor();
   _cerrarModal();
   _renderResultado(_voucherActual.cabecera, _voucherActual.detalles);
 
@@ -660,12 +695,42 @@ function _guardar() {
   );
 }
 
+function _sincronizarTributarioEditor() {
+  if (!_voucherActual?.tributario || _tributarioManual) return;
+  const sensibles = ['cuenta','debe','haber','moneda','tc','doc_tipo','doc_numero','codigo'];
+  const cambio = _voucherActual.detalles.some(d => {
+    const original = _voucherOriginal.detalles.find(x => Number(x.id)===Number(d.id));
+    return !original || sensibles.some(k => _valorComparable(k,d[k]) !== _valorComparable(k,original[k]));
+  });
+  if (!cambio) {
+    _tributarioAviso = null;
+    // Restore amounts only, retaining edited references and review flags.
+    const tipo = _voucherActual.tributario.tipo_registro === 'COMPRA' ? 'compra' : 'venta';
+    for (const [k,v] of Object.entries(_voucherOriginal.tributario?.[tipo] || {})) {
+      if (/^(g[123]_(base|igv)|valor_no_gravado|valor_exportacion|base_gravada|descuento_base|igv|descuento_igv|importe_exonerado|importe_inafecto|isc|base_ivap|ivap|icbper|otros_tributos|importe_total)$/.test(k)) _voucherActual.tributario[tipo][k] = v;
+    }
+  } else {
+    const resultado = sincronizarTributarioLineas(_voucherOriginal.tributario, _voucherOriginal.detalles, _voucherActual.detalles);
+    _tributarioAviso = resultado.ok ? null : resultado.texto;
+    if (resultado.ok) {
+      const tipo = resultado.tributario.tipo_registro === 'COMPRA' ? 'compra' : 'venta';
+      for (const [k,v] of Object.entries(resultado.tributario[tipo])) {
+        if (/^(g[123]_(base|igv)|valor_no_gravado|valor_exportacion|base_gravada|descuento_base|igv|descuento_igv|importe_exonerado|importe_inafecto|isc|base_ivap|ivap|icbper|otros_tributos|importe_total)$/.test(k)) _voucherActual.tributario[tipo][k] = v;
+      }
+    }
+  }
+  _tributarioModificado = JSON.stringify(_voucherActual.tributario) !== JSON.stringify(_voucherOriginal.tributario);
+}
+
 function _descartarCambios() {
   if (!_hayCambiosPendientes() || !_voucherOriginal) return;
   if (!confirm('¿Descartar todos los cambios pendientes de este asiento?')) return;
   _voucherActual = _clonar(_voucherOriginal);
   _cambiosPendientes.clear();
   _tributarioModificado = false;
+  _tributarioManual = false;
+  _tributarioAviso = null;
+  _tributarioExpandido = false;
   _renderResultado(_voucherActual.cabecera, _voucherActual.detalles);
   _status('info', 'Cambios descartados. El asiento volvió a los valores guardados.');
 }
@@ -765,6 +830,9 @@ body.dark-mode .er-hero{background:var(--brand-grad);}
 .er-table{width:100%;border-collapse:collapse;font-size:12px;}
 .er-table thead th{background:var(--bg-th);color:var(--tx-th);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0;padding:8px 10px;}
 .er-table tbody td{padding:8px 10px;border-bottom:1px solid var(--brd-lt);color:var(--tx);}
+.er-lines-table{table-layout:fixed;min-width:1000px;}
+.er-lines-table tbody td:nth-child(3),.er-lines-table tbody td:nth-child(7),.er-lines-table tbody td:nth-child(8){overflow-wrap:anywhere;}
+.er-lines-table tbody td:nth-child(4),.er-lines-table tbody td:nth-child(5){white-space:nowrap;}
 .er-table tbody tr:hover{background:var(--accent-lt);cursor:pointer;}
 .er-btn-edit{width:28px;height:28px;border-radius:6px;border:1px solid var(--brd);background:var(--bg-block);color:var(--accent);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;transition:all 0.15s;}
 .er-btn-edit:hover{background:var(--btn-primary);color:#fff;}

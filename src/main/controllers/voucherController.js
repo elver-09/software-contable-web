@@ -17,6 +17,23 @@ function getSiguienteNumero({ origen, periodo, fechaContable }) {
   }
 }
 
+function validarDuplicados(db, origen, detalles, excluirId = -1) {
+  if (!['8','14'].includes(String(origen))) return;
+  const revisados = new Set();
+  for (const d of detalles) {
+    const doc = String(d.doc_numero || '').trim();
+    if (!doc || doc === '-') continue;
+    const relacionados = detalles.filter(l => String(l.doc_numero || '').trim().toUpperCase() === doc.toUpperCase());
+    const tipo = String(d.doc_tipo || relacionados.find(l => l.doc_tipo)?.doc_tipo || '').trim();
+    const proveedor = String(d.codigo || relacionados.find(l => l.codigo)?.codigo || '').trim();
+    const clave = [doc.toUpperCase(),tipo, String(origen)==='8'?proveedor:''].join('|');
+    if (revisados.has(clave)) continue;
+    revisados.add(clave);
+    const existente = voucherRepository.addVoucher_get_voucher_detalles(db, doc, String(origen), tipo, String(origen), proveedor, excluirId);
+    if (existente) throw new Error(`DUPLICADO: El comprobante ${doc} ya está registrado en ${String(origen)==='8'?'Compras':'Ventas'}, período ${existente.periodo}, voucher N° ${existente.numero_voucher}.`);
+  }
+}
+
 function addVoucher(data) {
   try {
     const db = getDB();
@@ -33,22 +50,7 @@ function addVoucher(data) {
     // en compras ni en ventas. En otros orígenes (caja, diario, etc.)
     // sí puede repetirse porque se registra el pago/cobro de esa factura.
     if (origen === '8' || origen === '14' || origen === 8 || origen === 14) {
-      const docNums = detalles
-        .map(d => (d.doc_numero || '').trim())
-        .filter(n => n && n !== '-' && n !== '');
-
-      for (const docNum of [...new Set(docNums)]) {
-        const existente = voucherRepository.addVoucher_get_voucher_detalles(db, docNum, String(origen));
-
-        if (existente) {
-          const origenNombre = String(origen) === '14' ? 'Ventas' : 'Compras';
-          throw new Error(
-            `DUPLICADO: El comprobante ${docNum} ya está registrado en ${origenNombre}, ` +
-            `período ${existente.periodo}, voucher N° ${existente.numero_voucher}. ` +
-            `No se puede registrar el mismo comprobante dos veces.`
-          );
-        }
-      }
+      validarDuplicados(db, origen, detalles);
     }
 
     const { debe: totalDebe, haber: totalHaber } = calcularTotales(detalles);
@@ -214,6 +216,7 @@ function updateVoucherCompleto(data) {
       });
 
       const cuadrados = validarCuadre(totalDebe, totalHaber);
+      validarDuplicados(db, voucher.origen, preparados, voucherId);
 
       const stmtUpdate = voucherRepository.updateVoucherCompleto_prepare_voucher_detalles(db);
 

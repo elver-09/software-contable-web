@@ -10,7 +10,7 @@
     {
       "archivo": "src/renderer/index.html",
       "sha256_escritorio": "00c520f1ca0dae2357267d2d97b05e8de2350f61c537e97cf6a2ecf8d46a155b",
-      "sha256_web": "3d4a04628206d3e3f618e7ff4c404a64a1c1a8bce3f863d7a18b1c5658be68dc",
+      "sha256_web": "086060d0b584c7f22ca5e50f6d2d2104971a206c11ec20127529498e467a3e21",
       "identico": false
     },
     {
@@ -94,8 +94,8 @@
     {
       "archivo": "src/tests/tributario.test.js",
       "sha256_escritorio": "41c527cc5e4e23c77d481fd10b159188d639607e4976763ac67d6636675d9562",
-      "sha256_web": "41c527cc5e4e23c77d481fd10b159188d639607e4976763ac67d6636675d9562",
-      "identico": true
+      "sha256_web": "ab1e9485fb378689ed0874d1700f8465a7d8c63f337f9ea3c90a6e2f7f00f858",
+      "identico": false
     },
     {
       "archivo": "src/tests/cartera.test.js",
@@ -154,7 +154,7 @@
     {
       "archivo": "src/main/controllers/tributarioController.js",
       "sha256_escritorio": "9d5417b90c225d80b4014ef2f1db4a6cf3e81d52ad95ca3d3ffe0a26a2255ad7",
-      "sha256_web": "f594b8270bcf10c96a40c066a175c6d4d395c268c8e1cf823c77628669ebcb1b",
+      "sha256_web": "3c548a3fcf0906addcb405ccf3da7b512a553bb50dc7c963cb0117f9f9b3a567",
       "identico": false
     },
     {
@@ -190,7 +190,7 @@
     {
       "archivo": "src/main/controllers/voucherController.js",
       "sha256_escritorio": "876995c19a7680ec967d51c8a532323ed6eb2b7a8445e09243cb35edc6bdce3d",
-      "sha256_web": "88c2893985f6e68656b12d9c453f605eba88785e3dd99e6579e108aa696b4d0c",
+      "sha256_web": "97dcdd26e7f645127881e89d8ce8d0849f5fa61ab54ff1759e8e60e5f9d2de96",
       "identico": false
     },
     {
@@ -322,8 +322,8 @@
     {
       "archivo": "src/renderer/css/styles.css",
       "sha256_escritorio": "e0c878bb5c177866682add84f10a9ecfacd2a4c57a7e3ee52f56721b4e32181b",
-      "sha256_web": "e0c878bb5c177866682add84f10a9ecfacd2a4c57a7e3ee52f56721b4e32181b",
-      "identico": true
+      "sha256_web": "a923561359ff9b5a5c7face0251c4d49f3473d7bd0ab4ff02ba71710ae3ac81c",
+      "identico": false
     },
     {
       "archivo": "src/renderer/js/theme.js",
@@ -376,14 +376,14 @@
     {
       "archivo": "src/renderer/js/modules/voucher.js",
       "sha256_escritorio": "7ca2b8f0c7e4546fd4f2cf5c9929f3874b87d04f491f1f75e4cfb9e5b92b5e13",
-      "sha256_web": "7ca2b8f0c7e4546fd4f2cf5c9929f3874b87d04f491f1f75e4cfb9e5b92b5e13",
-      "identico": true
+      "sha256_web": "30d84aada7fb98ab5fcd13a419851718bdcc7686d659f311ad7b4948e6e42ff5",
+      "identico": false
     },
     {
       "archivo": "src/renderer/js/modules/editarRegistros.js",
       "sha256_escritorio": "2a3dbb9e53303ad4d5bf49f88d68c4a08875bf941fecec775f2681398b8dcc10",
-      "sha256_web": "2a3dbb9e53303ad4d5bf49f88d68c4a08875bf941fecec775f2681398b8dcc10",
-      "identico": true
+      "sha256_web": "155e375fe6f46c958400a340d2fa1d8db3faf25d3902fe75794a386ddcfae474",
+      "identico": false
     },
     {
       "archivo": "src/renderer/js/modules/entidades.js",

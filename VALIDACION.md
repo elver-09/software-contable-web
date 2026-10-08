@@ -4,9 +4,9 @@ Motor activo: PostgreSQL de Supabase. Catálogo global y una empresa de la versi
 
 ## Evidencia
 
-- 45 pruebas originales y 25 pruebas web pasan.
+- 50 pruebas de la suite original y 31 pruebas web pasan.
 - 5 pruebas del esquema y repositorio PostgreSQL pasan: campos/semillas, aislamiento, relaciones, certificados y creación de empresas.
-- 3 pruebas de traducción de consultas y 3 pruebas de separación de repositorios pasan. Total automatizado: **81 pruebas**.
+- 3 pruebas de traducción de consultas y 3 pruebas de separación de repositorios pasan. 6 pruebas de sincronización y presentación del editor pasan. Total automatizado: **98 pruebas**.
 - Comparación contra PostgreSQL real: resultados idénticos a SQLite para nueve familias de reportes, cartera, dashboard y documentos pendientes usando un conjunto controlado de asientos.
 - Verificación real de creación/búsqueda de asientos, totales, correlativos, respaldo SQLite, reimportación y creación posterior sin colisión de identificadores.
 - Verificación real de Storage: bucket privado; acceso del propietario permitido, acceso de otro usuario y anónimo bloqueado. Los objetos de esa prueba se revirtieron.
@@ -20,6 +20,14 @@ Las pruebas reales usan una cuenta confirmada existente y transacciones revertid
 Se extrajeron las consultas de los 15 controladores, servicios con acceso a datos, registro de rutas y manejo web de reintentos a `src/main/repositories/`. Se conservan los cálculos, validaciones y límites transaccionales. Los identificadores dinámicos de catálogos y configuración SIRE se restringen a los campos declarados; los valores continúan ligados mediante parámetros. PostgreSQL crea sus tablas desde migraciones SQL. SQLite mantiene su esquema de compatibilidad para importar, respaldar y revisar.
 
 La comparación entre motores incluye ahora el mismo catálogo global, además de la misma empresa, para comparar también los tipos de cambio.
+
+## Flujo del detalle tributario del comprobante
+
+El Asistente concentra el ingreso del comprobante y conserva todos los campos. Se retiraron el botón y el modal tributario independientes; el voucher muestra un estado informativo. Los importes habituales se completan desde Base/IGV/Total y los especiales quedan desplegables dentro del Asistente. Otros impuestos, distribuciones mixtas y referencias están en secciones desplegables. Un comprobante simple reabierto mantiene su clasificación y tasa sin activar la distribución especial. Una validación compartida entre navegador y servidor rechaza fichas vacías, importes inválidos y componentes que no suman el total, con tolerancia de un céntimo. El estado se actualiza al cambiar las líneas. El guardado inconsistente revierte asiento y detalle juntos.
+
+Los duplicados distinguen tipo de documento y, en compras, proveedor, incluyendo la edición. El asistente permite elegir G1/G2/G3 para clasificar compras gravadas. Esa selección conserva la generación contable configurada en los amarres: el usuario debe revisar las cuentas de IGV en G2/G3; no se calcula prorrata automáticamente.
+
+Comprobación visual en un espacio local aislado: compra base 100, IGV 18 y total 118 generada con tres líneas; reabrir y completar el comprobante conserva exactamente esas líneas; guardar persiste el asiento y asigna el siguiente correlativo. El ingreso manual permite completar el comprobante dentro del mismo Asistente sin regenerar líneas. Las correcciones posteriores permanecen en Editar Registros. La barra web tiene espacio reservado para no tapar Guardar Asiento. No se modificaron los movimientos ni credenciales de la instancia Supabase.
 
 ## Límites
 
@@ -92,3 +100,9 @@ No se modificaron tablas, políticas ni registros contables remotos. No se revel
 **Las 70 pruebas no certifican por sí solas que todas las funciones sean idénticas con datos reales.** Son la evidencia inicial para seguir la migración sin omitir los módulos existentes.
 
 La carpeta fuente del escritorio se mantiene intacta. PROVENIENCIA.json registra las huellas de los archivos originales y de las copias web.
+
+## Simplificación de Editar Registros
+
+Comprobación visual en datos locales aislados: compra de base 100 / IGV 18 / total 118 editada a 200 / 36 / 236. El resumen tributario se actualizó sin una segunda entrada de montos, mantuvo G1 y se guardó junto con las tres líneas. Los campos especiales permanecen cerrados por defecto y su edición de importes requiere activar el modo manual. Las pruebas cubren G2/G3, ventas exoneradas, notas negativas, conservación de detracciones, reversión de líneas y bloqueo de cambios ambiguos aunque el total coincida. La sincronización se limita a estructuras simples identificables en PEN; no infiere la clasificación de operaciones mixtas.
+
+La verificación visual detectó y corrigió un falso conflicto de versión al buscar por período/factura: sus columnas adicionales de presentación producían una versión diferente a la búsqueda por ID. Ahora ambas utilizan la representación canónica, conservando el rechazo de versiones antiguas.

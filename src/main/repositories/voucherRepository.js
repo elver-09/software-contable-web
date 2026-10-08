@@ -20,6 +20,9 @@ function addVoucher_get_voucher_detalles(db, ...params) {
           JOIN vouchers v ON v.id = vd.voucher_id
           WHERE UPPER(TRIM(vd.doc_numero)) = UPPER(TRIM(?))
             AND v.origen = ?
+            AND UPPER(TRIM(COALESCE(vd.doc_tipo,''))) = UPPER(TRIM(?))
+            AND (? <> '8' OR TRIM(COALESCE(vd.codigo,'')) = TRIM(?))
+            AND v.id <> ?
           LIMIT 1
         `,
     )

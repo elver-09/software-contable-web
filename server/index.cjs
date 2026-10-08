@@ -434,6 +434,7 @@ function makeServer() {
       const mime = {
         ".html": "text/html",
         ".js": "text/javascript",
+        ".mjs": "text/javascript",
         ".css": "text/css",
         ".svg": "image/svg+xml",
         ".png": "image/png",

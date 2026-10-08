@@ -1091,14 +1091,7 @@
                 >
                   <i class="fa-solid fa-wand-magic-sparkles"></i> Asistente
                 </button>
-                <button
-                  id="btnVoucherTributario"
-                  type="button"
-                  class="btn-action-voucher btn-warning-soft"
-                  hidden
-                >
-                  <i class="fa-solid fa-receipt"></i> Completar datos tributarios
-                </button>
+<span id="voucher-comprobante-estado" class="voucher-comprobante-estado" role="status" hidden></span>
                 <button
                   id="btnVoucherAgregarLinea"
                   type="button"
@@ -1269,7 +1262,7 @@
             <!-- Cabecera -->
             <div class="modal-header modal-header--voucher">
               <h3 class="modal-title modal-title--icon" id="modalVoucherAsistente-title">
-                <i class="fa-solid fa-wand-magic-sparkles"></i> Asistente de Asiento Automático
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Asistente del comprobante
               </h3>
               <button
                 type="button"
@@ -1360,6 +1353,10 @@
                     />
                   </div>
 
+                  <div id="asistente-modo-datos" class="assistant-tax-note" hidden>
+                    <input id="asistente-solo-datos" type="checkbox" checked disabled />
+                    Completar el comprobante sin cambiar las líneas del borrador. Después de guardar, use Editar Registros para corregirlo.
+                  </div>
                   <!-- Afectación IGV -->
                   <div class="tax-options">
                     <span class="tax-option-label" id="asistente-afectacion-label"
@@ -1382,6 +1379,15 @@
                     />
                   </div>
 
+                  <div id="asistente-grupo-compra" class="tax-purchase-group" hidden>
+                    <label for="asistente_grupo_compra">Destino tributario de la compra gravada</label>
+                    <select id="asistente_grupo_compra">
+                      <option value="G1">G1 — Operaciones gravadas o exportación</option>
+                      <option value="G2">G2 — Operaciones gravadas y no gravadas</option>
+                      <option value="G3">G3 — Operaciones no gravadas, sin crédito fiscal</option>
+                    </select>
+                    <p>Esta selección clasifica el comprobante. En G2/G3 revise también las cuentas de IGV del asiento.</p>
+                  </div>
                   <div class="form-grid form-grid--amounts form-grid--amounts-aligned">
                     <div>
                       <label for="asistente_cuenta" class="field-label">Cuenta</label>
@@ -1435,8 +1441,8 @@
                     </div>
                   </div>
                 </div>
+                <section id="asistente-datos-especiales" class="assistant-tax-special" hidden></section>
               </div>
-
               <!-- Footer del form -->
               <div class="modal-footer modal-footer--voucher">
                 <button

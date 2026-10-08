@@ -1,3 +1,4 @@
+const { evaluarDetalleTributario } = require('../../renderer/js/utils/tributario.mjs');
 const tributarioRepository = require('../repositories/tributarioRepository.js');
 // src/main/controllers/tributarioController.js
 // Modelo tributario explícito asociado a vouchers de Compras (8) y Ventas (14).
@@ -8,7 +9,7 @@ const TOLERANCIA = 0.01;
 
 function _num(v, campo = 'monto') {
   if (v === null || v === undefined || String(v).trim() === '') return 0;
-  const n = Number.parseFloat(v);
+  const n = Number(v);
   if (!Number.isFinite(n)) throw new Error(`Valor tributario inválido en ${campo}.`);
   return n;
 }
@@ -135,19 +136,8 @@ function normalizarTributario(tributario, { origen, detalles = [], fechaContable
 
 function validarClasificacionMinima(normalizado) {
   if (!normalizado) return;
-  const datos = normalizado.tipo_registro === 'VENTA' ? normalizado.venta : normalizado.compra;
-  const campos = normalizado.tipo_registro === 'VENTA'
-    ? ['valor_exportacion','base_gravada','descuento_base','igv','descuento_igv','importe_exonerado','importe_inafecto','isc','base_ivap','ivap','icbper','otros_tributos']
-    : ['g1_base','g1_igv','g2_base','g2_igv','g3_base','g3_igv','valor_no_gravado','isc','icbper','otros_tributos'];
-  const total = _num(datos?.importe_total, 'importe total');
-  const tieneDetalle = campos.some(c => Math.abs(_num(datos?.[c], c)) > TOLERANCIA);
-
-  // Una ficha explícita que solo contiene el total no constituye una clasificación:
-  // seguiría siendo imposible distinguir gravado/exonerado/inafecto o G1/G2/G3.
-  // Los vouchers históricos pueden permanecer SIN ficha y seguir usando el modo inferido.
-  if (Math.abs(total) > TOLERANCIA && !tieneDetalle) {
-    throw new Error('Los datos tributarios están incompletos: se informó el total, pero falta clasificar al menos una base, importe o impuesto. Complete la ficha tributaria o mantenga el voucher como histórico/inferido.');
-  }
+  const resultado = evaluarDetalleTributario(normalizado);
+  if (!resultado.ok) throw new Error('Datos tributarios incompletos o inconsistentes: ' + resultado.texto + '.');
 }
 
 function validarContraAsiento(normalizado, totalDebe, totalHaber) {

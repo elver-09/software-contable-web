@@ -1,3 +1,4 @@
+import { evaluarDetalleTributario, resumirTributarioAsistente } from '../utils/tributario.mjs';
 // src/renderer/js/modules/voucher.js
 import { initEntidades } from './entidades.js';
 import { escapeHTML, escapeAttr } from '../utils/security.js';
@@ -529,19 +530,11 @@ function _totalVoucherVisible() {
 
 function _evaluarTributarioBorrador(t = tributarioPendiente, totalAsiento = _totalVoucherVisible()) {
   if (!t) return { estado:'PENDIENTE', ok:false, texto:'Datos tributarios pendientes' };
-  const tipo = String(t.tipo_registro || '').toUpperCase();
-  const datos = tipo === 'VENTA' ? (t.venta || {}) : (t.compra || {});
-  const camposClasificacion = tipo === 'VENTA'
-    ? ['valor_exportacion','base_gravada','descuento_base','igv','descuento_igv','importe_exonerado','importe_inafecto','isc','base_ivap','ivap','icbper','otros_tributos']
-    : ['g1_base','g1_igv','g2_base','g2_igv','g3_base','g3_igv','valor_no_gravado','isc','icbper','otros_tributos'];
-  const tieneClasificacion = camposClasificacion.some(k => Math.abs(Number(datos[k]) || 0) > 0.009);
-  const totalTrib = Number(datos.importe_total) || 0;
-  if (!tieneClasificacion && Math.abs(totalTrib) > 0.009) {
-    return { estado:'INCOMPLETO', ok:false, texto:'Falta clasificar base/impuestos', totalTrib };
-  }
-  if (totalAsiento > 0.009 && Math.abs(Math.abs(totalTrib) - totalAsiento) > 0.01) {
-    return { estado:'DIFERENCIA', ok:false, texto:'Total tributario no coincide', totalTrib };
-  }
+  const detalle = evaluarDetalleTributario(t);
+  if (!detalle.ok) return detalle;
+  const datos = t.tipo_registro === 'VENTA' ? t.venta : t.compra;
+  const totalTrib = Number(datos.importe_total);
+  if (Math.abs(Math.abs(totalTrib) - totalAsiento) > 0.010001) return { estado:'DIFERENCIA', ok:false, texto:'El total del comprobante no coincide con el asiento', totalTrib };
   if (Number(t.comprobante?.requiere_revision || 0) === 1) {
     return { estado:'REVISION', ok:true, texto:'Datos tributarios por revisar', totalTrib };
   }
@@ -549,7 +542,7 @@ function _evaluarTributarioBorrador(t = tributarioPendiente, totalAsiento = _tot
 }
 
 function _actualizarBotonTributario() {
-  const btn = document.getElementById('btnVoucherTributario');
+  const btn = document.getElementById('voucher-comprobante-estado');
   if (!btn) return;
   const origen = String(document.getElementById('voucher_origen')?.value || '');
   const aplica = origen === '8' || origen === '14';
@@ -557,7 +550,7 @@ function _actualizarBotonTributario() {
   if (!aplica) return;
   const estado = _evaluarTributarioBorrador();
   const visual = {
-    PENDIENTE:  ['warn','fa-receipt','Completar datos tributarios'],
+    PENDIENTE:  ['warn','fa-receipt','Complete el comprobante con el Asistente'],
     INCOMPLETO: ['warn','fa-triangle-exclamation','Tributarios incompletos'],
     DIFERENCIA: ['err','fa-circle-exclamation','Revisar total tributario'],
     REVISION:   ['warn','fa-magnifying-glass','Revisar datos tributarios'],
@@ -570,14 +563,23 @@ function _actualizarBotonTributario() {
   btn.title = estado.texto;
 }
 
-function _abrirTributarioManual() {
-  const origen = String(document.getElementById('voucher_origen')?.value || '');
-  if (origen !== '8' && origen !== '14') return alert('Los datos tributarios aplican a Compras (8) o Ventas (14).');
-  const tipo = origen === '14' ? 'VENTA' : 'COMPRA';
-  const totalAsiento = _totalVoucherVisible();
-  const previo = tributarioPendiente && String(tributarioPendiente.tipo_registro||'') === tipo ? tributarioPendiente : null;
+function _renderDatosEspecialesAsistente() {
+  const host = document.getElementById('asistente-datos-especiales');
+  const tipo = document.getElementById('voucher_origen').value === '14' ? 'VENTA' : 'COMPRA';
+  const aplica = ['8','14'].includes(document.getElementById('voucher_origen').value);
+  host.hidden = !aplica;
+  const previo = tributarioPendiente?.tipo_registro === tipo ? tributarioPendiente : null;
   const datos = tipo === 'VENTA' ? (previo?.venta || {}) : (previo?.compra || {});
   const compPrev = previo?.comprobante || {};
+  const simple = resumirTributarioAsistente(previo);
+  const especial = !!previo && !simple;
+  if (simple) {
+    document.getElementById('asistente_base').value=simple.base;
+    document.getElementById('asistente_igv').value=simple.igv;
+    document.getElementById('asistente_afectacion').value=simple.afectacion;
+    document.getElementById('asistente_grupo_compra').value=simple.grupo;
+    document.getElementById('asistente_tasa_igv').value=simple.tasa;
+  }
   const campos = tipo === 'VENTA' ? [
     ['valor_exportacion','Valor exportación','Ventas destinadas a exportación.'],
     ['base_gravada','Base gravada','Base imponible de operaciones gravadas con IGV.'],
@@ -605,79 +607,47 @@ function _abrirTributarioManual() {
     ['otros_tributos','Otros conceptos','Otros tributos o cargos incluidos en el comprobante.'],
     ['importe_total','Importe total','Total tributario del comprobante; debe coincidir en valor absoluto con el total del asiento.']
   ];
-  document.getElementById('voucher-tributario-overlay')?.remove();
-  const ov=document.createElement('div'); ov.id='voucher-tributario-overlay';
-  ov.style.cssText='position:fixed;inset:0;z-index:2300;background:rgba(5,12,22,.72);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px);';
-  ov.innerHTML=`<div style="width:760px;max-width:94%;max-height:90vh;overflow:hidden;background:var(--bg-modal,#fff);border:1px solid var(--brd);border-radius:7px;box-shadow:0 18px 50px rgba(0,0,0,.35);">
-    <div style="padding:13px 18px;background:var(--bg-mhdr,#13263a);color:var(--modal-title);display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #8a5a16;">
-      <b><i class="fa-solid fa-receipt"></i> Información tributaria del comprobante — ${tipo}</b><button id="vt-cerrar" type="button" style="border:0;background:none;color:#fff;cursor:pointer"><i class="fa-solid fa-xmark"></i></button>
+
+  host.innerHTML = `<details ${especial || Object.keys(compPrev).some(k=>k.startsWith('ref_')&&compPrev[k]) || datos.detraccion_numero || datos.detraccion_fecha || datos.marca_retencion ? 'open' : ''}>
+    <summary>Datos especiales del comprobante (opcional)</summary>
+    <p>Para operaciones mixtas, otros impuestos, notas de crédito/débito o detracciones. Los importes habituales se completan con Base, IGV y Total.</p>
+    <label class="assistant-tax-check"><input id="asistente-desglose-manual" type="checkbox" ${especial ? 'checked' : ''}> Usar una distribución especial de importes</label>
+    <div id="asistente-desglose-campos" class="assistant-tax-grid" ${especial ? '' : 'hidden'}>
+      ${campos.filter(([k])=>k !== 'importe_total').map(([k,l,ayuda])=>`<label title="${ayuda}">${l}<input data-at="${k}" type="number" step="0.01" value="${Number(datos[k]||0)}"></label>`).join('')}
     </div>
-    <div style="padding:16px 18px;overflow:auto;max-height:70vh;">
-      <div style="padding:9px 11px;background:var(--bg-block,#f4f8fc);border:1px solid var(--brd);border-radius:5px;font-size:10px;color:var(--tx2);margin-bottom:10px;line-height:1.5;">
-        <b>¿Para qué sirve?</b> Aquí se indica cómo se distribuye tributariamente el comprobante (base, impuestos, exonerado, inafecto, etc.). <b>No modifica las cuentas ni el Debe/Haber</b>; estos datos se usan para Compras/Ventas y comparación SIRE.<br>
-        El tipo/número, entidad, fecha, moneda y T/C se tomarán de las líneas del asiento. Total contable actual: <b>S/ ${totalAsiento.toFixed(2)}</b>.
-      </div>
-      ${tipo==='COMPRA' ? `<div style="padding:8px 10px;background:rgba(var(--accent-rgb),.07);border:1px solid rgba(var(--accent-rgb),.2);border-radius:5px;font-size:9.5px;color:var(--tx2);margin-bottom:10px;line-height:1.45;"><b>G1:</b> crédito fiscal para operaciones gravadas/exportación · <b>G2:</b> destino conjunto a operaciones gravadas y no gravadas · <b>G3:</b> destino a operaciones no gravadas, sin derecho a crédito fiscal.</div>` : ''}
-      <div id="vt-estado" style="padding:7px 10px;border-radius:5px;font-size:10px;font-weight:700;margin-bottom:12px;"></div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;">
-        ${campos.map(([k,l,ayuda])=>`<label title="${ayuda}" style="font-size:10px;font-weight:700;color:var(--tx2);">${l} <i class="fa-regular fa-circle-question" style="font-size:9px;opacity:.65"></i><input data-vt="${k}" type="number" step="0.01" value="${Number(datos[k] ?? (k==='importe_total'?totalAsiento:0))}" style="width:100%;margin-top:4px;"></label>`).join('')}
-      </div>
-      <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--brd);">
-        <div style="font-size:10px;font-weight:800;color:var(--tx2);margin-bottom:7px;">Documento modificado / referencia (cuando corresponda)</div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;">
-          <label style="font-size:10px;font-weight:700;color:var(--tx2);">Fecha referencia<input data-vtc="ref_fecha" type="date" value="${escapeAttr(compPrev.ref_fecha || '')}" style="width:100%;margin-top:4px;"></label>
-          <label style="font-size:10px;font-weight:700;color:var(--tx2);">Tipo CP referencia<input data-vtc="ref_tipo_documento" type="text" maxlength="2" value="${escapeAttr(compPrev.ref_tipo_documento || '')}" style="width:100%;margin-top:4px;"></label>
-          <label style="font-size:10px;font-weight:700;color:var(--tx2);">Serie referencia<input data-vtc="ref_serie" type="text" maxlength="20" value="${escapeAttr(compPrev.ref_serie || '')}" style="width:100%;margin-top:4px;"></label>
-          <label style="font-size:10px;font-weight:700;color:var(--tx2);">Número referencia<input data-vtc="ref_numero" type="text" maxlength="20" value="${escapeAttr(compPrev.ref_numero || '')}" style="width:100%;margin-top:4px;"></label>
-        </div>
-      </div>
-      ${tipo==='COMPRA' ? `<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--brd);">
-        <div style="font-size:10px;font-weight:800;color:var(--tx2);margin-bottom:7px;">Datos adicionales de compra</div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;">
-          <label style="font-size:10px;font-weight:700;color:var(--tx2);">Fecha detracción<input data-vtp="detraccion_fecha" type="date" value="${escapeAttr(datos.detraccion_fecha || '')}" style="width:100%;margin-top:4px;"></label>
-          <label style="font-size:10px;font-weight:700;color:var(--tx2);">N° detracción<input data-vtp="detraccion_numero" type="text" value="${escapeAttr(datos.detraccion_numero || '')}" style="width:100%;margin-top:4px;"></label>
-          <label style="font-size:10px;font-weight:700;color:var(--tx2);">Marca retención<input data-vtp="marca_retencion" type="text" maxlength="1" value="${escapeAttr(datos.marca_retencion || '')}" style="width:100%;margin-top:4px;"></label>
-        </div>
-      </div>` : ''}
-      <label style="display:flex;gap:7px;align-items:flex-start;margin-top:12px;font-size:10px;color:var(--tx2);line-height:1.4;"><input id="vt-revision" type="checkbox" ${previo?.comprobante?.requiere_revision?'checked':''} style="margin-top:2px;"><span><b>Dejar pendiente de revisión tributaria</b><br><span style="font-size:9px;color:var(--tx3);">Úselo cuando los importes fueron cargados pero aún deben ser verificados. No modifica el asiento.</span></span></label>
-    </div>
-    <div style="padding:10px 18px;border-top:1px solid var(--brd);display:flex;justify-content:flex-end;gap:8px;background:var(--bg-mftr,#f4f8fc);">
-      <button id="vt-cancelar" type="button" style="padding:7px 13px;border:1px solid var(--brd);background:var(--bg-card,#fff);border-radius:5px;cursor:pointer;">Cancelar</button>
-      <button id="vt-guardar" type="button" style="padding:7px 14px;border:0;background:var(--btn-ok);color:#fff;border-radius:5px;font-weight:700;cursor:pointer;"><i class="fa-solid fa-check"></i> Aplicar datos al borrador</button>
-    </div></div>`;
-  document.body.appendChild(ov);
-  const cerrar=()=>ov.remove();
-  ov.querySelector('#vt-cerrar').onclick=cerrar; ov.querySelector('#vt-cancelar').onclick=cerrar;
-  ov.addEventListener('click',e=>{if(e.target===ov)cerrar();});
-  const leerTemporal = () => {
-    const out={}; ov.querySelectorAll('[data-vt]').forEach(i=>{const n=Number.parseFloat(i.value);out[i.dataset.vt]=Number.isFinite(n)?n:0;});
-    const comprobante={ fuente:'MANUAL', requiere_revision:ov.querySelector('#vt-revision').checked?1:0 };
-    return tipo==='VENTA' ? {tipo_registro:'VENTA',comprobante,venta:out} : {tipo_registro:'COMPRA',comprobante,compra:out};
-  };
-  const refrescarEstado = () => {
-    const e = _evaluarTributarioBorrador(leerTemporal(), totalAsiento);
-    const box=ov.querySelector('#vt-estado'); if(!box) return;
-    const cfg = e.estado==='LISTO' ? ['rgba(var(--ok-rgb),.12)','#2f745c','fa-circle-check','Listo para guardar']
-      : e.estado==='REVISION' ? ['rgba(var(--warn-rgb),.12)','var(--warn)','fa-magnifying-glass','Completado, pendiente de revisión']
-      : e.estado==='DIFERENCIA' ? ['rgba(var(--err-rgb),.12)','#a0444f','fa-circle-exclamation',`El total tributario debe coincidir con S/ ${totalAsiento.toFixed(2)}`]
-      : ['rgba(var(--warn-rgb),.12)','var(--warn)','fa-triangle-exclamation','Complete al menos una base, importe o impuesto además del total'];
-    box.style.background=cfg[0]; box.style.color=cfg[1];
-    box.innerHTML=`<i class="fa-solid ${cfg[2]}"></i> ${cfg[3]}`;
-  };
-  ov.querySelectorAll('[data-vt],#vt-revision').forEach(i=>i.addEventListener('input',refrescarEstado));
-  refrescarEstado();
-  ov.querySelector('#vt-guardar').onclick=()=>{
-    const temporal = leerTemporal();
-    const estado = _evaluarTributarioBorrador(temporal,totalAsiento);
-    if (estado.estado === 'INCOMPLETO') return alert('Complete al menos una base, importe o impuesto tributario además del total.');
-    if (estado.estado === 'DIFERENCIA') return alert(`El importe total tributario debe coincidir en valor absoluto con el total del asiento (S/ ${totalAsiento.toFixed(2)}).`);
-    const out = tipo==='VENTA' ? temporal.venta : temporal.compra;
-    ov.querySelectorAll('[data-vtp]').forEach(i=>{out[i.dataset.vtp]=String(i.value||'').trim();});
-    const comprobante=temporal.comprobante;
-    ov.querySelectorAll('[data-vtc]').forEach(i=>{comprobante[i.dataset.vtc]=String(i.value||'').trim();});
-    tributarioPendiente = temporal;
-    cerrar(); _actualizarBotonTributario();
-  };
+    <details ${Object.keys(compPrev).some(k=>k.startsWith('ref_')&&compPrev[k]) ? 'open' : ''}><summary>Documento de referencia</summary><div class="assistant-tax-grid">
+      ${[['ref_fecha','Fecha','date'],['ref_tipo_documento','Tipo de documento','text'],['ref_serie','Serie','text'],['ref_numero','Número','text']].map(([k,l,t])=>`<label>${l}<input data-atc="${k}" type="${t}" value="${escapeAttr(compPrev[k]||'')}"></label>`).join('')}
+    </div></details>
+    ${tipo === 'COMPRA' ? `<details ${datos.detraccion_numero || datos.detraccion_fecha || datos.marca_retencion ? 'open' : ''}><summary>Detracción y retención</summary><div class="assistant-tax-grid">
+      ${[['detraccion_fecha','Fecha detracción','date'],['detraccion_numero','Número detracción','text'],['marca_retencion','Marca retención','text']].map(([k,l,t])=>`<label>${l}<input data-atp="${k}" type="${t}" value="${escapeAttr(datos[k]||'')}"></label>`).join('')}
+    </div></details>` : ''}
+    <label class="assistant-tax-check"><input id="asistente-revision" type="checkbox" ${compPrev.requiere_revision ? 'checked' : ''}> Dejar pendiente de revisión</label>
+  </details>`;
+  document.getElementById('asistente_afectacion').dispatchEvent(new Event('change'));
+}
+
+function _leerTributarioAsistente() {
+  const tipo = document.getElementById('voucher_origen').value === '14' ? 'VENTA' : 'COMPRA';
+  const base = Number(document.getElementById('asistente_base').value || 0);
+  const igv = Number(document.getElementById('asistente_igv').value || 0);
+  const total = Number(document.getElementById('asistente_total').value || 0);
+  const afectacion = document.getElementById('asistente_afectacion').value;
+  const grupo = document.getElementById('asistente_grupo_compra').value.toLowerCase();
+  let datos = tipo === 'VENTA' ? {
+    valor_exportacion:afectacion==='EXPORTACION'?base:0,
+    base_gravada:afectacion==='GRAVADO'?base:0, igv:afectacion==='GRAVADO'?igv:0,
+    importe_exonerado:afectacion==='EXONERADO'?base:0, importe_inafecto:afectacion==='INAFECTO'?base:0,
+  } : { [grupo+'_base']:afectacion==='GRAVADO'?base:0, [grupo+'_igv']:afectacion==='GRAVADO'?igv:0,
+    valor_no_gravado:afectacion==='GRAVADO'?0:base };
+  const host = document.getElementById('asistente-datos-especiales');
+  if (host.querySelector('#asistente-desglose-manual')?.checked) {
+    datos={}; host.querySelectorAll('[data-at]').forEach(i=>datos[i.dataset.at]=Number(i.value||0));
+  }
+  datos.importe_total=total;
+  host.querySelectorAll('[data-atp]').forEach(i=>datos[i.dataset.atp]=i.value.trim());
+  const comprobante={...tributarioPendiente?.comprobante,fuente:'ASISTENTE',requiere_revision:host.querySelector('#asistente-revision')?.checked?1:0};
+  host.querySelectorAll('[data-atc]').forEach(i=>comprobante[i.dataset.atc]=i.value.trim());
+  return tipo==='VENTA'?{tipo_registro:tipo,comprobante,venta:datos}:{tipo_registro:tipo,comprobante,compra:datos};
 }
 
 export function initVoucher(mesSeleccionado, anoSeleccionado) {
@@ -701,7 +671,7 @@ export function initVoucher(mesSeleccionado, anoSeleccionado) {
 
   // ── Referencias a elementos del DOM ───────────────────────────────────────
   const btnAsistente          = document.getElementById('btnVoucherAsistente');
-  const btnTributario         = document.getElementById('btnVoucherTributario');
+  const soloDatosInput = document.getElementById('asistente-solo-datos');
   const modalAsistente        = document.getElementById('modalVoucherAsistente');
   const btnVoucherAgregarLinea= document.getElementById('btnVoucherAgregarLinea');
   const modalVoucherLinea     = document.getElementById('modalVoucherLinea');
@@ -727,7 +697,6 @@ export function initVoucher(mesSeleccionado, anoSeleccionado) {
   if (fechaInput) {
     fechaInput.addEventListener('change', actualizarNumeroVoucher);
   }
-  if (btnTributario) btnTributario.addEventListener('click', _abrirTributarioManual);
   _actualizarBotonTributario();
 
   // ── Actualizar totales (Debe / Haber) ─────────────────────────────────────
@@ -739,6 +708,7 @@ export function initVoucher(mesSeleccionado, anoSeleccionado) {
     });
     document.getElementById('voucher_total_debe').textContent  = totalDebe.toFixed(2);
     document.getElementById('voucher_total_haber').textContent = totalHaber.toFixed(2);
+    _actualizarBotonTributario();
   }
 
   // ── Selector de tipo de cambio con desplegable ────────────────────────────
@@ -968,7 +938,7 @@ export function initVoucher(mesSeleccionado, anoSeleccionado) {
         return alert("Por favor, complete el Origen del asiento y la Fecha contable antes de usar el Asistente.");
       }
 
-      mostrarConfirmacionAsistente(async () => {
+      (async () => {
         try {
           const estadoEmpresa = await window.api.getEmpresaEstado();
           if (!estadoEmpresa?.connected) throw new Error('No hay ninguna empresa seleccionada.');
@@ -982,14 +952,31 @@ export function initVoucher(mesSeleccionado, anoSeleccionado) {
             selectDoc.appendChild(opt);
           });
 
-          asistenteFechaDocInput.value = fecha;
+          const lineas = leerDetallesDesdeTabla();
+          const aplica = ['8','14'].includes(origen);
+          const solo = aplica && lineas.length > 0;
+          document.getElementById('asistente-modo-datos').hidden = !solo;
+          soloDatosInput.checked = solo;
+          const primero = lineas.find(d=>d.doc_numero) || lineas[0];
+          const campos = {asistente_doc_tipo:'doc_tipo',asistente_doc_numero:'doc_numero',asistente_codigo:'codigo',asistente_razon_social:'razon_social',asistente_moneda:'moneda',asistente_tc:'tc',asistente_fecha_doc:'fecha_doc',asistente_fecha_venc:'fecha_venc',asistente_glosa:'glosa'};
+          for (const [id,k] of Object.entries(campos)) {
+            const input=document.getElementById(id);
+            input.disabled=solo;
+            if(solo && primero) input.value=primero[k] || (k==='moneda'?'PEN':k==='tc'?1:'');
+          }
+          document.getElementById('asistente_glosa').required=!solo;
+          document.getElementById('asistente_cuenta').required=!solo;
+          document.getElementById('asistente_cuenta').disabled=solo;
+          document.querySelector('#formVoucherAsistente button[type="submit"]').textContent = solo ? 'Completar comprobante del borrador' : 'Generar Asiento';
+          _renderDatosEspecialesAsistente();
+          if (!solo) asistenteFechaDocInput.value = fecha;
           modalAsistente.style.display = 'flex';
-          asistenteFechaDocInput.dispatchEvent(new Event('change'));
+          if (!solo) asistenteFechaDocInput.dispatchEvent(new Event('change'));
           updateIgvAndTotal();
         } catch (error) {
           alert("Acción denegada: No hay ninguna empresa seleccionada.");
         }
-      });
+      })();
     });
   }
 
@@ -1007,6 +994,16 @@ export function initVoucher(mesSeleccionado, anoSeleccionado) {
   const asistenteTasaIgvInput = document.getElementById('asistente_tasa_igv');
 
   const updateIgvAndTotal = () => {
+    const manual = document.getElementById('asistente-desglose-manual')?.checked;
+    if (inputBase) { inputBase.required=!manual; inputBase.disabled=!!manual; inputBase.closest('div').hidden=!!manual; }
+    if (inputIgv) { inputIgv.disabled=!!manual; inputIgv.closest('div').hidden=!!manual; }
+    if (inputTotal) inputTotal.readOnly=true;
+    document.getElementById('asistente-desglose-campos')?.toggleAttribute('hidden', !manual);
+    if (manual) {
+      const valores=[...document.querySelectorAll('#asistente-datos-especiales [data-at]')].map(i=>Number(i.value||0));
+      inputTotal.value=valores.every(Number.isFinite)?valores.reduce((a,b)=>a+b,0).toFixed(2):'';
+      return;
+    }
     const base = parseFloat(inputBase?.value) || 0;
     const tasa = Math.max(0, parseFloat(asistenteTasaIgvInput?.value) || 0);
     let igv = 0, total = base;
@@ -1017,6 +1014,16 @@ export function initVoucher(mesSeleccionado, anoSeleccionado) {
     if (inputTotal) inputTotal.value = total.toFixed(2);
   };
 
+  const grupoCompraSelect = document.getElementById('asistente_grupo_compra');
+  const actualizarGrupoCompra = () => {
+    const compra = document.getElementById('voucher_origen')?.value === '8';
+    document.getElementById('asistente-grupo-compra')?.toggleAttribute('hidden', !compra || asistenteAfectacionSelect?.value !== 'GRAVADO');
+  };
+  document.getElementById('voucher_origen')?.addEventListener('change', actualizarGrupoCompra);
+  asistenteAfectacionSelect?.addEventListener('change', actualizarGrupoCompra);
+  actualizarGrupoCompra();
+  document.getElementById('asistente-datos-especiales').addEventListener('input', updateIgvAndTotal);
+  document.getElementById('asistente-datos-especiales').addEventListener('change', updateIgvAndTotal);
   inputBase?.addEventListener('input', updateIgvAndTotal);
   asistenteAfectacionSelect?.addEventListener('change', updateIgvAndTotal);
   asistenteTasaIgvInput?.addEventListener('input', updateIgvAndTotal);
@@ -1076,9 +1083,9 @@ export function initVoucher(mesSeleccionado, anoSeleccionado) {
 
       const cuenta      = document.getElementById('asistente_cuenta').value.trim();
       const nombreCuenta= document.getElementById('asistente_cuenta_nombre').value;
-      const base        = parseFloat(document.getElementById('asistente_base').value)  || 0;
-      const igv         = parseFloat(inputIgv.value)   || 0;
-      const total       = parseFloat(inputTotal.value) || 0;
+      let base          = parseFloat(document.getElementById('asistente_base').value)  || 0;
+      let igv           = parseFloat(inputIgv.value)   || 0;
+      let total         = parseFloat(inputTotal.value) || 0;
       const moneda      = document.getElementById('asistente_moneda').value;
       const tc          = parseFloat(document.getElementById('asistente_tc').value)    || 1;
       const docTipo     = document.getElementById('asistente_doc_tipo').value;
@@ -1091,11 +1098,38 @@ export function initVoucher(mesSeleccionado, anoSeleccionado) {
       const afectacion  = document.getElementById('asistente_afectacion')?.value || 'GRAVADO';
       const tbody       = document.getElementById('tabla-voucher-detalle');
 
-      // Validación: la cuenta debe tener entre 3 y 8 dígitos
+      const origenActual = String(document.getElementById('voucher_origen').value);
+      const aplicaTrib = ['8','14'].includes(origenActual);
+      const tributarioNuevo = aplicaTrib ? _leerTributarioAsistente() : null;
+      if (tributarioNuevo) {
+        const estado=evaluarDetalleTributario(tributarioNuevo);
+        if(!estado.ok) return alert(estado.texto);
+        if(!docTipo || !docNumero.trim()) return alert('Complete tipo y número del comprobante.');
+      }
+      if (aplicaTrib && soloDatosInput.checked) {
+        const lineas=leerDetallesDesdeTabla();
+        const documentos=new Set(lineas.filter(d=>d.doc_numero&&d.doc_numero!=='-').map(d=>[d.doc_tipo,d.doc_numero.toUpperCase(),d.codigo].join('|')));
+        if(documentos.size>1) return alert('Complete un comprobante por voucher. Separe los documentos antes de continuar.');
+        const estado=_evaluarTributarioBorrador(tributarioNuevo);
+        if(!estado.ok) return alert(estado.texto);
+        tributarioPendiente=tributarioNuevo;
+        _actualizarBotonTributario(); cerrarAsistente(); return;
+      }
       if (!validarCuentaContable(cuenta)) return;
+      if (aplicaTrib && tbody.children.length) return alert('El borrador ya contiene líneas. Complete sus datos con el Asistente o empiece un voucher nuevo para generar otro asiento.');
 
+      let invertir = false;
+      if (tributarioNuevo) {
+        const d = tributarioNuevo.venta || tributarioNuevo.compra;
+        invertir = d.importe_total < 0;
+        total = Math.abs(d.importe_total);
+        igv = Math.abs(tributarioNuevo.venta ? Number(d.igv||0)+Number(d.descuento_igv||0) : Number(d.g1_igv||0)+Number(d.g2_igv||0)+Number(d.g3_igv||0));
+        if (igv > total) return alert('El IGV no puede superar el total del comprobante.');
+        base = total - igv;
+      }
       // Genera una fila de la tabla a partir de cuenta/monto
       const crearFila = (acc, accName, debe, haber) => {
+        if (invertir) [debe,haber] = [haber,debe];
         const tr = document.createElement('tr');
         const equiv = (debe > 0 ? debe : haber) * tc;
         const estiloTd = 'padding:6px 10px;font-size:12px;border-bottom:1px solid var(--border-light,#dde5ef);';
@@ -1135,6 +1169,9 @@ export function initVoucher(mesSeleccionado, anoSeleccionado) {
         .filter(a => Number(a.activo) === 1 && a.prefijo && cuenta.startsWith(String(a.prefijo)))
         .sort((a, b) => String(b.prefijo).length - String(a.prefijo).length)[0];
 
+      if (aplicaTrib && (!amarre || (origenActual==='8' ? 'COMPRA' : 'VENTA') !== amarre.tipo)) {
+        return alert('Configure un amarre de Compra/Venta para esta cuenta en Tablas → Amarres del Asistente.');
+      }
       if (amarre) {
         const allCuentas = await window.api.getPlanCuentas();
         const nombreDe = (cod, fallback) => {
@@ -1152,6 +1189,7 @@ export function initVoucher(mesSeleccionado, anoSeleccionado) {
         // La línea de IGV sólo se crea si HAY IGV (> 0) y hay una cuenta configurada
         // para esa afectación. Si está exonerado/inafecto (igv = 0) NO se genera la
         // línea de la cuenta 40 → se evita la fila en blanco.
+        if (aplicaTrib && igv > 0 && !cuentaIgvAmarre) return alert('Configure la cuenta de IGV del amarre antes de generar el asiento.');
         const aplicaIgv  = igv > 0 && !!cuentaIgvAmarre;
         const nomIgv     = nombreDe(cuentaIgvAmarre,       'IGV');
         const nomDestino = nombreDe(amarre.cuenta_destino, 'CUENTA DESTINO');
@@ -1173,63 +1211,7 @@ export function initVoucher(mesSeleccionado, anoSeleccionado) {
         tbody.appendChild(crearFila(cuenta, nombreCuenta, base, 0));
       }
 
-      // Construir la FUENTE TRIBUTARIA explícita del comprobante. Esto evita que
-      // Registro de Ventas/Compras tenga que adivinar la afectación mirando cuentas 40.
-      const origenActual = String(document.getElementById('voucher_origen')?.value || '');
-      const tipoTrib = amarre?.tipo === 'VENTA' ? 'VENTA' : amarre?.tipo === 'COMPRA' ? 'COMPRA' : '';
-      const origenEsperado = tipoTrib === 'VENTA' ? '14' : tipoTrib === 'COMPRA' ? '8' : '';
-      if (tipoTrib && origenActual === origenEsperado) {
-        const partes = String(docNumero || '').split('-');
-        const serieTrib = partes.length > 1 ? partes.shift().trim().toUpperCase() : '';
-        const numeroTrib = partes.length > 0 ? partes.join('-').trim() : String(docNumero || '').trim();
-        const tipoDocIdentidad = String(codigo || '').length === 11 ? '6' : String(codigo || '').length === 8 ? '1' : '0';
-        const comprobante = {
-          fecha_emision: fechaDoc,
-          fecha_vencimiento: fechaVenc,
-          tipo_documento: docTipo,
-          serie: serieTrib,
-          numero: numeroTrib,
-          tipo_doc_identidad: tipoDocIdentidad,
-          numero_doc_identidad: codigo,
-          razon_social: razonSocial,
-          moneda,
-          tipo_cambio: tc,
-          fuente: 'ASISTENTE',
-          requiere_revision: 0,
-        };
-
-        if (tipoTrib === 'VENTA') {
-          tributarioPendiente = {
-            tipo_registro: 'VENTA', comprobante,
-            venta: {
-              valor_exportacion: afectacion === 'EXPORTACION' ? base : 0,
-              base_gravada: afectacion === 'GRAVADO' ? base : 0,
-              descuento_base: 0,
-              igv: afectacion === 'GRAVADO' ? igv : 0,
-              descuento_igv: 0,
-              importe_exonerado: afectacion === 'EXONERADO' ? base : 0,
-              importe_inafecto: afectacion === 'INAFECTO' ? base : 0,
-              isc: 0, base_ivap: 0, ivap: 0, icbper: 0, otros_tributos: 0,
-              importe_total: total,
-            }
-          };
-        } else {
-          tributarioPendiente = {
-            tipo_registro: 'COMPRA', comprobante,
-            compra: {
-              g1_base: afectacion === 'GRAVADO' ? base : 0,
-              g1_igv: afectacion === 'GRAVADO' ? igv : 0,
-              g2_base: 0, g2_igv: 0, g3_base: 0, g3_igv: 0,
-              valor_no_gravado: afectacion === 'GRAVADO' ? 0 : base,
-              isc: 0, icbper: 0, otros_tributos: 0,
-              importe_total: total,
-              detraccion_numero: '', detraccion_fecha: '', marca_retencion: '',
-            }
-          };
-        }
-      } else {
-        tributarioPendiente = null;
-      }
+      tributarioPendiente = tributarioNuevo;
       _actualizarBotonTributario();
 
       actualizarTotales();
@@ -1292,12 +1274,12 @@ export function initVoucher(mesSeleccionado, anoSeleccionado) {
           alert(estadoTrib.estado === 'DIFERENCIA'
             ? 'Revise Datos tributarios: el importe total tributario no coincide con el total del asiento.'
             : 'Los Datos tributarios están incompletos. Complete al menos una base, importe o impuesto además del total.');
-          _abrirTributarioManual();
+          btnAsistente.click();
           return;
         }
       }
       if ((String(origen) === '8' || String(origen) === '14') && !tributarioPendiente) {
-        const continuar = confirm('Este comprobante aún no tiene datos tributarios detallados. Puede guardarlo, pero los reportes de Compras/Ventas tendrán que inferir la clasificación y quedará pendiente de revisión. ¿Desea continuar?');
+        const continuar = confirm('Este comprobante aún no tiene datos tributarios detallados. Puede completarlos ahora con el Asistente, o guardarlo pendiente y completarlos después en Editar Registros. Si continúa, los reportes usarán una clasificación inferida. ¿Guardar pendiente?');
         if (!continuar) return;
       }
 

@@ -1914,3 +1914,19 @@ body.dark-mode { color-scheme: dark; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
 }
+
+.tax-purchase-group { margin-bottom: 12px; }
+.tax-purchase-group p { font-size: 11px; }
+
+.voucher-comprobante-estado { font-size: 11px; padding: 7px 10px; border: 1px solid var(--brd); border-radius: 5px; }
+.assistant-tax-special { padding: 0 20px 15px; color: var(--tx2); }
+.assistant-tax-special summary { cursor: pointer; font-weight: 700; padding: 8px 0; }
+.assistant-tax-special p, .assistant-tax-note { font-size: 11px; line-height: 1.5; }
+.assistant-tax-note { padding: 10px; background: var(--bg-block); border-radius: 5px; margin-bottom: 12px; }
+.assistant-tax-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); gap: 10px; }
+.assistant-tax-grid[hidden], .assistant-tax-special[hidden], .assistant-tax-note[hidden] { display: none; }
+.assistant-tax-grid label { font-size: 11px; }
+.assistant-tax-grid input { display: block; width: 100%; margin-top: 4px; }
+.assistant-tax-check { display: flex; align-items: center; gap: 8px; margin: 10px 0; font-size: 11px; }
+
+body.web-session .main-content { padding-bottom: 64px; }

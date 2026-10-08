@@ -74,3 +74,35 @@ test('guardarTributario persiste cabecera y detalle dentro del esquema migrado',
     assert.equal(saved.comprobante.serie, 'F001');
   } finally { close(); }
 });
+
+
+test('una ficha vacía no se considera completa', () => {
+  const n = normalizarTributario(venta({base_gravada:0,igv:0,importe_total:0}), {origen:'14',detalles:detalleVenta});
+  assert.throws(() => validarClasificacionMinima(n), /incompletos/i);
+});
+test('rechaza un detalle que no suma el total aunque coincida con el asiento', () => {
+  const n = normalizarTributario(venta({importe_total:999}), {origen:'14',detalles:detalleVenta});
+  assert.doesNotThrow(() => validarContraAsiento(n,999,999));
+  assert.throws(() => validarClasificacionMinima(n), /suma del detalle/i);
+});
+test('clasificaciones G2, G3, no gravada y ajustes con signo conservan su suma', () => {
+  for (const compra of [
+    {g2_base:100,g2_igv:18,importe_total:118},
+    {g3_base:100,g3_igv:18,importe_total:118},
+    {valor_no_gravado:118,importe_total:118},
+    {g1_base:-100,g1_igv:-18,importe_total:-118},
+  ]) {
+    const n = normalizarTributario({tipo_registro:'COMPRA',compra}, {origen:'8',detalles:detalleVenta});
+    assert.doesNotThrow(() => validarClasificacionMinima(n));
+    assert.doesNotThrow(() => validarContraAsiento(n,118,118));
+  }
+});
+test('descuentos con signo se suman sin aplicar un porcentaje fijo', () => {
+  const n = normalizarTributario(venta({descuento_base:-10,descuento_igv:-1.8,importe_total:106.2}), {origen:'14',detalles:detalleVenta});
+  assert.doesNotThrow(() => validarClasificacionMinima(n));
+});
+
+test('rechaza números con texto y valores no finitos',()=>{
+ for(const base_gravada of ['100abc',Infinity,NaN])
+ assert.throws(()=>normalizarTributario(venta({base_gravada}),{origen:'14',detalles:detalleVenta}),/inválido/i);
+});

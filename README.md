@@ -48,6 +48,10 @@ El botón **Respaldos** descarga empresa o catálogo global en formato SQLite co
 
 La clave maestra de cifrado se conserva aparte de los respaldos. Las credenciales SUNAT protegidas por el almacén del sistema operativo del escritorio pueden requerir reingreso; no se extraen automáticamente.
 
+## Ingreso y corrección de comprobantes
+
+El Asistente reúne los datos del comprobante, los importes habituales y las opciones especiales desplegables. Genera las líneas y su clasificación tributaria juntas. Si el borrador ya tiene líneas manuales, completa el comprobante sin cambiarlas. El voucher muestra el estado del detalle; las correcciones de asientos guardados se hacen en Editar Registros. Los importes especiales calculan su total y se validan antes del guardado.
+
 ## Archivos y concurrencia
 
 PDF, Excel, TXT, ZIP y respaldos generados se guardan en Storage privado y se descargan mediante referencias ligadas al usuario y la empresa. Los archivos SIRE tienen copia remota y se recuperan para las operaciones de listado/comparación. El disco local conserva archivos de trabajo; no se considera una copia única de la contabilidad. Las referencias de descarga y las sesiones son temporales y se pierden al reiniciar.
@@ -74,3 +78,5 @@ Estas pruebas generan datos temporales y los revierten. La comparación real pro
 ## Acceso por Internet
 
 El servidor actual solo está disponible en este equipo. Publicarlo requiere alojar Node detrás de HTTPS y configurar las variables privadas. Supabase almacena datos y archivos, pero no aloja este servidor Node. Las sesiones y referencias están en memoria: se requiere afinidad de sesiones para más de una instancia o sustituir ese almacenamiento. Todavía no se configuraron copias automáticas, recuperación operativa ni el alojamiento público. Mantener el escritorio hasta validar casos reales y SIRE con credenciales autorizadas.
+
+En Editar Registros, el detalle tributario se presenta como resumen. Las operaciones simples en PEN con base, IGV (4011) y contrapartida identificables (42 en compras, 12 en ventas) sincronizan sus importes al editar las líneas, conservando la clasificación original. Las distribuciones mixtas, monedas extranjeras o cambios de cuentas/documento requieren revisión manual en «Datos especiales y clasificación tributaria». Activar la edición manual mantiene la marca de revisión; las referencias y detracciones se conservan. El guardado sigue exigiendo cuadre y consistencia tributaria.

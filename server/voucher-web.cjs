@@ -22,7 +22,12 @@ function install(handlers) {
   ])
     handlers.set(channel, (...args) => {
       const result = fn(...args);
-      if (result.success) result.webVersion = version(result);
+      if (result.success && result.cabecera?.id) {
+        // Invoice/period searches include joined display columns in the header.
+        // Hash the same canonical representation used by the update guard.
+        const canonical = channel === "voucher:buscar" ? result : search({}, { id: result.cabecera.id });
+        if (canonical.success) result.webVersion = version(canonical);
+      }
       return result;
     });
   handlers.set("voucher:update-completo", (_, data) => {
