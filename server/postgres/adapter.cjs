@@ -102,7 +102,6 @@ function database(scopeId) {
       };
     },
     exec(sql) {
-      if (sql.startsWith("CREATE TABLE IF NOT EXISTS _web_requests")) return;
       bridge.query(translate(sql), [], scopeId);
     },
     transaction(fn) {

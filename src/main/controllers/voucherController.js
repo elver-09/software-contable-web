@@ -1,3 +1,4 @@
+const voucherRepository = require('../repositories/voucherRepository.js');
 // src/main/controllers/voucherController.js
 const { getDB } = require('../database/db');
 const { guardarTributario, obtenerTributario } = require('./tributarioController');
@@ -8,10 +9,7 @@ function getSiguienteNumero({ origen, periodo, fechaContable }) {
     const db = getDB();
     // El correlativo va por origen y por PERÍODO contable (no por la fecha de hoy).
     const per = periodo || (fechaContable ? fechaContable.substring(0, 7) : '');
-    const fila = db.prepare(`
-      SELECT COALESCE(MAX(numero_voucher), 0) AS maximo
-      FROM vouchers WHERE origen = ? AND periodo = ?
-    `).get(origen, per);
+    const fila = voucherRepository.getSiguienteNumero_get_vouchers(db, origen, per);
     return { success: true, numero: (fila.maximo || 0) + 1 };
   } catch (error) {
     console.error("Error calculando siguiente número:", error);
@@ -38,16 +36,9 @@ function addVoucher(data) {
       const docNums = detalles
         .map(d => (d.doc_numero || '').trim())
         .filter(n => n && n !== '-' && n !== '');
-      
+
       for (const docNum of [...new Set(docNums)]) {
-        const existente = db.prepare(`
-          SELECT v.id, v.periodo, v.numero_voucher, v.origen
-          FROM voucher_detalles vd
-          JOIN vouchers v ON v.id = vd.voucher_id
-          WHERE UPPER(TRIM(vd.doc_numero)) = UPPER(TRIM(?))
-            AND v.origen = ?
-          LIMIT 1
-        `).get(docNum, String(origen));
+        const existente = voucherRepository.addVoucher_get_voucher_detalles(db, docNum, String(origen));
 
         if (existente) {
           const origenNombre = String(origen) === '14' ? 'Ventas' : 'Compras';
@@ -63,9 +54,9 @@ function addVoucher(data) {
     const { debe: totalDebe, haber: totalHaber } = calcularTotales(detalles);
     validarCuadre(totalDebe, totalHaber);
 
-    const stmtMax = db.prepare(`SELECT COALESCE(MAX(numero_voucher),0) AS maximo FROM vouchers WHERE origen=? AND periodo=?`);
-    const stmtCab = db.prepare(`INSERT INTO vouchers (origen,numero_voucher,fecha,periodo,glosa_cabecera,total_debe,total_haber) VALUES (?,?,?,?,?,?,?)`);
-    const stmtDet = db.prepare(`INSERT INTO voucher_detalles (voucher_id,cuenta,nombre_cuenta,debe,haber,moneda,tc,equivalente,doc_tipo,doc_numero,fecha_doc,fecha_venc,codigo,razon_social,glosa) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
+    const stmtMax = voucherRepository.prepararInsercionCabecera(db);
+    const stmtCab = voucherRepository.addVoucher_prepare_vouchers_2(db);
+    const stmtDet = voucherRepository.prepararInsercionDetalle(db);
 
     let numeroAsignado = null, idInsertado = null;
     db.transaction(() => {
@@ -104,25 +95,17 @@ function buscarVoucher({ origen, numeroVoucher, id, periodo, numero_voucher }) {
     let cabecera = null;
     const numV = numeroVoucher || numero_voucher;
     if (id) {
-      cabecera = db.prepare(`SELECT * FROM vouchers WHERE id = ?`).get(id);
+      cabecera = voucherRepository.buscarVoucher_get_vouchers(db, id);
     } else if (numV && periodo) {
-      let sql = 'SELECT * FROM vouchers WHERE numero_voucher = ? AND periodo = ?';
-      const params = [parseInt(numV, 10), periodo];
-      if (origen) { sql += ' AND origen = ?'; params.push(origen); }
-      sql += ' ORDER BY id DESC LIMIT 1';
-      cabecera = db.prepare(sql).get(...params);
+
+      cabecera = voucherRepository.buscarVoucher_get_vouchers_2(db, { numV, periodo, origen });
     } else if (numV && origen) {
-      cabecera = db.prepare('SELECT * FROM vouchers WHERE origen = ? AND numero_voucher = ? ORDER BY id DESC LIMIT 1').get(origen, parseInt(numV, 10));
+      cabecera = voucherRepository.buscarVoucher_get_vouchers_3(db, origen, parseInt(numV, 10));
     }
 
     if (!cabecera) return { success: false, error: `No se encontró el voucher.` };
 
-    const detalles = db.prepare(`
-      SELECT d.*, COALESCE(pc.descripcion, d.nombre_cuenta) AS nombre_plan
-      FROM voucher_detalles d
-      LEFT JOIN plan_cuentas pc ON pc.codigo = d.cuenta
-      WHERE d.voucher_id = ? ORDER BY d.id ASC
-    `).all(cabecera.id);
+    const detalles = voucherRepository.buscarVoucher_all_voucher_detalles(db, cabecera.id);
 
     const tributario = obtenerTributario(db, cabecera.id);
     return { success: true, cabecera, detalles, tributario };
@@ -141,27 +124,20 @@ function buscarVoucherPorFactura({ periodo, docNumero, origen }) {
 
     if (!tieneFactura) {
       if (!periodo) return { success: false, error: 'Seleccione un período para buscar.' };
-      let sqlList = "SELECT v.*, (SELECT vd.doc_numero FROM voucher_detalles vd WHERE vd.voucher_id = v.id AND vd.doc_numero IS NOT NULL AND TRIM(vd.doc_numero) != '' LIMIT 1) AS doc_numero FROM vouchers v WHERE v.periodo = ?";
-      const paramsList = [periodo];
-      if (origen) { sqlList += ' AND v.origen = ?'; paramsList.push(origen); }
-      sqlList += ' ORDER BY v.id DESC LIMIT 50';
-      const cabeceras = db.prepare(sqlList).all(...paramsList);
+
+      const cabeceras = voucherRepository.buscarVoucherPorFactura_all_voucher_detalles(db, { periodo, origen });
       if (!cabeceras.length) return { success: false, error: 'No hay asientos en el período ' + periodo + '.' };
       const cabecera = cabeceras[0];
-      const detalles = db.prepare('SELECT d.*, COALESCE(pc.descripcion, d.nombre_cuenta) AS nombre_plan FROM voucher_detalles d LEFT JOIN plan_cuentas pc ON pc.codigo = d.cuenta WHERE d.voucher_id = ? ORDER BY d.id ASC').all(cabecera.id);
+      const detalles = voucherRepository.buscarVoucherPorFactura_all_voucher_detalles_2(db, cabecera.id);
       const tributario = obtenerTributario(db, cabecera.id);
       return { success: true, cabecera, detalles, tributario, multiples: cabeceras.length, listaVouchers: cabeceras };
     }
 
-    let sql = 'SELECT DISTINCT v.* FROM vouchers v JOIN voucher_detalles d ON d.voucher_id = v.id WHERE UPPER(TRIM(d.doc_numero)) = UPPER(TRIM(?))';
-    const params = [String(docNumero).trim()];
-    if (periodo) { sql += ' AND v.periodo = ?'; params.push(periodo); }
-    if (origen)  { sql += ' AND v.origen = ?'; params.push(origen); }
-    sql += ' ORDER BY v.id DESC';
-    const cabeceras = db.prepare(sql).all(...params);
+
+    const cabeceras = voucherRepository.buscarVoucherPorFactura_all_vouchers(db, { docNumero, periodo, origen });
     if (!cabeceras.length) return { success: false, error: 'No se encontró un asiento con la factura "' + docNumero + '"' + (periodo ? ' en el período ' + periodo : '') + '.' };
     const cabecera = cabeceras[0];
-    const detalles = db.prepare('SELECT d.*, COALESCE(pc.descripcion, d.nombre_cuenta) AS nombre_plan FROM voucher_detalles d LEFT JOIN plan_cuentas pc ON pc.codigo = d.cuenta WHERE d.voucher_id = ? ORDER BY d.id ASC').all(cabecera.id);
+    const detalles = voucherRepository.buscarVoucherPorFactura_all_voucher_detalles_3(db, cabecera.id);
     const tributario = obtenerTributario(db, cabecera.id);
     return { success: true, cabecera, detalles, tributario, multiples: cabeceras.length };
   } catch (error) {
@@ -185,18 +161,13 @@ function updateVoucherCompleto(data) {
       return { success: false, error: 'El voucher debe contener al menos una línea.' };
 
     const resultado = db.transaction(() => {
-      const voucher = db.prepare('SELECT id, origen, fecha FROM vouchers WHERE id = ?').get(voucherId);
+      const voucher = voucherRepository.updateVoucherCompleto_get_vouchers(db, voucherId);
       if (!voucher) throw new Error('Voucher no encontrado.');
 
       // La edición actual solo modifica líneas existentes. Exigimos recibir el
       // conjunto completo para evitar guardar totales calculados sobre un borrador
       // incompleto o sobre líneas pertenecientes a otro voucher.
-      const actuales = db.prepare(`
-        SELECT id
-        FROM voucher_detalles
-        WHERE voucher_id = ?
-        ORDER BY id ASC
-      `).all(voucherId);
+      const actuales = voucherRepository.updateVoucherCompleto_all_voucher_detalles(db, voucherId);
 
       if (actuales.length !== detalles.length) {
         throw new Error('Las líneas del asiento cambiaron mientras se editaba. Vuelva a cargar el voucher.');
@@ -244,13 +215,7 @@ function updateVoucherCompleto(data) {
 
       const cuadrados = validarCuadre(totalDebe, totalHaber);
 
-      const stmtUpdate = db.prepare(`
-        UPDATE voucher_detalles SET
-          cuenta = ?, nombre_cuenta = ?, debe = ?, haber = ?, moneda = ?, tc = ?, equivalente = ?,
-          doc_tipo = ?, doc_numero = ?, fecha_doc = ?, fecha_venc = ?,
-          codigo = ?, razon_social = ?, glosa = ?
-        WHERE id = ? AND voucher_id = ?
-      `);
+      const stmtUpdate = voucherRepository.updateVoucherCompleto_prepare_voucher_detalles(db);
 
       for (const d of preparados) {
         const info = stmtUpdate.run(
@@ -262,11 +227,7 @@ function updateVoucherCompleto(data) {
       }
 
       // Comprobación defensiva con los valores realmente persistidos antes del COMMIT.
-      const totalesPersistidos = db.prepare(`
-        SELECT COALESCE(SUM(debe), 0) AS td, COALESCE(SUM(haber), 0) AS th
-        FROM voucher_detalles
-        WHERE voucher_id = ?
-      `).get(voucherId);
+      const totalesPersistidos = voucherRepository.updateVoucherCompleto_get_voucher_detalles(db, voucherId);
       const finales = validarCuadre(totalesPersistidos.td, totalesPersistidos.th);
 
       // Si el voucher ya tenía datos tributarios explícitos, no permitimos que una
@@ -286,11 +247,7 @@ function updateVoucherCompleto(data) {
         );
       }
 
-      db.prepare(`
-        UPDATE vouchers
-        SET total_debe = ?, total_haber = ?
-        WHERE id = ?
-      `).run(finales.debe, finales.haber, voucherId);
+      voucherRepository.updateVoucherCompleto_run_vouchers(db, finales.debe, finales.haber, voucherId);
 
       return {
         voucher_id: voucherId,
@@ -311,21 +268,7 @@ function updateVoucherCompleto(data) {
 function getDocumentosPendientes({ tipo, termino } = {}) {
   try {
     const db = getDB();
-    let cuentaCondition = "substr(vd.cuenta,1,2) IN ('12','42')";
-    if (tipo === 'COMPRA') cuentaCondition = "substr(vd.cuenta,1,2) = '42'";
-    else if (tipo === 'VENTA') cuentaCondition = "substr(vd.cuenta,1,2) = '12'";
-    let rows = db.prepare(`
-      SELECT vd.doc_tipo, vd.doc_numero, vd.fecha_doc, vd.fecha_venc, vd.codigo, vd.razon_social, vd.cuenta,
-        CASE WHEN substr(vd.cuenta,1,2) = '12' THEN 'CXC' ELSE 'CXP' END AS tipo_cxc,
-        SUM(vd.debe) AS total_debe, SUM(vd.haber) AS total_haber,
-        CASE WHEN substr(vd.cuenta,1,2) = '12' THEN SUM(vd.debe - vd.haber) ELSE SUM(vd.haber - vd.debe) END AS saldo_pendiente,
-        MAX(v.origen) AS origen, MAX(v.periodo) AS periodo, MAX(v.fecha) AS fecha_asiento, MAX(v.id) AS voucher_id, MAX(v.numero_voucher) AS numero_voucher
-      FROM voucher_detalles vd JOIN vouchers v ON v.id = vd.voucher_id
-      WHERE ${cuentaCondition} AND vd.doc_numero IS NOT NULL AND TRIM(vd.doc_numero) != ''
-      GROUP BY vd.doc_numero, vd.codigo, substr(vd.cuenta,1,2)
-      HAVING CASE WHEN substr(vd.cuenta,1,2) = '12' THEN SUM(vd.debe - vd.haber) ELSE SUM(vd.haber - vd.debe) END > 0.01
-      ORDER BY fecha_asiento DESC LIMIT 100
-    `).all();
+    let rows = voucherRepository.listarDocumentosPendientes(db, { tipo });
     if (termino && termino.trim()) {
       const t = termino.trim().toLowerCase();
       rows = rows.filter(r => (r.doc_numero||'').toLowerCase().includes(t) || (r.codigo||'').toLowerCase().includes(t) || (r.razon_social||'').toLowerCase().includes(t));

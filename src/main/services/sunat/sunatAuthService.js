@@ -1,3 +1,4 @@
+const sunatAuthServiceRepository = require('../../repositories/sunatAuthServiceRepository.js');
 // src/main/services/sunat/sunatAuthService.js
 // ─────────────────────────────────────────────────────────────────────────────
 // Autenticación OAuth2 contra el API de Seguridad SUNAT.
@@ -24,7 +25,7 @@ const AUTH_ERRORS = {
 function _getConfig() {
   try {
     const db = getDB();
-    return db.prepare('SELECT * FROM sire_config WHERE id = 1').get() || null;
+    return sunatAuthServiceRepository._getConfig_get_sire_config(db) || null;
   } catch (_) { return null; }
 }
 
@@ -32,13 +33,12 @@ function _updateConfig(fields) {
   try {
     const db = getDB();
     const keys = Object.keys(fields);
-    const sets = keys.map(k => `${k} = ?`).join(', ');
     const vals = keys.map(k => fields[k]);
-    const existing = db.prepare('SELECT id FROM sire_config WHERE id = 1').get();
+    const existing = sunatAuthServiceRepository._updateConfig_get_sire_config(db);
     if (existing) {
-      db.prepare(`UPDATE sire_config SET ${sets}, updated_at = datetime('now','localtime') WHERE id = 1`).run(...vals);
+      sunatAuthServiceRepository._updateConfig_run_sire_config(db, { keys }, ...vals);
     } else {
-      db.prepare(`INSERT INTO sire_config (id, ${keys.join(', ')}) VALUES (1, ${keys.map(() => '?').join(', ')})`).run(...vals);
+      sunatAuthServiceRepository._updateConfig_run_sire_config_2(db, { keys }, ...vals);
     }
   } catch (err) {
     console.error('sunatAuth._updateConfig:', err.message);

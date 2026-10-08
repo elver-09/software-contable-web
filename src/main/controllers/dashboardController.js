@@ -1,7 +1,8 @@
+const dashboardRepository = require('../repositories/dashboardRepository.js');
 // src/main/controllers/dashboardController.js
 // ═══════════════════════════════════════════════════════════════════════════════
 // Controlador de estadísticas para el Dashboard Contable Profesional
-// Todas las consultas son síncronas (better-sqlite3).
+// Acceso síncrono a los repositorios sobre el motor contable configurado.
 //
 // ARQUITECTURA DE DATOS:
 //   - vouchers          → cabecera del asiento (origen, fecha, totales)
@@ -85,13 +86,7 @@ function getDashboardData() {
   //    Calculamos la suma del Haber neto de esas cuentas en el período.
   // ─────────────────────────────────────────────────────────────────────────────
   const _ingresosDelMes = (periodo) =>
-    db.prepare(`
-      SELECT COALESCE(SUM(vd.haber - vd.debe), 0) AS total
-      FROM voucher_detalles vd
-      JOIN vouchers v ON v.id = vd.voucher_id
-      WHERE v.periodo = ?
-        AND substr(vd.cuenta, 1, 1) = '7'
-    `).get(periodo)?.total ?? 0;
+    dashboardRepository.getDashboardData_get_voucher_detalles(db, periodo)?.total ?? 0;
 
   const ingresosMes  = _ingresosDelMes(periodoActual);
   const ingresosAnt  = _ingresosDelMes(periodoAnt);
@@ -101,13 +96,7 @@ function getDashboardData() {
   //    En PCGE: los gastos van al Debe de cuentas 6x
   // ─────────────────────────────────────────────────────────────────────────────
   const _gastosDelMes = (periodo) =>
-    db.prepare(`
-      SELECT COALESCE(SUM(vd.debe - vd.haber), 0) AS total
-      FROM voucher_detalles vd
-      JOIN vouchers v ON v.id = vd.voucher_id
-      WHERE v.periodo = ?
-        AND substr(vd.cuenta, 1, 1) = '6'
-    `).get(periodo)?.total ?? 0;
+    dashboardRepository.getDashboardData_get_voucher_detalles_2(db, periodo)?.total ?? 0;
 
   const gastosMes  = _gastosDelMes(periodoActual);
   const gastosAnt  = _gastosDelMes(periodoAnt);
@@ -116,8 +105,7 @@ function getDashboardData() {
   // 3. KPI — Cantidad de asientos del mes
   // ─────────────────────────────────────────────────────────────────────────────
   const _asientosMes = (periodo) =>
-    db.prepare(`SELECT COUNT(*) AS n FROM vouchers WHERE periodo = ?`)
-      .get(periodo)?.n ?? 0;
+    dashboardRepository.getDashboardData_get_vouchers(db, periodo)?.n ?? 0;
 
   const vouchersMes = _asientosMes(periodoActual);
   const vouchersAnt = _asientosMes(periodoAnt);
@@ -126,10 +114,7 @@ function getDashboardData() {
   // KPI — Ventas del mes (importe total facturado, asientos origen '14')
   // ─────────────────────────────────────────────────────────────────────────────
   const _ventasDelMes = (periodo) =>
-    db.prepare(`
-      SELECT COALESCE(SUM(total_haber), 0) AS total
-      FROM vouchers WHERE periodo = ? AND origen = '14'
-    `).get(periodo)?.total ?? 0;
+    dashboardRepository.getDashboardData_get_vouchers_2(db, periodo)?.total ?? 0;
 
   const ventasMes = _ventasDelMes(periodoActual);
   const ventasAnt = _ventasDelMes(periodoAnt);
@@ -139,12 +124,7 @@ function getDashboardData() {
   //    En ventas el IGV se abona (Haber) → haber - debe es positivo.
   // ─────────────────────────────────────────────────────────────────────────────
   const _igvVentasMes = (periodo) =>
-    db.prepare(`
-      SELECT COALESCE(SUM(vd.haber - vd.debe), 0) AS total
-      FROM voucher_detalles vd
-      JOIN vouchers v ON v.id = vd.voucher_id
-      WHERE v.periodo = ? AND v.origen = '14' AND substr(vd.cuenta,1,2) = '40'
-    `).get(periodo)?.total ?? 0;
+    dashboardRepository.getDashboardData_get_voucher_detalles_3(db, periodo)?.total ?? 0;
 
   const igvMes = _igvVentasMes(periodoActual);
   const igvAnt = _igvVentasMes(periodoAnt);
@@ -153,21 +133,13 @@ function getDashboardData() {
   // 4. KPI — Cuentas por Cobrar (saldo deudor cuentas 12x, 16x)
   //    Saldo acumulado histórico (no solo del mes), neto Debe-Haber
   // ─────────────────────────────────────────────────────────────────────────────
-  const cxCobrar = db.prepare(`
-    SELECT COALESCE(SUM(vd.debe - vd.haber), 0) AS saldo
-    FROM voucher_detalles vd
-    WHERE substr(vd.cuenta, 1, 2) IN ('12', '16')
-  `).get()?.saldo ?? 0;
+  const cxCobrar = dashboardRepository.getDashboardData_get_voucher_detalles_4(db)?.saldo ?? 0;
 
   // ─────────────────────────────────────────────────────────────────────────────
   // 5. KPI — Cuentas por Pagar (saldo acreedor cuentas 42x, 46x)
   //    Saldo acumulado histórico, neto Haber-Debe
   // ─────────────────────────────────────────────────────────────────────────────
-  const cxPagar = db.prepare(`
-    SELECT COALESCE(SUM(vd.haber - vd.debe), 0) AS saldo
-    FROM voucher_detalles vd
-    WHERE substr(vd.cuenta, 1, 2) IN ('42', '46')
-  `).get()?.saldo ?? 0;
+  const cxPagar = dashboardRepository.getDashboardData_get_voucher_detalles_5(db)?.saldo ?? 0;
 
   // ─────────────────────────────────────────────────────────────────────────────
   // 6. KPI — Resultado del período = Ingresos - Gastos
@@ -178,15 +150,12 @@ function getDashboardData() {
   // ─────────────────────────────────────────────────────────────────────────────
   // 7. KPI — Total de asientos histórico y total de cuentas
   // ─────────────────────────────────────────────────────────────────────────────
-  const totalVouchers  = db.prepare(`SELECT COUNT(*) AS n FROM vouchers`).get()?.n ?? 0;
-  const totalCuentas   = db.prepare(`SELECT COUNT(*) AS n FROM plan_cuentas`).get()?.n ?? 0;
-  const totalEntidades = db.prepare(`SELECT COUNT(*) AS n FROM entidades`).get()?.n ?? 0;
+  const totalVouchers  = dashboardRepository.getDashboardData_get_vouchers_3(db)?.n ?? 0;
+  const totalCuentas   = dashboardRepository.getDashboardData_get_plan_cuentas(db)?.n ?? 0;
+  const totalEntidades = dashboardRepository.getDashboardData_get_entidades(db)?.n ?? 0;
 
   // Debes y Haberes del mes (para badge de cuadre)
-  const sumasMes = db.prepare(`
-    SELECT COALESCE(SUM(total_debe),0) AS debe, COALESCE(SUM(total_haber),0) AS haber
-    FROM vouchers WHERE periodo = ?
-  `).get(periodoActual) ?? { debe: 0, haber: 0 };
+  const sumasMes = dashboardRepository.getDashboardData_get_vouchers_4(db, periodoActual) ?? { debe: 0, haber: 0 };
 
   // ─────────────────────────────────────────────────────────────────────────────
   // 8. EVOLUCIÓN MENSUAL (12 meses): Ingresos, Gastos, Resultado
@@ -195,18 +164,7 @@ function getDashboardData() {
   const primerMes = ultimos12[0];
   const ultimoMes = ultimos12[ultimos12.length - 1];
 
-  const evolucionRaw = db.prepare(`
-    SELECT
-      v.periodo AS periodo,
-      SUM(CASE WHEN substr(vd.cuenta,1,1) = '7' THEN (vd.haber - vd.debe) ELSE 0 END) AS ingresos,
-      SUM(CASE WHEN substr(vd.cuenta,1,1) = '6' THEN (vd.debe - vd.haber) ELSE 0 END) AS gastos,
-      COUNT(DISTINCT v.id) AS asientos
-    FROM vouchers v
-    JOIN voucher_detalles vd ON vd.voucher_id = v.id
-    WHERE v.periodo BETWEEN ? AND ?
-    GROUP BY v.periodo
-    ORDER BY periodo ASC
-  `).all(primerMes, ultimoMes);
+  const evolucionRaw = dashboardRepository.getDashboardData_all_vouchers(db, primerMes, ultimoMes);
 
   // Rellenar meses sin datos con ceros
   const evolucionMap = {};
@@ -228,12 +186,7 @@ function getDashboardData() {
   // ─────────────────────────────────────────────────────────────────────────────
   // 8.b VENTAS vs COMPRAS por mes (12 meses): origen '14' vs origen '8'
   // ─────────────────────────────────────────────────────────────────────────────
-  const ventasComprasRaw = db.prepare(`
-    SELECT periodo AS periodo, origen, COALESCE(SUM(total_haber),0) AS total
-    FROM vouchers
-    WHERE periodo BETWEEN ? AND ? AND origen IN ('14','8')
-    GROUP BY periodo, origen
-  `).all(primerMes, ultimoMes);
+  const ventasComprasRaw = dashboardRepository.getDashboardData_all_vouchers_2(db, primerMes, ultimoMes);
   const vcMap = {};
   ventasComprasRaw.forEach(r => {
     if (!vcMap[r.periodo]) vcMap[r.periodo] = { ventas: 0, compras: 0 };
@@ -251,15 +204,7 @@ function getDashboardData() {
   //    Débito  = cuenta 40 en origen '14' (haber - debe)
   //    Crédito = cuenta 40 en origen '8'  (debe - haber)
   // ─────────────────────────────────────────────────────────────────────────────
-  const igvRaw = db.prepare(`
-    SELECT v.periodo AS periodo, v.origen AS origen,
-           COALESCE(SUM(vd.haber - vd.debe),0) AS neto40
-    FROM voucher_detalles vd
-    JOIN vouchers v ON v.id = vd.voucher_id
-    WHERE v.periodo BETWEEN ? AND ?
-      AND v.origen IN ('14','8') AND substr(vd.cuenta,1,2) = '40'
-    GROUP BY v.periodo, v.origen
-  `).all(primerMes, ultimoMes);
+  const igvRaw = dashboardRepository.getDashboardData_all_voucher_detalles(db, primerMes, ultimoMes);
   const igvMap = {};
   igvRaw.forEach(r => {
     if (!igvMap[r.periodo]) igvMap[r.periodo] = { debito: 0, credito: 0 };
@@ -276,18 +221,7 @@ function getDashboardData() {
   // 8.d TOP CLIENTES (origen '14') y TOP PROVEEDORES (origen '8')
   //    Agrupa el importe total de cada asiento por la entidad de su cabecera.
   // ─────────────────────────────────────────────────────────────────────────────
-  const _topEntidades = (origen) => db.prepare(`
-    SELECT codigo, razon_social, SUM(total) AS total FROM (
-      SELECT
-        (SELECT vd.codigo       FROM voucher_detalles vd WHERE vd.voucher_id = v.id AND vd.codigo       IS NOT NULL AND vd.codigo       <> '' LIMIT 1) AS codigo,
-        (SELECT vd.razon_social FROM voucher_detalles vd WHERE vd.voucher_id = v.id AND vd.razon_social IS NOT NULL AND vd.razon_social <> '' LIMIT 1) AS razon_social,
-        v.total_haber AS total
-      FROM vouchers v WHERE v.origen = ?
-    ) WHERE codigo IS NOT NULL AND codigo <> ''
-    GROUP BY codigo, razon_social
-    ORDER BY total DESC
-    LIMIT 6
-  `).all(origen);
+  const _topEntidades = (origen) => dashboardRepository.getDashboardData_all_voucher_detalles_2(db, origen);
   const topClientes    = _topEntidades('14');
   const topProveedores = _topEntidades('8');
 
@@ -295,26 +229,12 @@ function getDashboardData() {
   // 9. ESTRUCTURA DE GASTOS DEL MES (Elemento 6 desglosado por subcuenta)
   //    Agrupa por los 2 primeros dígitos de cuenta (cuenta de 2 dígitos = rubro)
   // ─────────────────────────────────────────────────────────────────────────────
-  const gastosPorRubroRaw = db.prepare(`
-    SELECT
-      substr(vd.cuenta, 1, 2) AS rubro,
-      SUM(vd.debe - vd.haber)   AS importe
-    FROM voucher_detalles vd
-    JOIN vouchers v ON v.id = vd.voucher_id
-    WHERE v.periodo = ?
-      AND substr(vd.cuenta, 1, 1) = '6'
-    GROUP BY substr(vd.cuenta, 1, 2)
-    HAVING SUM(vd.debe - vd.haber) > 0.01
-    ORDER BY importe DESC
-    LIMIT 10
-  `).all(periodoActual);
+  const gastosPorRubroRaw = dashboardRepository.getDashboardData_all_voucher_detalles_3(db, periodoActual);
 
   // Enriquecer con nombres del plan de cuentas
   const totalGastos = gastosPorRubroRaw.reduce((s, r) => s + r.importe, 0) || 1;
   const gastosPorRubro = gastosPorRubroRaw.map(r => {
-    const cuenta = db.prepare(`
-      SELECT descripcion FROM plan_cuentas WHERE codigo = ? LIMIT 1
-    `).get(r.rubro);
+    const cuenta = dashboardRepository.getDashboardData_get_plan_cuentas_2(db, r.rubro);
     return {
       rubro:       r.rubro,
       descripcion: cuenta?.descripcion ?? `Cuenta ${r.rubro}`,
@@ -326,48 +246,14 @@ function getDashboardData() {
   // ─────────────────────────────────────────────────────────────────────────────
   // 10. TOP 5 CUENTAS — Mayor movimiento Debe y Haber en el período
   // ─────────────────────────────────────────────────────────────────────────────
-  const topCuentasDebe = db.prepare(`
-    SELECT
-      vd.cuenta,
-      COALESCE(pc.descripcion, vd.nombre_cuenta, 'Sin descripción') AS descripcion,
-      SUM(vd.debe)  AS total_debe,
-      SUM(vd.haber) AS total_haber,
-      SUM(vd.debe - vd.haber) AS saldo
-    FROM voucher_detalles vd
-    JOIN vouchers v ON v.id = vd.voucher_id
-    LEFT JOIN plan_cuentas pc ON pc.codigo = vd.cuenta
-    WHERE v.periodo = ?
-    GROUP BY vd.cuenta
-    ORDER BY SUM(vd.debe) DESC
-    LIMIT 5
-  `).all(periodoActual);
+  const topCuentasDebe = dashboardRepository.getDashboardData_all_voucher_detalles_4(db, periodoActual);
 
-  const topCuentasHaber = db.prepare(`
-    SELECT
-      vd.cuenta,
-      COALESCE(pc.descripcion, vd.nombre_cuenta, 'Sin descripción') AS descripcion,
-      SUM(vd.debe)  AS total_debe,
-      SUM(vd.haber) AS total_haber,
-      SUM(vd.haber - vd.debe) AS saldo
-    FROM voucher_detalles vd
-    JOIN vouchers v ON v.id = vd.voucher_id
-    LEFT JOIN plan_cuentas pc ON pc.codigo = vd.cuenta
-    WHERE v.periodo = ?
-    GROUP BY vd.cuenta
-    ORDER BY SUM(vd.haber) DESC
-    LIMIT 5
-  `).all(periodoActual);
+  const topCuentasHaber = dashboardRepository.getDashboardData_all_voucher_detalles_5(db, periodoActual);
 
   // ─────────────────────────────────────────────────────────────────────────────
   // 11. MAPA DE CALOR — Asientos por día del mes actual
   // ─────────────────────────────────────────────────────────────────────────────
-  const heatmapRaw = db.prepare(`
-    SELECT fecha, COUNT(*) AS cantidad
-    FROM vouchers
-    WHERE periodo = ?
-    GROUP BY fecha
-    ORDER BY fecha ASC
-  `).all(periodoActual);
+  const heatmapRaw = dashboardRepository.getDashboardData_all_vouchers_3(db, periodoActual);
 
   // Generar estructura completa del mes con todos los días
   const diasEnMes = new Date(anio, parseInt(mes, 10), 0).getDate();
@@ -392,15 +278,7 @@ function getDashboardData() {
   const alertas = [];
 
   // A) Períodos descuadrados (últimos 12 meses)
-  const periodosDescuadrados = db.prepare(`
-    SELECT periodo AS periodo,
-           ABS(SUM(total_debe) - SUM(total_haber)) AS diferencia
-    FROM vouchers
-    WHERE periodo BETWEEN ? AND ?
-    GROUP BY periodo
-    HAVING ABS(SUM(total_debe) - SUM(total_haber)) > 0.01
-    ORDER BY periodo DESC
-  `).all(primerMes, ultimoMes);
+  const periodosDescuadrados = dashboardRepository.getDashboardData_all_vouchers_4(db, primerMes, ultimoMes);
 
   if (periodosDescuadrados.length > 0) {
     alertas.push({
@@ -412,11 +290,7 @@ function getDashboardData() {
   }
 
   // B) Vouchers sin glosa registrada en el mes actual
-  const vouchersSinGlosa = db.prepare(`
-    SELECT COUNT(*) AS n FROM vouchers
-    WHERE periodo = ?
-      AND (glosa_cabecera IS NULL OR TRIM(glosa_cabecera) = '')
-  `).get(periodoActual)?.n ?? 0;
+  const vouchersSinGlosa = dashboardRepository.getDashboardData_get_vouchers_5(db, periodoActual)?.n ?? 0;
 
   if (vouchersSinGlosa > 0) {
     alertas.push({
@@ -430,19 +304,7 @@ function getDashboardData() {
   // C) Líneas con fecha de vencimiento pasada (CxC y CxP vencidas)
   //    Ahora devuelve el detalle de cada documento para mostrar en el dashboard.
   const hoyStr  = hoy.toISOString().slice(0, 10);
-  const vencidasDetalle = db.prepare(`
-    SELECT vd.doc_tipo, vd.doc_numero, vd.fecha_venc, vd.codigo, vd.razon_social,
-           vd.debe, vd.haber, vd.cuenta,
-           CASE WHEN substr(vd.cuenta,1,2) IN ('12','16') THEN 'CXC' ELSE 'CXP' END AS tipo_cxc,
-           v.id AS voucher_id, v.origen, v.numero_voucher
-    FROM voucher_detalles vd
-    JOIN vouchers v ON v.id = vd.voucher_id
-    WHERE vd.fecha_venc IS NOT NULL
-      AND vd.fecha_venc != ''
-      AND vd.fecha_venc < ?
-      AND substr(vd.cuenta,1,2) IN ('12','16','42','46')
-    ORDER BY vd.fecha_venc ASC
-  `).all(hoyStr);
+  const vencidasDetalle = dashboardRepository.getDashboardData_all_voucher_detalles_6(db, hoyStr);
 
   if (vencidasDetalle.length > 0) {
     const cxcItems = vencidasDetalle.filter(d => d.tipo_cxc === 'CXC');
@@ -469,12 +331,7 @@ function getDashboardData() {
 
   // D) Cuentas 7x sin movimiento este mes (si hay asientos del mes)
   if (vouchersMes > 0) {
-    const tieneIngresos = db.prepare(`
-      SELECT COUNT(*) AS n
-      FROM voucher_detalles vd
-      JOIN vouchers v ON v.id = vd.voucher_id
-      WHERE v.periodo = ? AND substr(vd.cuenta,1,1) = '7'
-    `).get(periodoActual)?.n ?? 0;
+    const tieneIngresos = dashboardRepository.getDashboardData_get_voucher_detalles_6(db, periodoActual)?.n ?? 0;
 
     if (tieneIngresos === 0) {
       alertas.push({
@@ -489,49 +346,35 @@ function getDashboardData() {
   // ─────────────────────────────────────────────────────────────────────────────
   // 13. ASIENTOS POR ORIGEN (para donut - últimos 6 meses + mes actual)
   // ─────────────────────────────────────────────────────────────────────────────
-  const porOrigen = db.prepare(`
-    SELECT origen, COUNT(*) AS cantidad
-    FROM vouchers
-    WHERE periodo = ?
-    GROUP BY origen
-    ORDER BY cantidad DESC, origen DESC
-  `).all(periodoActual);
+  const porOrigen = dashboardRepository.getDashboardData_all_vouchers_5(db, periodoActual);
 
   // ─────────────────────────────────────────────────────────────────────────────
   // 15. DISTRIBUCIÓN DE ENTIDADES
   // ─────────────────────────────────────────────────────────────────────────────
-  const distribEntidades = db.prepare(`
-    SELECT tipo, COUNT(*) AS cantidad FROM entidades GROUP BY tipo ORDER BY cantidad DESC
-  `).all();
+  const distribEntidades = dashboardRepository.getDashboardData_all_entidades(db);
 
   // ─────────────────────────────────────────────────────────────────────────────
   // 16. ACTIVIDAD DIARIA (últimos 30 días) — para sparkline
   // ─────────────────────────────────────────────────────────────────────────────
   const hace30 = new Date(hoy.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-  const actividadDiaria = db.prepare(`
-    SELECT fecha, COUNT(*) AS cantidad, SUM(total_debe) AS debe, SUM(total_haber) AS haber
-    FROM vouchers
-    WHERE fecha >= ?
-    GROUP BY fecha
-    ORDER BY fecha ASC
-  `).all(hace30);
+  const actividadDiaria = dashboardRepository.getDashboardData_all_vouchers_6(db, hace30);
 
   // ─────────────────────────────────────────────────────────────────────────────
   // 17. DATOS DE EMPRESA + TIPO DE CAMBIO DEL DÍA
   // ─────────────────────────────────────────────────────────────────────────────
   let empresa = {};
-  try { empresa = db.prepare('SELECT * FROM config_empresa WHERE id = 1').get() || {}; } catch(_) {}
+  try { empresa = dashboardRepository.getDashboardData_get_config_empresa(db) || {}; } catch(_) {}
 
   let tcHoy = null;
   try {
     const { getGlobalDB } = require('../database/db');
     const gdb = getGlobalDB();
-    tcHoy = gdb.prepare(`SELECT compra, venta, fecha FROM monedas WHERE nombre = 'USD' ORDER BY fecha DESC LIMIT 1`).get() || null;
+    tcHoy = dashboardRepository.getDashboardData_get_monedas(gdb) || null;
   } catch(_) {}
 
   // Estado SIRE
   let sireEstado = 'NO_CONFIGURADO';
-  try { sireEstado = db.prepare('SELECT estado_conexion FROM sire_config WHERE id = 1').get()?.estado_conexion || 'NO_CONFIGURADO'; } catch(_) {}
+  try { sireEstado = dashboardRepository.getDashboardData_get_sire_config(db)?.estado_conexion || 'NO_CONFIGURADO'; } catch(_) {}
 
   // ─────────────────────────────────────────────────────────────────────────────
   // RETORNO CONSOLIDADO

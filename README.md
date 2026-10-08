@@ -8,6 +8,7 @@ La instancia configurada utiliza PostgreSQL de Supabase para la contabilidad, Su
 | --- | --- |
 | `src/renderer/` | Pantallas, estilos y lógica de interfaz original. |
 | `src/main/controllers/`, `src/main/domain/`, `src/main/services/` | Reglas contables, reportes e integración SUNAT del escritorio. |
+| `src/main/repositories/` | Consultas SQL por módulo, filtros y acceso a datos. |
 | `server/` | Servidor HTTP, sesiones, adaptación del navegador y descargas autorizadas. |
 | `server/postgres/` | Conexión privada, consultas compatibles, procesos contables, respaldos y Storage. |
 | `supabase/migrations/` | Cambios versionados de tablas, permisos y archivos privados. |
@@ -16,6 +17,8 @@ La instancia configurada utiliza PostgreSQL de Supabase para la contabilidad, Su
 | `data/` | Copias locales anteriores y archivos de trabajo; PostgreSQL es el motor activo. |
 
 El esquema `ansorito` contiene las 17 tablas contables, el registro de empresas y tablas auxiliares de solicitudes e importaciones. En el panel de Supabase, seleccionar ese esquema para verlas. Cada usuario posee sus empresas y su catálogo global; los permisos de PostgreSQL separan usuarios y empresas. La capa contable usa el rol `authenticated`, con el usuario previamente verificado por Supabase Auth.
+
+Los controladores y servicios delegan las consultas a los repositorios y conservan las validaciones, cálculos y transacciones contables. Las tablas PostgreSQL se definen en `supabase/migrations/`; los esquemas JavaScript de SQLite se conservan para respaldos, importación y revisión local. La tabla local de reintentos se inicializa en `server/legacy/schema.cjs`, fuera del guardado de vouchers. Las pruebas de arquitectura impiden volver a introducir SQL en controladores, servicios y registros de rutas.
 
 ## Iniciar
 

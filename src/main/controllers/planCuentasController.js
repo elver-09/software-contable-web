@@ -1,3 +1,4 @@
+const planCuentasRepository = require('../repositories/planCuentasRepository.js');
 const {
   getCatalogContext,
   resolveWriteTarget,
@@ -63,10 +64,7 @@ function addCuenta(data) {
     if (estadoResultados && !['6', '7', '8'].includes(codigo.charAt(0))) {
       return { success: false, error: 'Solo las cuentas de los elementos 6, 7 y 8 pueden habilitarse para Estado de Resultados. Estas cuentas alimentan las columnas NATURALEZA del Balance de Comprobación.' };
     }
-    const stmt = context.writeDb.prepare(`
-      INSERT INTO plan_cuentas (codigo, descripcion, tipo, nivel, estado_resultados)
-      VALUES (?, ?, ?, ?, ?)
-    `);
+    const stmt = planCuentasRepository.addCuenta_prepare_plan_cuentas(context.writeDb);
     stmt.run(codigo, descripcion, data.tipo || determinarTipoPorElemento(codigo), Number(data.nivel) || codigo.length, estadoResultados);
     return { success: true, scope: context.writeScope };
   } catch (error) {
@@ -110,28 +108,17 @@ function updateCuenta(data) {
 
     if (context.hasCompany) {
       if (localRow) {
-        context.localDb.prepare(`
-          UPDATE plan_cuentas
-          SET codigo = ?, descripcion = ?, tipo = ?, nivel = ?, estado_resultados = ?
-          WHERE codigo = ?
-        `).run(codigo, descripcion, tipo, nivel, estadoResultados, oldCodigo);
+        planCuentasRepository.updateCuenta_run_plan_cuentas(context.localDb, codigo, descripcion, tipo, nivel, estadoResultados, oldCodigo);
         return { success: true, scope: 'Local', override: Boolean(globalRow) };
       }
 
       // Una fila global heredada nunca se modifica desde una empresa. Se crea
       // una copia local con la misma clave que pasa a tener prioridad.
-      context.localDb.prepare(`
-        INSERT INTO plan_cuentas (codigo, descripcion, tipo, nivel, estado_resultados)
-        VALUES (?, ?, ?, ?, ?)
-      `).run(oldCodigo, descripcion, tipo, nivel, estadoResultados);
+      planCuentasRepository.updateCuenta_run_plan_cuentas_2(context.localDb, oldCodigo, descripcion, tipo, nivel, estadoResultados);
       return { success: true, scope: 'Local', override: true, createdOverride: true };
     }
 
-    context.globalDb.prepare(`
-      UPDATE plan_cuentas
-      SET codigo = ?, descripcion = ?, tipo = ?, nivel = ?, estado_resultados = ?
-      WHERE codigo = ?
-    `).run(codigo, descripcion, tipo, nivel, estadoResultados, oldCodigo);
+    planCuentasRepository.updateCuenta_run_plan_cuentas_3(context.globalDb, codigo, descripcion, tipo, nivel, estadoResultados, oldCodigo);
     return { success: true, scope: 'Global' };
   } catch (error) {
     if (String(error.message).includes('UNIQUE')) return { success: false, error: "El nuevo código de cuenta ya está en uso." };
@@ -157,26 +144,17 @@ function setEstadoResultados(codigoInput, enabledInput) {
 
     if (context.hasCompany) {
       if (localRow) {
-        context.localDb.prepare('UPDATE plan_cuentas SET estado_resultados=? WHERE codigo=?').run(enabled, codigo);
+        planCuentasRepository.setEstadoResultados_run_plan_cuentas(context.localDb, enabled, codigo);
         return { success: true, scope: 'Local', override: Boolean(globalRow), estado_resultados: enabled };
       }
 
       // La cuenta heredada global no se modifica desde una empresa. Crear un
       // override local idéntico cambiando solo la habilitación ER.
-      context.localDb.prepare(`
-        INSERT INTO plan_cuentas (codigo, descripcion, tipo, nivel, estado_resultados)
-        VALUES (?, ?, ?, ?, ?)
-      `).run(
-        codigo,
-        globalRow.descripcion || '',
-        globalRow.tipo || determinarTipoPorElemento(codigo),
-        Number(globalRow.nivel) || codigo.length,
-        enabled
-      );
+      planCuentasRepository.setEstadoResultados_run_plan_cuentas_2(context.localDb, codigo, globalRow.descripcion || '', globalRow.tipo || determinarTipoPorElemento(codigo), Number(globalRow.nivel) || codigo.length, enabled);
       return { success: true, scope: 'Local', override: true, createdOverride: true, estado_resultados: enabled };
     }
 
-    context.globalDb.prepare('UPDATE plan_cuentas SET estado_resultados=? WHERE codigo=?').run(enabled, codigo);
+    planCuentasRepository.setEstadoResultados_run_plan_cuentas_3(context.globalDb, enabled, codigo);
     return { success: true, scope: 'Global', estado_resultados: enabled };
   } catch (error) {
     console.error('Error actualizando switch ER:', error);
@@ -193,7 +171,7 @@ function deleteCuenta(codigoInput) {
 
     if (context.hasCompany) {
       if (localRow) {
-        context.localDb.prepare('DELETE FROM plan_cuentas WHERE codigo = ?').run(codigo);
+        planCuentasRepository.deleteCuenta_run_plan_cuentas(context.localDb, codigo);
         return {
           success: true,
           scope: 'Local',
@@ -213,7 +191,7 @@ function deleteCuenta(codigoInput) {
       return { success: false, error: 'La cuenta no existe.' };
     }
 
-    const info = context.globalDb.prepare('DELETE FROM plan_cuentas WHERE codigo = ?').run(codigo);
+    const info = planCuentasRepository.deleteCuenta_run_plan_cuentas_2(context.globalDb, codigo);
     if (info.changes === 0) return { success: false, error: 'La cuenta no existe.' };
     return { success: true, scope: 'Global' };
   } catch (error) {
@@ -229,7 +207,7 @@ function importFromExcel(filePath, options = {}) {
     const db = context.writeDb;
     const workbook = xlsx.readFile(filePath);
     const sheetName = workbook.SheetNames[0];
-    
+
     // Leer como array de arrays para poder saltar los títulos del principio
     const rows = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1 });
 
@@ -266,15 +244,7 @@ function importFromExcel(filePath, options = {}) {
 
     let imported = 0;
     let overrides = 0;
-    const insert = db.prepare(`
-      INSERT INTO plan_cuentas (codigo, descripcion, tipo, nivel, estado_resultados) 
-      VALUES (?, ?, ?, ?, ?)
-      ON CONFLICT(codigo) DO UPDATE SET 
-        descripcion=excluded.descripcion, 
-        tipo=excluded.tipo, 
-        nivel=excluded.nivel,
-        estado_resultados=excluded.estado_resultados
-    `);
+    const insert = planCuentasRepository.importFromExcel_prepare_plan_cuentas(db);
 
     const transaction = db.transaction((dataRows) => {
       // Empezar a leer justo debajo de la fila donde encontramos los encabezados
@@ -284,7 +254,7 @@ function importFromExcel(filePath, options = {}) {
 
         const codigo = String(row[colCodigo] || '').trim();
         const descripcion = String(row[colDesc] || '').trim();
-        
+
         // Ignorar si la fila está vacía
         if (!codigo || !descripcion) continue;
 
@@ -319,7 +289,7 @@ function exportToExcel(filePath) {
   try {
     const xlsx = require('xlsx');
     const cuentas = getPlanCuentas();
-    
+
     const data = cuentas.map(c => ({
       'Cuenta': c.codigo,
       'Nombre de la cuenta': c.descripcion,
@@ -327,12 +297,12 @@ function exportToExcel(filePath) {
       'Nivel': c.nivel || String(c.codigo).length,
       'Estado de Resultados': Number(c.estado_resultados || 0) === 1 ? 'Sí' : 'No'
     }));
-    
+
     const worksheet = xlsx.utils.json_to_sheet(data);
     const workbook = xlsx.utils.book_new();
     xlsx.utils.book_append_sheet(workbook, worksheet, 'PlanContable');
     xlsx.writeFile(workbook, filePath);
-    
+
     return { success: true };
   } catch (error) {
     console.error("Error exportando Excel:", error);

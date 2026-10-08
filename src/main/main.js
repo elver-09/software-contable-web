@@ -1,3 +1,4 @@
+const mainRepository = require('./repositories/mainRepository.js');
 // src/main/main.js
 const { app, BrowserWindow, ipcMain, dialog } = require('../../server/electron.cjs');
 const path = require('path');
@@ -518,7 +519,7 @@ function registrarRutasIPC() {
     // ── Notas Estados Financieros: CRUD ──
     ipcMain.handle('notas-eeff:get', () => {
       try { const db = require('./database/db').getDB();
-        return db.prepare("SELECT * FROM config_notas_eeff WHERE categoria IN ('ACTIVO_CORRIENTE','ACTIVO_NO_CORRIENTE','PASIVO_CORRIENTE','PASIVO_NO_CORRIENTE','PATRIMONIO') ORDER BY categoria, orden, id").all();
+        return mainRepository.registrarRutasIPC_all_config_notas_eeff(db);
       } catch(_) { return []; }
     });
     ipcMain.handle('notas-eeff:save', (event, data) => {
@@ -526,35 +527,25 @@ function registrarRutasIPC() {
         const categoriasEEFF = new Set(['ACTIVO_CORRIENTE','ACTIVO_NO_CORRIENTE','PASIVO_CORRIENTE','PASIVO_NO_CORRIENTE','PATRIMONIO']);
         if (!categoriasEEFF.has(String(data.categoria || ''))) return { success:false, error:'Categoría no válida para Config. EEFF. La Config. ER se administra por separado.' };
         if (data.id) {
-          db.prepare('UPDATE config_notas_eeff SET numero=?,nombre=?,categoria=?,cuentas=?,orden=? WHERE id=?')
-            .run(data.numero,data.nombre,data.categoria,JSON.stringify(data.cuentas||[]),data.orden||0,data.id);
+          mainRepository.registrarRutasIPC_run_config_notas_eeff(db, data.numero, data.nombre, data.categoria, JSON.stringify(data.cuentas||[]), data.orden||0, data.id);
         } else {
-          db.prepare('INSERT INTO config_notas_eeff (numero,nombre,categoria,cuentas,orden) VALUES (?,?,?,?,?)')
-            .run(data.numero,data.nombre,data.categoria,JSON.stringify(data.cuentas||[]),data.orden||0);
+          mainRepository.registrarRutasIPC_run_config_notas_eeff_2(db, data.numero, data.nombre, data.categoria, JSON.stringify(data.cuentas||[]), data.orden||0);
         }
         return { success: true };
       } catch(e) { return { success: false, error: e.message }; }
     });
     ipcMain.handle('notas-eeff:delete', (event, id) => {
       try { const db = require('./database/db').getDB();
-        db.prepare('DELETE FROM config_notas_eeff WHERE id=?').run(id);
+        mainRepository.registrarRutasIPC_run_config_notas_eeff_3(db, id);
         return { success: true };
       } catch(e) { return { success: false, error: e.message }; }
     });
     ipcMain.handle('notas-eeff:get-esf', (event, { desde, hasta }) => {
       try {
         const db = require('./database/db').getDB();
-        const notas = db.prepare("SELECT * FROM config_notas_eeff WHERE categoria IN ('ACTIVO_CORRIENTE','ACTIVO_NO_CORRIENTE','PASIVO_CORRIENTE','PASIVO_NO_CORRIENTE','PATRIMONIO') ORDER BY categoria, orden, id").all();
+        const notas = mainRepository.registrarRutasIPC_all_config_notas_eeff_2(db);
         // Get balances for all accounts in the period
-        const balances = db.prepare(`
-          SELECT vd.cuenta AS cuenta,
-            CASE WHEN SUM(vd.debe) >= SUM(vd.haber) THEN SUM(vd.debe) - SUM(vd.haber) ELSE 0 END AS saldo_deudor,
-            CASE WHEN SUM(vd.haber) > SUM(vd.debe) THEN SUM(vd.haber) - SUM(vd.debe) ELSE 0 END AS saldo_acreedor,
-            MAX(vd.nombre_cuenta) AS nombre_cuenta
-          FROM voucher_detalles vd JOIN vouchers v ON v.id = vd.voucher_id
-          WHERE v.periodo >= substr(?,1,7) AND v.periodo <= substr(?,1,7)
-          GROUP BY vd.cuenta
-        `).all(desde, hasta);
+        const balances = mainRepository.registrarRutasIPC_all_voucher_detalles(db, desde, hasta);
         const balMap = new Map(balances.map(b => [String(b.cuenta || '').trim(), b]));
         const { buildEffectivePlanMap, resolveEffectiveAccountName } = require('./services/catalogos/planCuentasLookup');
         const planMap = buildEffectivePlanMap();
@@ -587,13 +578,12 @@ function registrarRutasIPC() {
     // ── SIRE Codificación: guardar/cargar config de cuentas ──
     ipcMain.handle('sire:codificacion-get', () => {
       try { const db = require('./database/db').getDB();
-        return db.prepare('SELECT cuenta_gasto,cuenta_ingreso,cuenta_igv_compras,cuenta_igv_ventas,cuenta_cxp,cuenta_cxc FROM sire_config WHERE id=1').get() || {};
+        return mainRepository.registrarRutasIPC_get_sire_config(db) || {};
       } catch(_) { return {}; }
     });
     ipcMain.handle('sire:codificacion-save', (event, data) => {
       try { const db = require('./database/db').getDB();
-        db.prepare('UPDATE sire_config SET cuenta_gasto=?,cuenta_ingreso=?,cuenta_igv_compras=?,cuenta_igv_ventas=?,cuenta_cxp=?,cuenta_cxc=? WHERE id=1')
-          .run(data.cuenta_gasto||'',data.cuenta_ingreso||'',data.cuenta_igv_compras||'',data.cuenta_igv_ventas||'',data.cuenta_cxp||'',data.cuenta_cxc||'');
+        mainRepository.registrarRutasIPC_run_sire_config(db, data.cuenta_gasto||'', data.cuenta_ingreso||'', data.cuenta_igv_compras||'', data.cuenta_igv_ventas||'', data.cuenta_cxp||'', data.cuenta_cxc||'');
         return { success: true };
       } catch(e) { return { success: false, error: e.message }; }
     });
@@ -611,7 +601,7 @@ function registrarRutasIPC() {
         if (!cuentaBase || !cuentaDest) return { success:false, error:'Configure las cuentas en Codificación primero.' };
         // Obtener nombres de cuentas del plan contable
         const getNombreCuenta = (codigo) => {
-          try { return db.prepare('SELECT descripcion FROM plan_cuentas WHERE codigo = ? LIMIT 1').get(codigo)?.descripcion || ''; }
+          try { return mainRepository.registrarRutasIPC_get_plan_cuentas(db, codigo)?.descripcion || ''; }
           catch(_) { return ''; }
         };
         const nombreBase = getNombreCuenta(cuentaBase);

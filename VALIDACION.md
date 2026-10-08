@@ -6,7 +6,7 @@ Motor activo: PostgreSQL de Supabase. Catálogo global y una empresa de la versi
 
 - 45 pruebas originales y 25 pruebas web pasan.
 - 5 pruebas del esquema y repositorio PostgreSQL pasan: campos/semillas, aislamiento, relaciones, certificados y creación de empresas.
-- 3 pruebas de traducción de consultas pasan. Total automatizado: **78 pruebas**.
+- 3 pruebas de traducción de consultas y 3 pruebas de separación de repositorios pasan. Total automatizado: **81 pruebas**.
 - Comparación contra PostgreSQL real: resultados idénticos a SQLite para nueve familias de reportes, cartera, dashboard y documentos pendientes usando un conjunto controlado de asientos.
 - Verificación real de creación/búsqueda de asientos, totales, correlativos, respaldo SQLite, reimportación y creación posterior sin colisión de identificadores.
 - Verificación real de Storage: bucket privado; acceso del propietario permitido, acceso de otro usuario y anónimo bloqueado. Los objetos de esa prueba se revirtieron.
@@ -14,6 +14,12 @@ Motor activo: PostgreSQL de Supabase. Catálogo global y una empresa de la versi
 - Respaldo solicitado desde Chrome: objeto real de 167.936 bytes guardado en Storage privado, descargado al equipo y comprobado con `integrity_check = ok`.
 
 Las pruebas reales usan una cuenta confirmada existente y transacciones revertidas. Las semillas del escritorio conservan sus identificadores. Los empates de cantidades por origen se ordenan de forma explícita para obtener el mismo orden en ambos motores.
+
+## Separación de acceso a datos
+
+Se extrajeron las consultas de los 15 controladores, servicios con acceso a datos, registro de rutas y manejo web de reintentos a `src/main/repositories/`. Se conservan los cálculos, validaciones y límites transaccionales. Los identificadores dinámicos de catálogos y configuración SIRE se restringen a los campos declarados; los valores continúan ligados mediante parámetros. PostgreSQL crea sus tablas desde migraciones SQL. SQLite mantiene su esquema de compatibilidad para importar, respaldar y revisar.
+
+La comparación entre motores incluye ahora el mismo catálogo global, además de la misma empresa, para comparar también los tipos de cambio.
 
 ## Límites
 

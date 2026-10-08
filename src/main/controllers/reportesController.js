@@ -1,3 +1,4 @@
+const reportesRepository = require('../repositories/reportesRepository.js');
 // src/main/controllers/reportesController.js
 // ═══════════════════════════════════════════════════════════════════════════════
 // Controlador de Reportes Contables — Ansorito
@@ -83,7 +84,7 @@ function textoPeriodo(desde, hasta) {
 
 function getEmpresa() {
   try {
-    return getDB().prepare('SELECT * FROM config_empresa WHERE id = 1').get() || {};
+    return reportesRepository.getEmpresa_get_config_empresa(getDB()) || {};
   } catch (_) { return {}; }
 }
 
@@ -153,20 +154,8 @@ const DIARIO_REPORTES = {
 
 function queryLibroDiario(desde, hasta, origen) {
   const db = getDB();
-  let sql = `
-    SELECT v.id AS voucher_id, v.origen, v.numero_voucher, v.fecha, v.glosa_cabecera,
-      v.total_debe AS v_total_debe, v.total_haber AS v_total_haber,
-      d.id AS detalle_id, d.cuenta, d.nombre_cuenta, d.debe, d.haber,
-      d.moneda, d.tc, d.glosa AS detalle_glosa, d.doc_tipo, d.doc_numero,
-      d.fecha_doc, d.fecha_venc, d.codigo, d.razon_social
-    FROM vouchers v
-    INNER JOIN voucher_detalles d ON d.voucher_id = v.id
-    WHERE v.periodo >= substr(?,1,7) AND v.periodo <= substr(?,1,7)
-  `;
-  const params = [desde, hasta];
-  if (origen) { sql += ' AND v.origen = ?'; params.push(origen); }
-  sql += ' ORDER BY v.fecha ASC, v.numero_voucher ASC, d.id ASC';
-  return db.prepare(sql).all(...params);
+
+  return reportesRepository.listarLibroDiario(db, { desde, hasta, origen });
 }
 
 /**
@@ -349,34 +338,11 @@ function construirPDFLibroDiario(empresa, vouchers, desde, hasta, headerColor, t
 
 function queryLibroMayor(desde, hasta, cuentaDesde, cuentaHasta) {
   const db = getDB();
-  let sqlMov = `
-    SELECT vd.cuenta,
-      COALESCE(pc.descripcion, vd.nombre_cuenta, 'Sin descripción') AS nombre,
-      v.fecha, v.origen, v.numero_voucher, vd.glosa, vd.debe, vd.haber,
-      vd.doc_tipo, vd.doc_numero
-    FROM voucher_detalles vd
-    JOIN vouchers v ON v.id = vd.voucher_id
-    LEFT JOIN plan_cuentas pc ON pc.codigo = vd.cuenta
-    WHERE v.periodo >= substr(?,1,7) AND v.periodo <= substr(?,1,7)
-  `;
-  const paramsMov = [desde, hasta];
-  if (cuentaDesde) { sqlMov += ' AND vd.cuenta >= ?'; paramsMov.push(cuentaDesde); }
-  if (cuentaHasta) { sqlMov += ' AND vd.cuenta <= ?'; paramsMov.push(cuentaHasta); }
-  sqlMov += ' ORDER BY vd.cuenta ASC, v.fecha ASC, v.numero_voucher ASC';
-  const movimientos = db.prepare(sqlMov).all(...paramsMov);
 
-  let sqlIni = `
-    SELECT vd.cuenta, SUM(vd.debe) AS debe_ini, SUM(vd.haber) AS haber_ini
-    FROM voucher_detalles vd JOIN vouchers v ON v.id = vd.voucher_id
-    WHERE v.periodo < substr(?,1,7)
-  `;
-  const paramsIni = [desde];
-  if (cuentaDesde) { sqlIni += ' AND vd.cuenta >= ?'; paramsIni.push(cuentaDesde); }
-  if (cuentaHasta) { sqlIni += ' AND vd.cuenta <= ?'; paramsIni.push(cuentaHasta); }
-  sqlIni += ' GROUP BY vd.cuenta';
+  const movimientos = reportesRepository.listarMovimientosMayor(db, { desde, hasta, cuentaDesde, cuentaHasta });
 
   const saldosIni = {};
-  db.prepare(sqlIni).all(...paramsIni).forEach(r => {
+  reportesRepository.listarSaldosInicialesMayor(db, { desde, cuentaDesde, cuentaHasta }).forEach(r => {
     saldosIni[r.cuenta] = (r.debe_ini || 0) - (r.haber_ini || 0);
   });
 
@@ -500,20 +466,7 @@ function queryBalanceComprobacion(desde, hasta, nivel) {
   const db = getDB();
   const dig = Number(nivel || 0);
   if (!Number.isInteger(dig) || dig < 0 || dig > 32) throw new Error('Nivel de cuenta inválido');
-  const cuentaExpr = dig > 0 ? `substr(vd.cuenta, 1, ${dig})` : 'vd.cuenta';
-  const rows = db.prepare(`
-    SELECT ${cuentaExpr} AS cuenta,
-      COALESCE(MAX(pc.descripcion), MAX(vd.nombre_cuenta), 'Sin descripción') AS nombre,
-      SUM(vd.debe) AS sum_debe, SUM(vd.haber) AS sum_haber,
-      CASE WHEN SUM(vd.debe)>=SUM(vd.haber) THEN SUM(vd.debe)-SUM(vd.haber) ELSE 0 END AS saldo_deudor,
-      CASE WHEN SUM(vd.haber)>SUM(vd.debe) THEN SUM(vd.haber)-SUM(vd.debe) ELSE 0 END AS saldo_acreedor,
-      COUNT(DISTINCT v.id) AS num_asientos
-    FROM voucher_detalles vd
-    JOIN vouchers v ON v.id = vd.voucher_id
-    LEFT JOIN plan_cuentas pc ON pc.codigo = ${cuentaExpr}
-    WHERE v.periodo >= substr(?,1,7) AND v.periodo <= substr(?,1,7)
-    GROUP BY ${cuentaExpr} ORDER BY ${cuentaExpr} ASC
-  `).all(desde, hasta);
+  const rows = reportesRepository.listarBalanceComprobacion(db, { dig }, desde, hasta);
 
   // Calcular CUENTAS (Activo/Pasivo), NATURALEZA (Pérdida/Ganancia), FUNCIÓN
   return rows.map(c => {
@@ -704,27 +657,13 @@ function queryEstadoSituacionFinanciera(desde, hasta) {
   // Helper: busca nombre de cuenta en plan_cuentas probando varios niveles
   const getNombre = (codigo) => {
     for (const len of [codigo.length, 2, 1]) {
-      const r = db.prepare('SELECT descripcion FROM plan_cuentas WHERE codigo = ? LIMIT 1').get(codigo.substring(0, len));
+      const r = reportesRepository.queryEstadoSituacionFinanciera_get_plan_cuentas(db, codigo.substring(0, len));
       if (r?.descripcion) return r.descripcion;
     }
     return `Cuenta ${codigo}`;
   };
 
-  const q = (elem) => db.prepare(`
-    SELECT substr(vd.cuenta,1,2) AS cuenta,
-      COALESCE(MAX(pc.descripcion), MAX(vd.nombre_cuenta), '') AS nombre_raw,
-      SUM(vd.debe) AS debe, SUM(vd.haber) AS haber,
-      SUM(vd.debe - vd.haber) AS saldo_deudor,
-      SUM(vd.haber - vd.debe) AS saldo_acreedor
-    FROM voucher_detalles vd
-    JOIN vouchers v ON v.id = vd.voucher_id
-    LEFT JOIN plan_cuentas pc ON pc.codigo = substr(vd.cuenta,1,2)
-    WHERE v.periodo >= substr(?,1,7) AND v.periodo <= substr(?,1,7)
-      AND substr(vd.cuenta,1,1) = ?
-    GROUP BY substr(vd.cuenta,1,2)
-    HAVING ABS(SUM(vd.debe - vd.haber)) > 0.005
-    ORDER BY substr(vd.cuenta,1,2)
-  `).all(desde, hasta, elem).map(r => ({ ...r, nombre: r.nombre_raw || getNombre(r.cuenta) }));
+  const q = (elem) => reportesRepository.queryEstadoSituacionFinanciera_all_voucher_detalles(db, desde, hasta, elem).map(r => ({ ...r, nombre: r.nombre_raw || getNombre(r.cuenta) }));
 
   // ACTIVO: elementos 1,2,3 → saldo deudor (debe - haber)
   const activoCorriente = q('1').map(r => ({ ...r, importe: r.saldo_deudor }));
@@ -739,16 +678,8 @@ function queryEstadoSituacionFinanciera(desde, hasta) {
   const patrimonio = q('5').map(r => ({ ...r, importe: r.saldo_acreedor }));
 
   // Resultado del ejercicio (ingresos - gastos)
-  const ingresos = db.prepare(`
-    SELECT COALESCE(SUM(vd.haber - vd.debe),0) AS total
-    FROM voucher_detalles vd JOIN vouchers v ON v.id = vd.voucher_id
-    WHERE v.periodo >= substr(?,1,7) AND v.periodo <= substr(?,1,7) AND substr(vd.cuenta,1,1) = '7'
-  `).get(desde, hasta)?.total || 0;
-  const gastos = db.prepare(`
-    SELECT COALESCE(SUM(vd.debe - vd.haber),0) AS total
-    FROM voucher_detalles vd JOIN vouchers v ON v.id = vd.voucher_id
-    WHERE v.periodo >= substr(?,1,7) AND v.periodo <= substr(?,1,7) AND substr(vd.cuenta,1,1) = '6'
-  `).get(desde, hasta)?.total || 0;
+  const ingresos = reportesRepository.queryEstadoSituacionFinanciera_get_voucher_detalles(db, desde, hasta)?.total || 0;
+  const gastos = reportesRepository.queryEstadoSituacionFinanciera_get_voucher_detalles_2(db, desde, hasta)?.total || 0;
   const resultadoEjercicio = ingresos - gastos;
 
   const totalActivoCorriente = activoCorriente.reduce((s, r) => s + r.importe, 0);
@@ -860,15 +791,15 @@ function tipoDocIdentidad(codigo) {
 function mapaEntidadesDocTipo() {
   const m = {};
   const cargar = (rows) => rows.forEach(r => { if (r.codigo) m[String(r.codigo)] = String(r.tipo_documento || ''); });
-  try { cargar(getGlobalDB().prepare('SELECT codigo, tipo_documento FROM entidades').all()); } catch (_) {}
-  try { cargar(getDB().prepare('SELECT codigo, tipo_documento FROM entidades').all()); } catch (_) {}
+  try { cargar(reportesRepository.mapaEntidadesDocTipo_all_entidades(getGlobalDB())); } catch (_) {}
+  try { cargar(reportesRepository.mapaEntidadesDocTipo_all_entidades_2(getDB())); } catch (_) {}
   return m;
 }
 
 // Mapa { codigo → descripción } de tipos de documento (FACTURA, BOLETA, etc.)
 function mapaTiposDocumento() {
   try {
-    const filas = getDB().prepare('SELECT codigo, descripcion FROM tipos_documentos').all();
+    const filas = reportesRepository.mapaTiposDocumento_all_tipos_documentos(getDB());
     const m = {};
     filas.forEach(f => { m[String(f.codigo)] = f.descripcion; });
     return m;
@@ -882,19 +813,7 @@ function mapaTiposDocumento() {
 function _mapaTributarioVentas(voucherIds) {
   if (!voucherIds.length) return new Map();
   const db = getDB();
-  const ph = voucherIds.map(() => '?').join(',');
-  const rows = db.prepare(`
-    SELECT ct.voucher_id, ct.fecha_emision, ct.fecha_vencimiento, ct.tipo_documento,
-      ct.serie, ct.numero, ct.tipo_doc_identidad, ct.numero_doc_identidad, ct.razon_social,
-      ct.moneda, ct.tipo_cambio, ct.ref_fecha, ct.ref_tipo_documento, ct.ref_serie, ct.ref_numero,
-      ct.car_sunat, ct.fuente, ct.requiere_revision,
-      cv.valor_exportacion, cv.base_gravada, cv.descuento_base, cv.igv, cv.descuento_igv,
-      cv.importe_exonerado, cv.importe_inafecto, cv.isc, cv.base_ivap, cv.ivap,
-      cv.icbper, cv.otros_tributos, cv.importe_total
-    FROM comprobantes_tributarios ct
-    JOIN comprobante_venta cv ON cv.comprobante_id = ct.id
-    WHERE ct.tipo_registro='VENTA' AND ct.voucher_id IN (${ph})
-  `).all(...voucherIds);
+  const rows = reportesRepository._mapaTributarioVentas_all_comprobantes_tributarios(db, ...voucherIds);
   return new Map(rows.map(r => [Number(r.voucher_id), r]));
 }
 
@@ -1113,19 +1032,7 @@ function construirPDFRegistroVentas(empresa, dataReg, desde, hasta, headerColor,
 function _mapaTributarioCompras(voucherIds) {
   if (!voucherIds.length) return new Map();
   const db = getDB();
-  const ph = voucherIds.map(() => '?').join(',');
-  const rows = db.prepare(`
-    SELECT ct.voucher_id, ct.fecha_emision, ct.fecha_vencimiento, ct.tipo_documento,
-      ct.serie, ct.numero, ct.tipo_doc_identidad, ct.numero_doc_identidad, ct.razon_social,
-      ct.moneda, ct.tipo_cambio, ct.ref_fecha, ct.ref_tipo_documento, ct.ref_serie, ct.ref_numero,
-      ct.car_sunat, ct.fuente, ct.requiere_revision,
-      cc.g1_base,cc.g1_igv,cc.g2_base,cc.g2_igv,cc.g3_base,cc.g3_igv,
-      cc.valor_no_gravado,cc.isc,cc.icbper,cc.otros_tributos,cc.importe_total,
-      cc.detraccion_numero,cc.detraccion_fecha,cc.marca_retencion
-    FROM comprobantes_tributarios ct
-    JOIN comprobante_compra cc ON cc.comprobante_id = ct.id
-    WHERE ct.tipo_registro='COMPRA' AND ct.voucher_id IN (${ph})
-  `).all(...voucherIds);
+  const rows = reportesRepository._mapaTributarioCompras_all_comprobantes_tributarios(db, ...voucherIds);
   return new Map(rows.map(r => [Number(r.voucher_id), r]));
 }
 
@@ -1380,17 +1287,9 @@ function previsualizar(params) {
 // ── Helper: obtener datos ESF basados en notas configuradas ──
 function _getESFNotasData(db, desde, hasta) {
   try {
-    const notas = db.prepare("SELECT * FROM config_notas_eeff WHERE categoria IN ('ACTIVO_CORRIENTE','ACTIVO_NO_CORRIENTE','PASIVO_CORRIENTE','PASIVO_NO_CORRIENTE','PATRIMONIO') ORDER BY categoria, orden, id").all();
+    const notas = reportesRepository._getESFNotasData_all_config_notas_eeff(db);
     if (!notas.length) return null;
-    const balances = db.prepare(`
-      SELECT vd.cuenta AS cuenta,
-        CASE WHEN SUM(vd.debe) >= SUM(vd.haber) THEN SUM(vd.debe) - SUM(vd.haber) ELSE 0 END AS saldo_deudor,
-        CASE WHEN SUM(vd.haber) > SUM(vd.debe) THEN SUM(vd.haber) - SUM(vd.debe) ELSE 0 END AS saldo_acreedor,
-        MAX(vd.nombre_cuenta) AS nombre_cuenta
-      FROM voucher_detalles vd JOIN vouchers v ON v.id = vd.voucher_id
-      WHERE v.periodo >= substr(?,1,7) AND v.periodo <= substr(?,1,7)
-      GROUP BY vd.cuenta
-    `).all(desde, hasta);
+    const balances = reportesRepository._getESFNotasData_all_voucher_detalles(db, desde, hasta);
     const balMap = new Map(balances.map(b => [String(b.cuenta || '').trim(), b]));
     const planMap = buildEffectivePlanMap();
     return notas.map(n => {
@@ -2229,14 +2128,8 @@ function resumenPeriodo(params) {
     const db = getDB();
     const { desde, hasta } = params;
     if (!desde || !hasta) return { success: false, error: 'Indique período.' };
-    const stats = db.prepare(`
-      SELECT COUNT(*) AS asientos, COALESCE(SUM(total_debe),0) AS totalDebe, COALESCE(SUM(total_haber),0) AS totalHaber
-      FROM vouchers WHERE periodo >= substr(?,1,7) AND periodo <= substr(?,1,7)
-    `).get(desde, hasta);
-    const origenes = db.prepare(`
-      SELECT origen, COUNT(*) AS cantidad FROM vouchers
-      WHERE periodo >= substr(?,1,7) AND periodo <= substr(?,1,7) GROUP BY origen ORDER BY cantidad DESC, origen DESC
-    `).all(desde, hasta);
+    const stats = reportesRepository.resumenPeriodo_get_vouchers(db, desde, hasta);
+    const origenes = reportesRepository.resumenPeriodo_all_vouchers(db, desde, hasta);
     return { success: true, asientos: stats.asientos, totalDebe: stats.totalDebe, totalHaber: stats.totalHaber,
       cuadre: Math.abs(stats.totalDebe - stats.totalHaber) < 0.01, origenes };
   } catch (err) { return { success: false, error: err.message }; }

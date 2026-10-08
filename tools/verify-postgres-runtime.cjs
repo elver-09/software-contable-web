@@ -21,7 +21,8 @@ const context = {
 };
 let passed = false,
   pgSnapshot,
-  backupFile;
+  backupFile,
+  globalBackupFile;
 function snapshot() {
   const report = require("../src/main/controllers/reportesController");
   return {
@@ -135,6 +136,7 @@ try {
         "empresa",
       );
       backupFile = backup.filePath;
+      globalBackupFile = require("../server/postgres/backups.cjs").backupDatabase("global").filePath;
       assert.ok(fs.statSync(backup.filePath).size > 0);
       const restored = require("../server/postgres/backups.cjs").importDatabase(
         {
@@ -163,6 +165,7 @@ if (passed) {
     const folder = path.join(workspace, "companies", companyId);
     fs.mkdirSync(folder, { recursive: true });
     fs.copyFileSync(backupFile, path.join(folder, "contable.db"));
+    fs.copyFileSync(globalBackupFile, path.join(workspace, "global_contable.db"));
     fs.writeFileSync(
       path.join(workspace, "companies.json"),
       JSON.stringify([

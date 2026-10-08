@@ -1,3 +1,4 @@
+const sireApiClientRepository = require('../../repositories/sireApiClientRepository.js');
 // src/main/services/sunat/sireApiClient.js
 // ─────────────────────────────────────────────────────────────────────────────
 // Cliente HTTP centralizado para las APIs SIRE de SUNAT.
@@ -83,7 +84,7 @@ function _log(ruc, tipo, periodo, operacion, metodo, endpoint, statusCode, succe
 function _getLocalContext() {
   try {
     const db = getDB();
-    const cfg = db.prepare('SELECT ruc FROM sire_config WHERE id = 1').get();
+    const cfg = sireApiClientRepository._getLocalContext_get_sire_config(db);
     return { ruc: cfg?.ruc || '' };
   } catch (_) {
     return { ruc: '' };

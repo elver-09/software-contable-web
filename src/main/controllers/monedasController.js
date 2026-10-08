@@ -1,3 +1,4 @@
+const monedasRepository = require('../repositories/monedasRepository.js');
 function _getGlobalDB() {
   // Carga diferida para que la lógica pura de fechas/BCRP pueda probarse sin
   // inicializar Electron ni abrir SQLite.
@@ -21,11 +22,7 @@ const DIAS_BUSQUEDA_ANTERIOR = 15;
 function getMonedas() {
   try {
     const db = _getGlobalDB();
-    return db.prepare(`
-      SELECT fecha, nombre, tipo_cambio, compra, venta, fuente, fecha_fuente
-      FROM monedas
-      ORDER BY fecha DESC, nombre ASC
-    `).all();
+    return monedasRepository.getMonedas_all_monedas(db);
   } catch (error) {
     console.error('Error obteniendo monedas:', error);
     return [];
@@ -64,24 +61,7 @@ function addMoneda(data) {
       return { success: false, error: 'El tipo de cambio debe ser mayor que cero.' };
     }
 
-    db.prepare(`
-      INSERT INTO monedas (fecha, nombre, tipo_cambio, compra, venta, fuente, fecha_fuente)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-      ON CONFLICT(fecha, nombre) DO UPDATE SET
-        tipo_cambio = excluded.tipo_cambio,
-        compra = excluded.compra,
-        venta = excluded.venta,
-        fuente = excluded.fuente,
-        fecha_fuente = excluded.fecha_fuente
-    `).run(
-      moneda.fecha,
-      moneda.nombre,
-      moneda.tipo_cambio,
-      moneda.compra,
-      moneda.venta,
-      moneda.fuente,
-      moneda.fecha_fuente
-    );
+    monedasRepository.addMoneda_run_monedas(db, moneda.fecha, moneda.nombre, moneda.tipo_cambio, moneda.compra, moneda.venta, moneda.fuente, moneda.fecha_fuente);
 
     return { success: true };
   } catch (error) {
@@ -103,17 +83,7 @@ function updateMoneda({ newData, oldData }) {
       return { success: false, error: 'El tipo de cambio debe ser mayor que cero.' };
     }
 
-    const info = db.prepare(`
-      UPDATE monedas
-      SET fecha = ?, nombre = ?, tipo_cambio = ?
-      WHERE fecha = ? AND nombre = ?
-    `).run(
-      newData.fecha,
-      nombre,
-      tipoCambio,
-      oldData.fecha,
-      oldData.nombre
-    );
+    const info = monedasRepository.updateMoneda_run_monedas(db, newData.fecha, nombre, tipoCambio, oldData.fecha, oldData.nombre);
 
     if (info.changes === 0) {
       return { success: false, error: 'El registro a actualizar no fue encontrado.' };
@@ -132,7 +102,7 @@ function updateMoneda({ newData, oldData }) {
 function deleteMoneda({ fecha, nombre }) {
   try {
     const db = _getGlobalDB();
-    const info = db.prepare(`DELETE FROM monedas WHERE fecha = ? AND nombre = ?`).run(fecha, nombre);
+    const info = monedasRepository.deleteMoneda_run_monedas(db, fecha, nombre);
     if (info.changes === 0) {
       return { success: false, error: 'El registro a eliminar no fue encontrado.' };
     }
@@ -365,19 +335,10 @@ async function fetchSUNATTxt() {
 function guardarLoteTiposCambio(registros) {
   const db = _getGlobalDB();
   const existentes = new Set(
-    db.prepare(`SELECT fecha || '|' || nombre AS clave FROM monedas WHERE nombre = ?`).all(MONEDA_USD).map(r => r.clave)
+    monedasRepository.guardarLoteTiposCambio_all_monedas(db, MONEDA_USD).map(r => r.clave)
   );
 
-  const upsert = db.prepare(`
-    INSERT INTO monedas (fecha, nombre, tipo_cambio, compra, venta, fuente, fecha_fuente)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-    ON CONFLICT(fecha, nombre) DO UPDATE SET
-      tipo_cambio = excluded.tipo_cambio,
-      compra = excluded.compra,
-      venta = excluded.venta,
-      fuente = excluded.fuente,
-      fecha_fuente = excluded.fecha_fuente
-  `);
+  const upsert = monedasRepository.guardarLoteTiposCambio_prepare_monedas(db);
 
   let insertados = 0;
   let actualizados = 0;
@@ -502,10 +463,7 @@ async function fetchAndSaveTipoCambio(fecha) {
   if (!resultado.success) return resultado;
 
   const db = _getGlobalDB();
-  const data = db.prepare(`
-    SELECT fecha, nombre, tipo_cambio, compra, venta, fuente, fecha_fuente
-    FROM monedas WHERE fecha = ? AND nombre = ?
-  `).get(fecha, MONEDA_USD);
+  const data = monedasRepository.fetchAndSaveTipoCambio_get_monedas(db, fecha, MONEDA_USD);
 
   return data
     ? { success: true, data: { ...data, fecha_solicitada: fecha, fecha_encontrada: data.fecha_fuente || fecha } }

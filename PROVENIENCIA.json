@@ -118,7 +118,7 @@
     {
       "archivo": "src/main/main.js",
       "sha256_escritorio": "92a906edaacd930f9999167edb8c3796d021bac5615fca5cfd02562d5b610f1c",
-      "sha256_web": "20776bdc846d5cd2814bbbd5d6fefc66a7e5f0ad1a56bcc28f61fa740f1d8141",
+      "sha256_web": "573e9fff6350c62fb27056027aa857bb3f60cdb2b8baea926d220e8a2fdce00d",
       "identico": false
     },
     {
@@ -130,7 +130,7 @@
     {
       "archivo": "src/main/database/db.js",
       "sha256_escritorio": "2c51a761eab7b7fcdd7b373af8e883439e6e35b28ffc25a444620471a2955361",
-      "sha256_web": "9bba83cca71377dbc6ae71f064606e7aa894546d4ddf1f8b16007184ed1d61c9",
+      "sha256_web": "e6bc53c601d97e39d49fe1bd03510056bbe7be146d300cc9d77a5e1cdf5da354",
       "identico": false
     },
     {
@@ -142,62 +142,62 @@
     {
       "archivo": "src/main/controllers/carteraController.js",
       "sha256_escritorio": "1f509b715773eacc1448ee4b924c906ebc577d92e46fcff207d6a985f88a4eff",
-      "sha256_web": "1f509b715773eacc1448ee4b924c906ebc577d92e46fcff207d6a985f88a4eff",
-      "identico": true
+      "sha256_web": "3535ee13a025aba3dae41c772e11ab48cb9ed50087d941948ce5d4b8ea2decac",
+      "identico": false
     },
     {
       "archivo": "src/main/controllers/entidadesController.js",
       "sha256_escritorio": "0ce54134bd1e9bf22f4854bd81ddc6bf11af4135ef2e5d80b1ee4a7713151b12",
-      "sha256_web": "0ce54134bd1e9bf22f4854bd81ddc6bf11af4135ef2e5d80b1ee4a7713151b12",
-      "identico": true
+      "sha256_web": "3f4eac7f53de17e10da1e3de0801ded103632f598e1ce530ebe93c1e4a79cd8c",
+      "identico": false
     },
     {
       "archivo": "src/main/controllers/tributarioController.js",
       "sha256_escritorio": "9d5417b90c225d80b4014ef2f1db4a6cf3e81d52ad95ca3d3ffe0a26a2255ad7",
-      "sha256_web": "9d5417b90c225d80b4014ef2f1db4a6cf3e81d52ad95ca3d3ffe0a26a2255ad7",
-      "identico": true
+      "sha256_web": "f594b8270bcf10c96a40c066a175c6d4d395c268c8e1cf823c77628669ebcb1b",
+      "identico": false
     },
     {
       "archivo": "src/main/controllers/dashboardController.js",
       "sha256_escritorio": "810fedb13944fad7c86067fa11c9b64a516c0bf044d262abb57622517090c158",
-      "sha256_web": "2846aa5d58248913848f3296670d600652c405d1706a954d87477e19998d4b78",
+      "sha256_web": "f4455382b44be6f390972db397a3fa9570da2406ecfa518af3bcb6816119309c",
       "identico": false
     },
     {
       "archivo": "src/main/controllers/tiposDocumentosController.js",
       "sha256_escritorio": "3274e2ffb051c079fc5f2cf89b819a33245d823327888ef81ce5ff2dad39eefe",
-      "sha256_web": "3274e2ffb051c079fc5f2cf89b819a33245d823327888ef81ce5ff2dad39eefe",
-      "identico": true
+      "sha256_web": "08554d9ff3392f0293f23c218d11248f3bdf195ce7ddd7dcb1638650194d1210",
+      "identico": false
     },
     {
       "archivo": "src/main/controllers/monedasController.js",
       "sha256_escritorio": "84bd5c84fbfa9d67df9df585c220ce12142a453bcab303911e08e202179e8d27",
-      "sha256_web": "84bd5c84fbfa9d67df9df585c220ce12142a453bcab303911e08e202179e8d27",
-      "identico": true
+      "sha256_web": "3e2ca2a01a9e142895db527c14ee3e2fc0f284ed3df2d72366eff7aa019fbec3",
+      "identico": false
     },
     {
       "archivo": "src/main/controllers/estadoResultadosController.js",
       "sha256_escritorio": "95d7e23bca5efd521ace403e9ba8e1df1a0133fa4d7d2d06ffeee1c98cf099f2",
-      "sha256_web": "95d7e23bca5efd521ace403e9ba8e1df1a0133fa4d7d2d06ffeee1c98cf099f2",
-      "identico": true
+      "sha256_web": "6c71a1138dc1ba5a3eccf8182445108457c3f987cf3b654162a07df81f882924",
+      "identico": false
     },
     {
       "archivo": "src/main/controllers/amarresController.js",
       "sha256_escritorio": "ccde21d38272d5eb97dd6d36d088c66a453c90f74d2bab6b1e2ecbf36862e2ca",
-      "sha256_web": "ccde21d38272d5eb97dd6d36d088c66a453c90f74d2bab6b1e2ecbf36862e2ca",
-      "identico": true
+      "sha256_web": "28c74a0af8595766ba07ac9caf3955c23d13231ef14a0c066710a2bae91ac756",
+      "identico": false
     },
     {
       "archivo": "src/main/controllers/voucherController.js",
       "sha256_escritorio": "876995c19a7680ec967d51c8a532323ed6eb2b7a8445e09243cb35edc6bdce3d",
-      "sha256_web": "876995c19a7680ec967d51c8a532323ed6eb2b7a8445e09243cb35edc6bdce3d",
-      "identico": true
+      "sha256_web": "88c2893985f6e68656b12d9c453f605eba88785e3dd99e6579e108aa696b4d0c",
+      "identico": false
     },
     {
       "archivo": "src/main/controllers/sireConfigController.js",
       "sha256_escritorio": "506505bc7b4b7a26d22e1c882766ebb3a06b033e8ac979475c4f4bc26c2aac58",
-      "sha256_web": "506505bc7b4b7a26d22e1c882766ebb3a06b033e8ac979475c4f4bc26c2aac58",
-      "identico": true
+      "sha256_web": "054f217b38187a9dd59895330173361b7fb13c8fc9303664edaf6c2520ee331c",
+      "identico": false
     },
     {
       "archivo": "src/main/controllers/sireController.js",
@@ -208,25 +208,25 @@
     {
       "archivo": "src/main/controllers/empresaController.js",
       "sha256_escritorio": "80096d9846d58bcff84e5a51d94f28626d4ff3261cd32c6e5f6796eb49b42876",
-      "sha256_web": "80096d9846d58bcff84e5a51d94f28626d4ff3261cd32c6e5f6796eb49b42876",
-      "identico": true
+      "sha256_web": "c9d490ff12ad0d1a5669f633708f7ed5a976bccee4636cf7156b7a80be6e11da",
+      "identico": false
     },
     {
       "archivo": "src/main/controllers/sireSunatController.js",
       "sha256_escritorio": "150ade8e6a212c6229e9fc2bc9dae5e1bc328e97dd4e2f4b4c66df226fad5edf",
-      "sha256_web": "d7a2804430805061ec96dad69e8306af389d11bd621af180faa3e475c5706864",
+      "sha256_web": "2428559c8bb53ccd1d7090b98da492fe239bab5a91a938e07f6816b0b8175cc3",
       "identico": false
     },
     {
       "archivo": "src/main/controllers/planCuentasController.js",
       "sha256_escritorio": "0d766d4827a99158674ca955656030164f7e4df683cf7cc92637ac9504ea3e57",
-      "sha256_web": "0d766d4827a99158674ca955656030164f7e4df683cf7cc92637ac9504ea3e57",
-      "identico": true
+      "sha256_web": "d7c2353564324e01f768bb2b03a847e50340944dfca57561b8a5a4655e8bb5df",
+      "identico": false
     },
     {
       "archivo": "src/main/controllers/reportesController.js",
       "sha256_escritorio": "f7ec063063545b4eb2061c4ec91957f1be1b4f4f9655e46ea89ef247e09bb90a",
-      "sha256_web": "c2e9e4519c314c0d530550eebec48005476894549a6531638dfca7f2d40caa1d",
+      "sha256_web": "ede2fb64795ac64a14c94889bffbce8b3860971a1075956970db74bcc5c4902a",
       "identico": false
     },
     {
@@ -250,14 +250,14 @@
     {
       "archivo": "src/main/services/sunat/sireApiClient.js",
       "sha256_escritorio": "3335f2bbc095322b07d6a472862ebe91134535aec077aa1b50068ce454ddab0e",
-      "sha256_web": "3335f2bbc095322b07d6a472862ebe91134535aec077aa1b50068ce454ddab0e",
-      "identico": true
+      "sha256_web": "eb4462f242cb366d1ede2868670df65fe421183aedc0f88076a16245250ea87b",
+      "identico": false
     },
     {
       "archivo": "src/main/services/sunat/sunatAuthService.js",
       "sha256_escritorio": "affa287b1d1f2bd78e26da5b38b372b619080991d4836d9773169882ee27f494",
-      "sha256_web": "affa287b1d1f2bd78e26da5b38b372b619080991d4836d9773169882ee27f494",
-      "identico": true
+      "sha256_web": "59f7ed29d5c8238df979ab9a259e9d173979b5009a2714388bc3fef895e8f780",
+      "identico": false
     },
     {
       "archivo": "src/main/services/sunat/sireVentasService.js",
@@ -274,8 +274,8 @@
     {
       "archivo": "src/main/services/sunat/sireTicketService.js",
       "sha256_escritorio": "f55f2b34aaa7ce34f38a6c7f9037122a6bf1c3b33b818291cce6f67232578ff6",
-      "sha256_web": "f55f2b34aaa7ce34f38a6c7f9037122a6bf1c3b33b818291cce6f67232578ff6",
-      "identico": true
+      "sha256_web": "084423d1b753a9df84168b04007856fdc7da478d05605735f5724481e554e7a8",
+      "identico": false
     },
     {
       "archivo": "src/main/services/sunat/sunatSecurityConfig.js",
@@ -298,8 +298,8 @@
     {
       "archivo": "src/main/services/catalogos/catalogoScope.js",
       "sha256_escritorio": "65d1d49a2ce9e5708707b36ff77c2154a76c306dbd102651e42987a139d14989",
-      "sha256_web": "65d1d49a2ce9e5708707b36ff77c2154a76c306dbd102651e42987a139d14989",
-      "identico": true
+      "sha256_web": "1a1492106cfb3d31b5614ee9abfb3f1fe61c18fd5c8f9332ce1a88af190c3c7e",
+      "identico": false
     },
     {
       "archivo": "src/main/database/migrations/global.js",
@@ -423,5 +423,6 @@
     }
   ],
   "motor_activo": "PostgreSQL de Supabase",
-  "infraestructura_postgres": "server/postgres"
+  "infraestructura_postgres": "server/postgres",
+  "acceso_datos": "src/main/repositories"
 }

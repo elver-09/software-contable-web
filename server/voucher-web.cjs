@@ -1,6 +1,7 @@
 const crypto = require("node:crypto");
 const { current } = require("./context.cjs");
 const { getDB } = require("../src/main/database/db");
+const requests = require("../src/main/repositories/webRequestsRepository");
 const hash = (v) =>
   crypto.createHash("sha256").update(JSON.stringify(v)).digest("hex");
 function version(v) {
@@ -41,14 +42,9 @@ function install(handlers) {
     if (!/^[a-f0-9-]{36}$/.test(request))
       throw Error("Identificador de solicitud inválido");
     const db = getDB();
-    db.exec(
-      "CREATE TABLE IF NOT EXISTS _web_requests (id TEXT PRIMARY KEY, hash TEXT NOT NULL, result TEXT NOT NULL)",
-    );
     return db.transaction(() => {
       const fingerprint = hash(data);
-      const previous = db
-        .prepare("SELECT * FROM _web_requests WHERE id=?")
-        .get(request);
+      const previous = requests.obtenerSolicitud(db, request);
       if (previous) {
         if (previous.hash !== fingerprint)
           throw Error("La solicitud ya existe con otros datos");
@@ -56,9 +52,7 @@ function install(handlers) {
       }
       const result = add({}, data);
       if (result.success)
-        db.prepare(
-          "INSERT INTO _web_requests (id,hash,result) VALUES (?,?,?)",
-        ).run(request, fingerprint, JSON.stringify(result));
+        requests.guardarSolicitud(db, request, fingerprint, JSON.stringify(result));
       return result;
     })();
   });

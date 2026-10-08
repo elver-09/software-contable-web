@@ -1,4 +1,5 @@
 'use strict';
+const estadoResultadosRepository = require('../repositories/estadoResultadosRepository.js');
 
 const { getDB } = require('../database/db');
 const planCuentasController = require('./planCuentasController');
@@ -18,20 +19,7 @@ function _normalizeNota(value) {
 }
 
 function _getNotas(db) {
-  return db.prepare(`
-    SELECT id, numero, nombre, bloque, cuentas, orden,
-           concepto_key, COALESCE(preestablecida,0) AS preestablecida
-    FROM config_notas_er
-    WHERE COALESCE(preestablecida,0)=1
-    ORDER BY CASE bloque
-      WHEN 'BRUTA' THEN 1
-      WHEN 'OPERATIVA' THEN 2
-      WHEN 'ANTES_FINANCIAMIENTO' THEN 3
-      WHEN 'ANTES_IMPUESTO' THEN 4
-      WHEN 'NETA' THEN 5
-      ELSE 99 END,
-      orden, id
-  `).all();
+  return estadoResultadosRepository._getNotas_all_config_notas_er(db);
 }
 
 function getConfig() {
@@ -75,10 +63,7 @@ function saveNota(data) {
     if (!id) return { success: false, error: 'Seleccione una nota preestablecida de la Configuración ER.' };
     if (!numero) return { success: false, error: 'El número de nota es obligatorio.' };
 
-    const current = db.prepare(`
-      SELECT id,numero,nombre,bloque,cuentas,orden,concepto_key,COALESCE(preestablecida,0) AS preestablecida
-      FROM config_notas_er WHERE id=?
-    `).get(id);
+    const current = estadoResultadosRepository.saveNota_get_config_notas_er(db, id);
     if (!current) return { success: false, error: 'La nota de Estado de Resultados ya no existe.' };
 
     const def = current.concepto_key ? ER_DEFAULT_BY_KEY[String(current.concepto_key)] : null;
@@ -111,11 +96,7 @@ function saveNota(data) {
       if (usadas.has(c)) return { success: false, error: `La cuenta ${c} ya está asignada a “${usadas.get(c)}”.` };
     }
 
-    db.prepare(`
-      UPDATE config_notas_er
-      SET numero=?, nombre=?, bloque=?, cuentas=?, orden=?, updated_at=CURRENT_TIMESTAMP
-      WHERE id=?
-    `).run(numero, def.nombre, def.bloque, JSON.stringify(cuentas), def.orden, id);
+    estadoResultadosRepository.saveNota_run_config_notas_er(db, numero, def.nombre, def.bloque, JSON.stringify(cuentas), def.orden, id);
     return { success: true, id };
   } catch (error) {
     if (/idx_config_notas_er_numero_unique|UNIQUE constraint failed/i.test(String(error.message || ''))) {
@@ -130,12 +111,12 @@ function deleteNota(idInput) {
     const db = getDB();
     const id = Number(idInput || 0);
     if (!id) return { success: false, error: 'Nota no válida.' };
-    const row = db.prepare('SELECT preestablecida FROM config_notas_er WHERE id=?').get(id);
+    const row = estadoResultadosRepository.deleteNota_get_config_notas_er(db, id);
     if (!row) return { success: false, error: 'La nota ya no existe.' };
     if (Number(row.preestablecida || 0) === 1) {
       return { success: false, error: 'Las notas base del Estado de Resultados son preestablecidas y no pueden eliminarse. Puede cambiar su número o sus cuentas.' };
     }
-    db.prepare('DELETE FROM config_notas_er WHERE id=?').run(id);
+    estadoResultadosRepository.deleteNota_run_config_notas_er(db, id);
     return { success: true };
   } catch (error) {
     return { success: false, error: error.message };
@@ -144,20 +125,7 @@ function deleteNota(idInput) {
 
 function _queryBalanceNaturaleza(desde, hasta) {
   const db = getDB();
-  const rows = db.prepare(`
-    SELECT vd.cuenta AS cuenta,
-      COALESCE(MAX(pc.descripcion), MAX(vd.nombre_cuenta), '') AS nombre,
-      SUM(vd.debe) AS sum_debe,
-      SUM(vd.haber) AS sum_haber,
-      CASE WHEN SUM(vd.debe)>=SUM(vd.haber) THEN SUM(vd.debe)-SUM(vd.haber) ELSE 0 END AS saldo_deudor,
-      CASE WHEN SUM(vd.haber)>SUM(vd.debe) THEN SUM(vd.haber)-SUM(vd.debe) ELSE 0 END AS saldo_acreedor
-    FROM voucher_detalles vd
-    JOIN vouchers v ON v.id = vd.voucher_id
-    LEFT JOIN plan_cuentas pc ON pc.codigo = vd.cuenta
-    WHERE v.periodo >= substr(?,1,7) AND v.periodo <= substr(?,1,7)
-    GROUP BY vd.cuenta
-    ORDER BY vd.cuenta
-  `).all(desde, hasta);
+  const rows = estadoResultadosRepository._queryBalanceNaturaleza_all_voucher_detalles(db, desde, hasta);
 
   return rows.map(r => {
     const elem = String(r.cuenta || '').charAt(0);

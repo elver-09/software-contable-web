@@ -1,3 +1,4 @@
+const entidadesRepository = require('../repositories/entidadesRepository.js');
 const {
   getCatalogContext,
   resolveWriteTarget,
@@ -38,10 +39,7 @@ function addEntidad(data) {
       };
     }
 
-    context.writeDb.prepare(`
-      INSERT INTO entidades (codigo, razon_social, tipo, tipo_documento)
-      VALUES (?, ?, ?, ?)
-    `).run(codigo, razonSocial, data.tipo || 'Cliente', data.tipo_documento || '');
+    entidadesRepository.addEntidad_run_entidades(context.writeDb, codigo, razonSocial, data.tipo || 'Cliente', data.tipo_documento || '');
 
     return { success: true, scope: context.writeScope };
   } catch (error) {
@@ -74,26 +72,15 @@ function updateEntidad(data) {
 
     if (context.hasCompany) {
       if (localRow) {
-        context.localDb.prepare(`
-          UPDATE entidades
-          SET codigo = ?, razon_social = ?, tipo = ?, tipo_documento = ?
-          WHERE codigo = ?
-        `).run(codigo, razonSocial, data.tipo || 'Cliente', td, oldCodigo);
+        entidadesRepository.updateEntidad_run_entidades(context.localDb, codigo, razonSocial, data.tipo || 'Cliente', td, oldCodigo);
         return { success: true, scope: 'Local', override: Boolean(globalRow) };
       }
 
-      context.localDb.prepare(`
-        INSERT INTO entidades (codigo, razon_social, tipo, tipo_documento)
-        VALUES (?, ?, ?, ?)
-      `).run(oldCodigo, razonSocial, data.tipo || 'Cliente', td);
+      entidadesRepository.updateEntidad_run_entidades_2(context.localDb, oldCodigo, razonSocial, data.tipo || 'Cliente', td);
       return { success: true, scope: 'Local', override: true, createdOverride: true };
     }
 
-    context.globalDb.prepare(`
-      UPDATE entidades
-      SET codigo = ?, razon_social = ?, tipo = ?, tipo_documento = ?
-      WHERE codigo = ?
-    `).run(codigo, razonSocial, data.tipo || 'Cliente', td, oldCodigo);
+    entidadesRepository.updateEntidad_run_entidades_3(context.globalDb, codigo, razonSocial, data.tipo || 'Cliente', td, oldCodigo);
     return { success: true, scope: 'Global' };
   } catch (error) {
     if (String(error.message).includes('UNIQUE')) return { success: false, error: 'El nuevo código ya está en uso.' };
@@ -110,7 +97,7 @@ function deleteEntidad(codigoInput) {
 
     if (context.hasCompany) {
       if (localRow) {
-        context.localDb.prepare('DELETE FROM entidades WHERE codigo = ?').run(codigo);
+        entidadesRepository.deleteEntidad_run_entidades(context.localDb, codigo);
         return {
           success: true,
           scope: 'Local',
@@ -130,7 +117,7 @@ function deleteEntidad(codigoInput) {
       return { success: false, error: 'El registro no existe.' };
     }
 
-    const info = context.globalDb.prepare('DELETE FROM entidades WHERE codigo = ?').run(codigo);
+    const info = entidadesRepository.deleteEntidad_run_entidades_2(context.globalDb, codigo);
     if (info.changes === 0) return { success: false, error: 'El registro no existe.' };
     return { success: true, scope: 'Global' };
   } catch (error) {
@@ -143,7 +130,7 @@ function importFromExcel(filePath, options = {}) {
     const xlsx = require('xlsx');
     const context = resolveWriteTarget(options.scope || 'Auto');
     const targetDb = context.writeDb;
-    
+
     const workbook = xlsx.readFile(filePath);
     const rows = xlsx.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { header: 1 });
     let headerRowIndex = -1, colCodigo = -1, colRazon = -1, colTipo = -1;
@@ -160,10 +147,10 @@ function importFromExcel(filePath, options = {}) {
     }
 
     if (headerRowIndex === -1) return { success: false, error: "No se encontraron las columnas (RUC/DNI y RAZÓN SOCIAL)." };
-    
+
     let imported = 0;
     let overrides = 0;
-    const insert = targetDb.prepare(`INSERT INTO entidades (codigo, razon_social, tipo, tipo_documento) VALUES (?, ?, ?, ?) ON CONFLICT(codigo) DO UPDATE SET razon_social=excluded.razon_social, tipo=excluded.tipo, tipo_documento=excluded.tipo_documento`);
+    const insert = entidadesRepository.importFromExcel_prepare_entidades(targetDb);
     // Detecta el tipo de documento de identidad por la longitud del código
     const detectarTipoDoc = (cod) => {
       const c = String(cod || '').replace(/\D/g, '');

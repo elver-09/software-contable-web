@@ -1,3 +1,4 @@
+const amarresRepository = require('../repositories/amarresRepository.js');
 // src/main/controllers/amarresController.js
 const { getDB } = require('../database/db');
 
@@ -46,12 +47,7 @@ function validarAmarre(a) {
 function getAmarres() {
   try {
     const db = getDB();
-    return db.prepare(`
-      SELECT id, nombre, tipo, prefijo, doc_tipo, moneda,
-             cuenta_igv, cuenta_igv_exo, cuenta_igv_ina, cuenta_destino, activo
-      FROM amarres_asistente
-      ORDER BY tipo ASC, LENGTH(prefijo) DESC, prefijo ASC
-    `).all();
+    return amarresRepository.getAmarres_all_amarres_asistente(db);
   } catch (error) {
     console.error("Error obteniendo amarres:", error);
     return [];
@@ -65,11 +61,7 @@ function addAmarre(data) {
     if (err) return { success: false, error: err };
 
     const db = getDB();
-    db.prepare(`
-      INSERT INTO amarres_asistente
-        (nombre, tipo, prefijo, doc_tipo, moneda, cuenta_igv, cuenta_igv_exo, cuenta_igv_ina, cuenta_destino, activo)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(a.nombre, a.tipo, a.prefijo, a.doc_tipo, a.moneda, a.cuenta_igv, a.cuenta_igv_exo, a.cuenta_igv_ina, a.cuenta_destino, a.activo);
+    amarresRepository.addAmarre_run_amarres_asistente(db, a.nombre, a.tipo, a.prefijo, a.doc_tipo, a.moneda, a.cuenta_igv, a.cuenta_igv_exo, a.cuenta_igv_ina, a.cuenta_destino, a.activo);
     return { success: true };
   } catch (error) {
     console.error("Error agregando amarre:", error);
@@ -85,12 +77,7 @@ function updateAmarre(data) {
     if (err) return { success: false, error: err };
 
     const db = getDB();
-    const info = db.prepare(`
-      UPDATE amarres_asistente
-      SET nombre = ?, tipo = ?, prefijo = ?, doc_tipo = ?, moneda = ?,
-          cuenta_igv = ?, cuenta_igv_exo = ?, cuenta_igv_ina = ?, cuenta_destino = ?, activo = ?
-      WHERE id = ?
-    `).run(a.nombre, a.tipo, a.prefijo, a.doc_tipo, a.moneda, a.cuenta_igv, a.cuenta_igv_exo, a.cuenta_igv_ina, a.cuenta_destino, a.activo, data.id);
+    const info = amarresRepository.updateAmarre_run_amarres_asistente(db, a.nombre, a.tipo, a.prefijo, a.doc_tipo, a.moneda, a.cuenta_igv, a.cuenta_igv_exo, a.cuenta_igv_ina, a.cuenta_destino, a.activo, data.id);
 
     if (info.changes === 0) return { success: false, error: "El amarre no existe." };
     return { success: true };
@@ -103,7 +90,7 @@ function updateAmarre(data) {
 function deleteAmarre(id) {
   try {
     const db = getDB();
-    const info = db.prepare('DELETE FROM amarres_asistente WHERE id = ?').run(id);
+    const info = amarresRepository.deleteAmarre_run_amarres_asistente(db, id);
     if (info.changes === 0) return { success: false, error: "El amarre no existe." };
     return { success: true };
   } catch (error) {

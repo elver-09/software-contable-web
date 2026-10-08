@@ -1,3 +1,4 @@
+const sireTicketServiceRepository = require('../../repositories/sireTicketServiceRepository.js');
 // src/main/services/sunat/sireTicketService.js
 // ─────────────────────────────────────────────────────────────────────────────
 // Servicio centralizado de consulta de tickets SIRE.
@@ -25,10 +26,7 @@ async function consultarTicket({ tipo, ticket, periodo }) {
       const db = getDB();
       const estado = r.data.codEstado || r.data.estado || 'DESCONOCIDO';
       const mensaje = r.data.desEstado || r.data.message || '';
-      db.prepare(`
-        UPDATE sire_operaciones SET estado = ?, mensaje = ?
-        WHERE ticket = ? AND tipo = ?
-      `).run(estado, mensaje, ticket, String(tipo).toUpperCase());
+      sireTicketServiceRepository.consultarTicket_run_sire_operaciones(db, estado, mensaje, ticket, String(tipo).toUpperCase());
     } catch (_) {}
   }
 
@@ -43,13 +41,8 @@ async function consultarTicket({ tipo, ticket, periodo }) {
 function getOperaciones({ tipo, periodo, limit } = {}) {
   try {
     const db = getDB();
-    let sql = 'SELECT * FROM sire_operaciones WHERE 1=1';
-    const params = [];
-    if (tipo)    { sql += ' AND tipo = ?'; params.push(String(tipo).toUpperCase()); }
-    if (periodo) { sql += ' AND periodo = ?'; params.push(periodo); }
-    sql += ' ORDER BY id DESC';
-    if (limit)   { sql += ' LIMIT ?'; params.push(limit); }
-    return db.prepare(sql).all(...params);
+
+    return sireTicketServiceRepository.getOperaciones_all_sire_operaciones(db, { tipo, periodo, limit });
   } catch (err) {
     console.error('sireTicketService.getOperaciones:', err.message);
     return [];
@@ -63,13 +56,8 @@ function getOperaciones({ tipo, periodo, limit } = {}) {
 function getLogs({ tipo, periodo, limit } = {}) {
   try {
     const db = getDB();
-    let sql = 'SELECT * FROM sire_logs WHERE 1=1';
-    const params = [];
-    if (tipo)    { sql += ' AND tipo = ?'; params.push(String(tipo).toUpperCase()); }
-    if (periodo) { sql += ' AND periodo = ?'; params.push(periodo); }
-    sql += ' ORDER BY id DESC';
-    if (limit)   { sql += ' LIMIT ?'; params.push(limit || 100); }
-    return db.prepare(sql).all(...params);
+
+    return sireTicketServiceRepository.getLogs_all_sire_logs(db, { tipo, periodo, limit });
   } catch (err) {
     console.error('sireTicketService.getLogs:', err.message);
     return [];

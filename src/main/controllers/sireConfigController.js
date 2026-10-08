@@ -1,3 +1,4 @@
+const sireConfigRepository = require('../repositories/sireConfigRepository.js');
 // src/main/controllers/sireConfigController.js
 // ─────────────────────────────────────────────────────────────────────────────
 // Gestión segura de credenciales SUNAT para SIRE API.
@@ -23,17 +24,7 @@ function _normalizeOfficialEndpoints(db) {
   // Aunque alguien haya alterado manualmente SQLite, dejamos persistidos los
   // valores oficiales. Los servicios de red, además, NO confían en estas columnas.
   try {
-    db.prepare(`
-      UPDATE sire_config
-         SET scope = ?, seguridad_base_url = ?, sire_base_url = ?
-       WHERE id = 1
-         AND (COALESCE(scope,'') <> ?
-          OR COALESCE(seguridad_base_url,'') <> ?
-          OR COALESCE(sire_base_url,'') <> ?)
-    `).run(
-      SUNAT_SCOPE, SUNAT_SECURITY_BASE_URL, SUNAT_SIRE_BASE_URL,
-      SUNAT_SCOPE, SUNAT_SECURITY_BASE_URL, SUNAT_SIRE_BASE_URL,
-    );
+    sireConfigRepository._normalizeOfficialEndpoints_run_sire_config(db, SUNAT_SCOPE, SUNAT_SECURITY_BASE_URL, SUNAT_SIRE_BASE_URL, SUNAT_SCOPE, SUNAT_SECURITY_BASE_URL, SUNAT_SIRE_BASE_URL);
   } catch (_) {}
 }
 
@@ -41,7 +32,7 @@ function getConfig() {
   try {
     const db = getDB();
     _normalizeOfficialEndpoints(db);
-    const row = db.prepare('SELECT * FROM sire_config WHERE id = 1').get();
+    const row = sireConfigRepository.getConfig_get_sire_config(db);
     const security = crypto.getSecurityInfo();
 
     if (!row) {
@@ -137,10 +128,7 @@ function saveConfig(data = {}) {
     const officialValidation = validateOfficialConfig(data);
     if (!officialValidation.ok) return { success: false, error: officialValidation.error };
 
-    const existing = db.prepare(`
-      SELECT id, clave_sol_enc, client_secret_enc
-      FROM sire_config WHERE id = 1
-    `).get();
+    const existing = sireConfigRepository.saveConfig_get_sire_config(db);
 
     const fields = {
       ruc: String(data.ruc).trim(),
@@ -176,23 +164,13 @@ function saveConfig(data = {}) {
     const keys = Object.keys(fields);
     const tx = db.transaction(() => {
       if (existing) {
-        const sets = keys.map(k => `${k} = ?`).join(', ');
-        db.prepare(`UPDATE sire_config SET ${sets}, updated_at = datetime('now','localtime') WHERE id = 1`)
-          .run(...keys.map(k => fields[k]));
+        sireConfigRepository.saveConfig_run_sire_config(db, { keys }, ...keys.map(k => fields[k]));
       } else {
-        const placeholders = keys.map(() => '?').join(', ');
-        db.prepare(`INSERT INTO sire_config (id, ${keys.join(', ')}) VALUES (1, ${placeholders})`)
-          .run(...keys.map(k => fields[k]));
+        sireConfigRepository.saveConfig_run_sire_config_2(db, { keys }, ...keys.map(k => fields[k]));
       }
 
       // Un token anterior deja de ser confiable si se cambió/regrabó configuración.
-      db.prepare(`
-        UPDATE sire_config
-           SET access_token_enc = NULL,
-               token_expires_at = NULL,
-               estado_conexion = 'CONFIGURADO'
-         WHERE id = 1
-      `).run();
+      sireConfigRepository.saveConfig_run_sire_config_3(db);
     });
     tx();
 

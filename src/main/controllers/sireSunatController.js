@@ -1,3 +1,4 @@
+const sireSunatRepository = require('../repositories/sireSunatRepository.js');
 // src/main/controllers/sireSunatController.js
 // ─────────────────────────────────────────────────────────────────────────────
 // Controlador de operaciones SIRE contra SUNAT API.
@@ -60,10 +61,7 @@ function _getArchivoDir(ruc, periodo, tipo) {
 function _registrarOperacion(tipo, periodo, operacion, ticket, estado, mensaje, archivoNombre, archivoPath) {
   try {
     const db = getDB();
-    db.prepare(`
-      INSERT INTO sire_operaciones (tipo, periodo, operacion, ticket, estado, archivo_nombre, archivo_path, mensaje)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(tipo, periodo, operacion, ticket || null, estado, archivoNombre || null, archivoPath || null, mensaje || null);
+    sireSunatRepository._registrarOperacion_run_sire_operaciones(db, tipo, periodo, operacion, ticket || null, estado, archivoNombre || null, archivoPath || null, mensaje || null);
   } catch (_) {}
 }
 
@@ -387,7 +385,7 @@ async function descargarArchivo({ tipo, nomArchivoReporte, codTipoArchivoReporte
   // FASE 7: Guardar el archivo — diálogo "Guardar como" para que el usuario elija
   try {
     const db = getDB();
-    const ruc = db.prepare('SELECT ruc FROM sire_config WHERE id = 1').get()?.ruc || '';
+    const ruc = sireSunatRepository.descargarArchivo_get_sire_config(db)?.ruc || '';
     const tipoUpper = tipoNormalizado;
     const nombre = nombreSeguro;
 
@@ -450,7 +448,7 @@ function listarArchivos({ tipo, periodo } = {}) {
     if (errPer) return { success: false, error: errPer, archivos: [] };
 
     const db = getDB();
-    const ruc = db.prepare('SELECT ruc FROM sire_config WHERE id = 1').get()?.ruc || '';
+    const ruc = sireSunatRepository.listarArchivos_get_sire_config(db)?.ruc || '';
     const dir = _getArchivoDir(ruc, periodo, tipoNormalizado);
     if (!fs.existsSync(dir)) return { success: true, archivos: [] };
     const archivos = fs.readdirSync(dir)

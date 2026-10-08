@@ -1,3 +1,4 @@
+const tiposDocumentosRepository = require('../repositories/tiposDocumentosRepository.js');
 const {
   getCatalogContext,
   resolveWriteTarget,
@@ -38,10 +39,7 @@ function addDocumento(data) {
       };
     }
 
-    context.writeDb.prepare(`
-      INSERT INTO tipos_documentos (codigo, descripcion)
-      VALUES (?, ?)
-    `).run(codigo, descripcion);
+    tiposDocumentosRepository.addDocumento_run_tipos_documentos(context.writeDb, codigo, descripcion);
     return { success: true, scope: context.writeScope };
   } catch (error) {
     console.error('Error agregando documento:', error);
@@ -75,26 +73,15 @@ function updateDocumento(data) {
 
     if (context.hasCompany) {
       if (localRow) {
-        context.localDb.prepare(`
-          UPDATE tipos_documentos
-          SET codigo = ?, descripcion = ?
-          WHERE codigo = ?
-        `).run(codigo, descripcion, oldCodigo);
+        tiposDocumentosRepository.updateDocumento_run_tipos_documentos(context.localDb, codigo, descripcion, oldCodigo);
         return { success: true, scope: 'Local', override: Boolean(globalRow) };
       }
 
-      context.localDb.prepare(`
-        INSERT INTO tipos_documentos (codigo, descripcion)
-        VALUES (?, ?)
-      `).run(oldCodigo, descripcion);
+      tiposDocumentosRepository.updateDocumento_run_tipos_documentos_2(context.localDb, oldCodigo, descripcion);
       return { success: true, scope: 'Local', override: true, createdOverride: true };
     }
 
-    context.globalDb.prepare(`
-      UPDATE tipos_documentos
-      SET codigo = ?, descripcion = ?
-      WHERE codigo = ?
-    `).run(codigo, descripcion, oldCodigo);
+    tiposDocumentosRepository.updateDocumento_run_tipos_documentos_3(context.globalDb, codigo, descripcion, oldCodigo);
     return { success: true, scope: 'Global' };
   } catch (error) {
     if (String(error.message).includes('UNIQUE')) return { success: false, error: 'El nuevo código ya está en uso.' };
@@ -113,7 +100,7 @@ function deleteDocumento(codigoInput) {
 
     if (context.hasCompany) {
       if (localRow) {
-        context.localDb.prepare('DELETE FROM tipos_documentos WHERE codigo = ?').run(codigo);
+        tiposDocumentosRepository.deleteDocumento_run_tipos_documentos(context.localDb, codigo);
         return {
           success: true,
           scope: 'Local',
@@ -133,7 +120,7 @@ function deleteDocumento(codigoInput) {
       return { success: false, error: 'El documento no existe.' };
     }
 
-    const info = context.globalDb.prepare('DELETE FROM tipos_documentos WHERE codigo = ?').run(codigo);
+    const info = tiposDocumentosRepository.deleteDocumento_run_tipos_documentos_2(context.globalDb, codigo);
     if (info.changes === 0) return { success: false, error: 'El documento no existe.' };
     return { success: true, scope: 'Global' };
   } catch (error) {
@@ -177,11 +164,7 @@ function importFromExcel(filePath, options = {}) {
 
     let imported = 0;
     let overrides = 0;
-    const insert = db.prepare(`
-      INSERT INTO tipos_documentos (codigo, descripcion)
-      VALUES (?, ?)
-      ON CONFLICT(codigo) DO UPDATE SET descripcion=excluded.descripcion
-    `);
+    const insert = tiposDocumentosRepository.importFromExcel_prepare_tipos_documentos(db);
 
     db.transaction((dataRows) => {
       for (let i = headerRowIndex + 1; i < dataRows.length; i++) {

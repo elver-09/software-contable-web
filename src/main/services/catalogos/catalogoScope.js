@@ -1,3 +1,4 @@
+const catalogoScopeRepository = require('../../repositories/catalogoScopeRepository.js');
 function _dbModule() {
   // Carga diferida: las funciones puras de política (merge/validación) pueden
   // probarse sin inicializar Electron ni better-sqlite3.
@@ -82,17 +83,17 @@ function getMergedCatalog(tableName) {
   }
 
   const { globalDb, localDb, hasCompany } = getCatalogContext();
-  const globalRows = globalDb.prepare(`SELECT * FROM ${tableName}`).all();
-  const localRows = localDb ? localDb.prepare(`SELECT * FROM ${tableName}`).all() : [];
+  const globalRows = catalogoScopeRepository.listarCatalogo(globalDb, { tableName });
+  const localRows = localDb ? catalogoScopeRepository.listarCatalogo(localDb, { tableName }) : [];
   return mergeCatalogRows(globalRows, localRows, hasCompany);
 }
 
 function existsByCode(db, tableName, codigo) {
-  return Boolean(db.prepare(`SELECT 1 FROM ${tableName} WHERE codigo = ?`).get(codigo));
+  return Boolean(catalogoScopeRepository.existeCodigo(db, { tableName }, codigo));
 }
 
 function getByCode(db, tableName, codigo) {
-  return db.prepare(`SELECT * FROM ${tableName} WHERE codigo = ?`).get(codigo) || null;
+  return catalogoScopeRepository.obtenerPorCodigo(db, { tableName }, codigo) || null;
 }
 
 function validateRename({ context, tableName, oldCodigo, newCodigo, localExists, globalExists }) {
