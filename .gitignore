@@ -1,3 +1,69 @@
+# Dependencias y archivos generados
 node_modules/
-data/
+.pnpm-store/
+.cache/
+dist/
+build/
+out/
+release/
+coverage/
+*.tsbuildinfo
+
+# Configuración privada: las plantillas sin secretos sí se versionan
 .env
+.env.*
+.env~
+!.env.example
+!.env.*.example
+*.key
+*.pem
+*.p12
+*.pfx
+.sire-master-key
+
+# Contabilidad, copias, exportaciones y archivos de trabajo
+data/
+/backups/
+/respaldos/
+/exports/
+/downloads/
+/tmp/
+/temp/
+/work/
+*.db
+*.db-*
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+*.bak
+*.zip
+*.pdf
+*.xls
+*.xlsx
+*.csv
+*.tsv
+
+# Registros y cachés de herramientas
+*.log
+logs/
+supabase/.temp/
+supabase/.branches/
+
+# Archivos del sistema y del editor
+.DS_Store
+._*
+Thumbs.db
+Desktop.ini
+*.swp
+*.swo
+*~
+
+# Capturas locales de revisión; conservar los íconos de assets/
+/Conexion-Supabase.png
+/Validacion-voucher.jpg
+/Vista-previa.jpg
+
+# Se incluyen src/, server/, tools/, las migraciones SQL, las pruebas,
+# package.json, pnpm-lock.yaml, .env.example y la documentación.
+# server/postgres/supabase-ca.crt es un certificado público, no una clave privada.

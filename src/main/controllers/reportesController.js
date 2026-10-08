@@ -498,7 +498,8 @@ function construirPDFLibroMayor(empresa, cuentas, desde, hasta, headerColor) {
 
 function queryBalanceComprobacion(desde, hasta, nivel) {
   const db = getDB();
-  const dig = nivel || 0;
+  const dig = Number(nivel || 0);
+  if (!Number.isInteger(dig) || dig < 0 || dig > 32) throw new Error('Nivel de cuenta inválido');
   const cuentaExpr = dig > 0 ? `substr(vd.cuenta, 1, ${dig})` : 'vd.cuenta';
   const rows = db.prepare(`
     SELECT ${cuentaExpr} AS cuenta,
@@ -2234,7 +2235,7 @@ function resumenPeriodo(params) {
     `).get(desde, hasta);
     const origenes = db.prepare(`
       SELECT origen, COUNT(*) AS cantidad FROM vouchers
-      WHERE periodo >= substr(?,1,7) AND periodo <= substr(?,1,7) GROUP BY origen ORDER BY cantidad DESC
+      WHERE periodo >= substr(?,1,7) AND periodo <= substr(?,1,7) GROUP BY origen ORDER BY cantidad DESC, origen DESC
     `).all(desde, hasta);
     return { success: true, asientos: stats.asientos, totalDebe: stats.totalDebe, totalHaber: stats.totalHaber,
       cuadre: Math.abs(stats.totalDebe - stats.totalHaber) < 0.01, origenes };

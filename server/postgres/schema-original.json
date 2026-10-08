@@ -1,0 +1,2333 @@
+{
+  "empresa": [
+    {
+      "name": "config_empresa",
+      "sql": "CREATE TABLE config_empresa (\n          id INTEGER PRIMARY KEY CHECK (id = 1),\n          nombre_comercial TEXT,\n          ruc TEXT UNIQUE,\n          direccion_fiscal TEXT,\n          telefono TEXT,\n          correo TEXT,\n          periodo_contable TEXT,\n          logo TEXT\n        )",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "nombre_comercial",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "ruc",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "direccion_fiscal",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "telefono",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "correo",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "periodo_contable",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "logo",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "sqlite_autoindex_config_empresa_1",
+          "unique": 1,
+          "origin": "u",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 2,
+              "name": "ruc"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [],
+      "seed": []
+    },
+    {
+      "name": "plan_cuentas",
+      "sql": "CREATE TABLE plan_cuentas (\n          id INTEGER PRIMARY KEY AUTOINCREMENT,\n          codigo TEXT UNIQUE NOT NULL,\n          descripcion TEXT NOT NULL,\n          tipo TEXT,\n          nivel INTEGER\n        , estado_resultados INTEGER NOT NULL DEFAULT 0)",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "codigo",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "descripcion",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "tipo",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "nivel",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "estado_resultados",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": "0",
+          "pk": 0
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "sqlite_autoindex_plan_cuentas_1",
+          "unique": 1,
+          "origin": "u",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 1,
+              "name": "codigo"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [],
+      "seed": []
+    },
+    {
+      "name": "tipos_documentos",
+      "sql": "CREATE TABLE tipos_documentos (\n          id INTEGER PRIMARY KEY AUTOINCREMENT,\n          codigo TEXT UNIQUE NOT NULL,\n          descripcion TEXT NOT NULL\n        )",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "codigo",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "descripcion",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "sqlite_autoindex_tipos_documentos_1",
+          "unique": 1,
+          "origin": "u",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 1,
+              "name": "codigo"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [],
+      "seed": []
+    },
+    {
+      "name": "entidades",
+      "sql": "CREATE TABLE entidades (\n          id INTEGER PRIMARY KEY AUTOINCREMENT,\n          codigo TEXT UNIQUE NOT NULL,\n          razon_social TEXT NOT NULL,\n          tipo TEXT NOT NULL,\n          tipo_documento TEXT DEFAULT ''\n        )",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "codigo",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "razon_social",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "tipo",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "tipo_documento",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": "''",
+          "pk": 0
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "sqlite_autoindex_entidades_1",
+          "unique": 1,
+          "origin": "u",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 1,
+              "name": "codigo"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [],
+      "seed": []
+    },
+    {
+      "name": "amarres_asistente",
+      "sql": "CREATE TABLE amarres_asistente (\n          id             INTEGER PRIMARY KEY AUTOINCREMENT,\n          nombre         TEXT    NOT NULL,\n          tipo           TEXT    NOT NULL,\n          prefijo        TEXT    NOT NULL,\n          doc_tipo       TEXT    DEFAULT '',\n          cuenta_igv     TEXT,\n          cuenta_igv_exo TEXT,\n          cuenta_igv_ina TEXT,\n          cuenta_destino TEXT    NOT NULL,\n          moneda         TEXT    DEFAULT 'PEN',\n          activo         INTEGER NOT NULL DEFAULT 1\n        )",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "nombre",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "tipo",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "prefijo",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "doc_tipo",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": "''",
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "cuenta_igv",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "cuenta_igv_exo",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "cuenta_igv_ina",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "cuenta_destino",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "moneda",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": "'PEN'",
+          "pk": 0
+        },
+        {
+          "cid": 10,
+          "name": "activo",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": "1",
+          "pk": 0
+        }
+      ],
+      "indexes": [],
+      "foreignKeys": [],
+      "seed": [
+        {
+          "id": 1,
+          "nombre": "Compras (gasto + IGV crédito fiscal)",
+          "tipo": "COMPRA",
+          "prefijo": "6",
+          "doc_tipo": "",
+          "cuenta_igv": "40111",
+          "cuenta_igv_exo": null,
+          "cuenta_igv_ina": null,
+          "cuenta_destino": "4212",
+          "moneda": "PEN",
+          "activo": 1
+        },
+        {
+          "id": 2,
+          "nombre": "Ventas (ingreso + IGV débito fiscal)",
+          "tipo": "VENTA",
+          "prefijo": "7",
+          "doc_tipo": "",
+          "cuenta_igv": "40111",
+          "cuenta_igv_exo": null,
+          "cuenta_igv_ina": null,
+          "cuenta_destino": "1212",
+          "moneda": "PEN",
+          "activo": 1
+        }
+      ]
+    },
+    {
+      "name": "voucher_detalles",
+      "sql": "CREATE TABLE voucher_detalles (\n          id            INTEGER PRIMARY KEY AUTOINCREMENT,\n          voucher_id    INTEGER NOT NULL,\n          cuenta        TEXT    NOT NULL,\n          nombre_cuenta TEXT,\n          debe          REAL    DEFAULT 0,\n          haber         REAL    DEFAULT 0,\n          moneda        TEXT    DEFAULT 'PEN',\n          tc            REAL    DEFAULT 1,\n          equivalente   REAL    DEFAULT 0,\n          doc_tipo      TEXT,\n          doc_numero    TEXT,\n          fecha_doc     TEXT,\n          fecha_venc    TEXT,\n          codigo        TEXT,\n          razon_social  TEXT,\n          glosa         TEXT\n        )",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "voucher_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "cuenta",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "nombre_cuenta",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "debe",
+          "type": "REAL",
+          "notnull": 0,
+          "dflt_value": "0",
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "haber",
+          "type": "REAL",
+          "notnull": 0,
+          "dflt_value": "0",
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "moneda",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": "'PEN'",
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "tc",
+          "type": "REAL",
+          "notnull": 0,
+          "dflt_value": "1",
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "equivalente",
+          "type": "REAL",
+          "notnull": 0,
+          "dflt_value": "0",
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "doc_tipo",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 10,
+          "name": "doc_numero",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 11,
+          "name": "fecha_doc",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 12,
+          "name": "fecha_venc",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 13,
+          "name": "codigo",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 14,
+          "name": "razon_social",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 15,
+          "name": "glosa",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "idx_vd_doc_numero",
+          "unique": 0,
+          "origin": "c",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 10,
+              "name": "doc_numero"
+            }
+          ]
+        },
+        {
+          "seq": 1,
+          "name": "idx_vd_cuenta",
+          "unique": 0,
+          "origin": "c",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 2,
+              "name": "cuenta"
+            }
+          ]
+        },
+        {
+          "seq": 2,
+          "name": "idx_vd_voucher_id",
+          "unique": 0,
+          "origin": "c",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 1,
+              "name": "voucher_id"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [],
+      "seed": []
+    },
+    {
+      "name": "vouchers",
+      "sql": "CREATE TABLE vouchers (\n      id             INTEGER PRIMARY KEY AUTOINCREMENT,\n      origen         TEXT    NOT NULL,\n      numero_voucher INTEGER NOT NULL DEFAULT 0,\n      fecha          TEXT    NOT NULL,\n      periodo        TEXT    NOT NULL DEFAULT '',\n      glosa_cabecera TEXT,\n      total_debe     REAL    DEFAULT 0,\n      total_haber    REAL    DEFAULT 0,\n      fecha_creacion TEXT    DEFAULT (datetime('now','localtime'))\n    )",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "origen",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "numero_voucher",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": "0",
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "fecha",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "periodo",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": "''",
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "glosa_cabecera",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "total_debe",
+          "type": "REAL",
+          "notnull": 0,
+          "dflt_value": "0",
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "total_haber",
+          "type": "REAL",
+          "notnull": 0,
+          "dflt_value": "0",
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "fecha_creacion",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": "datetime('now','localtime')",
+          "pk": 0
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "idx_vouchers_fecha",
+          "unique": 0,
+          "origin": "c",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 3,
+              "name": "fecha"
+            }
+          ]
+        },
+        {
+          "seq": 1,
+          "name": "idx_vouchers_origen_periodo",
+          "unique": 0,
+          "origin": "c",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 1,
+              "name": "origen"
+            },
+            {
+              "seqno": 1,
+              "cid": 4,
+              "name": "periodo"
+            }
+          ]
+        },
+        {
+          "seq": 2,
+          "name": "idx_vouchers_periodo",
+          "unique": 0,
+          "origin": "c",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 4,
+              "name": "periodo"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [],
+      "seed": []
+    },
+    {
+      "name": "comprobantes_tributarios",
+      "sql": "CREATE TABLE comprobantes_tributarios (\n          id                    INTEGER PRIMARY KEY AUTOINCREMENT,\n          voucher_id            INTEGER NOT NULL UNIQUE,\n          tipo_registro         TEXT NOT NULL CHECK (tipo_registro IN ('VENTA','COMPRA')),\n          fecha_emision         TEXT,\n          fecha_vencimiento     TEXT,\n          tipo_documento        TEXT,\n          serie                 TEXT,\n          numero                TEXT,\n          tipo_doc_identidad    TEXT,\n          numero_doc_identidad  TEXT,\n          razon_social          TEXT,\n          moneda                TEXT DEFAULT 'PEN',\n          tipo_cambio           REAL DEFAULT 1,\n          ref_fecha             TEXT,\n          ref_tipo_documento    TEXT,\n          ref_serie             TEXT,\n          ref_numero            TEXT,\n          car_sunat             TEXT,\n          fuente                TEXT NOT NULL DEFAULT 'MANUAL',\n          requiere_revision     INTEGER NOT NULL DEFAULT 0,\n          created_at            TEXT DEFAULT (datetime('now','localtime')),\n          updated_at            TEXT DEFAULT (datetime('now','localtime'))\n        )",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "voucher_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "tipo_registro",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "fecha_emision",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "fecha_vencimiento",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "tipo_documento",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "serie",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "numero",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "tipo_doc_identidad",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "numero_doc_identidad",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 10,
+          "name": "razon_social",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 11,
+          "name": "moneda",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": "'PEN'",
+          "pk": 0
+        },
+        {
+          "cid": 12,
+          "name": "tipo_cambio",
+          "type": "REAL",
+          "notnull": 0,
+          "dflt_value": "1",
+          "pk": 0
+        },
+        {
+          "cid": 13,
+          "name": "ref_fecha",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 14,
+          "name": "ref_tipo_documento",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 15,
+          "name": "ref_serie",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 16,
+          "name": "ref_numero",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 17,
+          "name": "car_sunat",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 18,
+          "name": "fuente",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": "'MANUAL'",
+          "pk": 0
+        },
+        {
+          "cid": 19,
+          "name": "requiere_revision",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": "0",
+          "pk": 0
+        },
+        {
+          "cid": 20,
+          "name": "created_at",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": "datetime('now','localtime')",
+          "pk": 0
+        },
+        {
+          "cid": 21,
+          "name": "updated_at",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": "datetime('now','localtime')",
+          "pk": 0
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "idx_ct_revision",
+          "unique": 0,
+          "origin": "c",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 19,
+              "name": "requiere_revision"
+            }
+          ]
+        },
+        {
+          "seq": 1,
+          "name": "idx_ct_documento",
+          "unique": 0,
+          "origin": "c",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 2,
+              "name": "tipo_registro"
+            },
+            {
+              "seqno": 1,
+              "cid": 5,
+              "name": "tipo_documento"
+            },
+            {
+              "seqno": 2,
+              "cid": 6,
+              "name": "serie"
+            },
+            {
+              "seqno": 3,
+              "cid": 7,
+              "name": "numero"
+            }
+          ]
+        },
+        {
+          "seq": 2,
+          "name": "idx_ct_tipo_fecha",
+          "unique": 0,
+          "origin": "c",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 2,
+              "name": "tipo_registro"
+            },
+            {
+              "seqno": 1,
+              "cid": 3,
+              "name": "fecha_emision"
+            }
+          ]
+        },
+        {
+          "seq": 3,
+          "name": "sqlite_autoindex_comprobantes_tributarios_1",
+          "unique": 1,
+          "origin": "u",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 1,
+              "name": "voucher_id"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [],
+      "seed": []
+    },
+    {
+      "name": "comprobante_venta",
+      "sql": "CREATE TABLE comprobante_venta (\n          comprobante_id        INTEGER PRIMARY KEY,\n          valor_exportacion     REAL DEFAULT 0,\n          base_gravada          REAL DEFAULT 0,\n          descuento_base        REAL DEFAULT 0,\n          igv                   REAL DEFAULT 0,\n          descuento_igv         REAL DEFAULT 0,\n          importe_exonerado     REAL DEFAULT 0,\n          importe_inafecto      REAL DEFAULT 0,\n          isc                   REAL DEFAULT 0,\n          base_ivap             REAL DEFAULT 0,\n          ivap                  REAL DEFAULT 0,\n          icbper                REAL DEFAULT 0,\n          otros_tributos        REAL DEFAULT 0,\n          importe_total         REAL DEFAULT 0\n        )",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "comprobante_id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "valor_exportacion",
+          "type": "REAL",
+          "notnull": 0,
+          "dflt_value": "0",
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "base_gravada",
+          "type": "REAL",
+          "notnull": 0,
+          "dflt_value": "0",
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "descuento_base",
+          "type": "REAL",
+          "notnull": 0,
+          "dflt_value": "0",
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "igv",
+          "type": "REAL",
+          "notnull": 0,
+          "dflt_value": "0",
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "descuento_igv",
+          "type": "REAL",
+          "notnull": 0,
+          "dflt_value": "0",
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "importe_exonerado",
+          "type": "REAL",
+          "notnull": 0,
+          "dflt_value": "0",
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "importe_inafecto",
+          "type": "REAL",
+          "notnull": 0,
+          "dflt_value": "0",
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "isc",
+          "type": "REAL",
+          "notnull": 0,
+          "dflt_value": "0",
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "base_ivap",
+          "type": "REAL",
+          "notnull": 0,
+          "dflt_value": "0",
+          "pk": 0
+        },
+        {
+          "cid": 10,
+          "name": "ivap",
+          "type": "REAL",
+          "notnull": 0,
+          "dflt_value": "0",
+          "pk": 0
+        },
+        {
+          "cid": 11,
+          "name": "icbper",
+          "type": "REAL",
+          "notnull": 0,
+          "dflt_value": "0",
+          "pk": 0
+        },
+        {
+          "cid": 12,
+          "name": "otros_tributos",
+          "type": "REAL",
+          "notnull": 0,
+          "dflt_value": "0",
+          "pk": 0
+        },
+        {
+          "cid": 13,
+          "name": "importe_total",
+          "type": "REAL",
+          "notnull": 0,
+          "dflt_value": "0",
+          "pk": 0
+        }
+      ],
+      "indexes": [],
+      "foreignKeys": [],
+      "seed": []
+    },
+    {
+      "name": "comprobante_compra",
+      "sql": "CREATE TABLE comprobante_compra (\n          comprobante_id        INTEGER PRIMARY KEY,\n          g1_base               REAL DEFAULT 0,\n          g1_igv                REAL DEFAULT 0,\n          g2_base               REAL DEFAULT 0,\n          g2_igv                REAL DEFAULT 0,\n          g3_base               REAL DEFAULT 0,\n          g3_igv                REAL DEFAULT 0,\n          valor_no_gravado      REAL DEFAULT 0,\n          isc                   REAL DEFAULT 0,\n          icbper                REAL DEFAULT 0,\n          otros_tributos        REAL DEFAULT 0,\n          importe_total         REAL DEFAULT 0,\n          detraccion_numero     TEXT,\n          detraccion_fecha      TEXT,\n          marca_retencion       TEXT\n        )",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "comprobante_id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "g1_base",
+          "type": "REAL",
+          "notnull": 0,
+          "dflt_value": "0",
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "g1_igv",
+          "type": "REAL",
+          "notnull": 0,
+          "dflt_value": "0",
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "g2_base",
+          "type": "REAL",
+          "notnull": 0,
+          "dflt_value": "0",
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "g2_igv",
+          "type": "REAL",
+          "notnull": 0,
+          "dflt_value": "0",
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "g3_base",
+          "type": "REAL",
+          "notnull": 0,
+          "dflt_value": "0",
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "g3_igv",
+          "type": "REAL",
+          "notnull": 0,
+          "dflt_value": "0",
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "valor_no_gravado",
+          "type": "REAL",
+          "notnull": 0,
+          "dflt_value": "0",
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "isc",
+          "type": "REAL",
+          "notnull": 0,
+          "dflt_value": "0",
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "icbper",
+          "type": "REAL",
+          "notnull": 0,
+          "dflt_value": "0",
+          "pk": 0
+        },
+        {
+          "cid": 10,
+          "name": "otros_tributos",
+          "type": "REAL",
+          "notnull": 0,
+          "dflt_value": "0",
+          "pk": 0
+        },
+        {
+          "cid": 11,
+          "name": "importe_total",
+          "type": "REAL",
+          "notnull": 0,
+          "dflt_value": "0",
+          "pk": 0
+        },
+        {
+          "cid": 12,
+          "name": "detraccion_numero",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 13,
+          "name": "detraccion_fecha",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 14,
+          "name": "marca_retencion",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "indexes": [],
+      "foreignKeys": [],
+      "seed": []
+    },
+    {
+      "name": "sire_config",
+      "sql": "CREATE TABLE sire_config (\n          id INTEGER PRIMARY KEY CHECK (id = 1),\n          ruc TEXT,\n          usuario_sol TEXT,\n          clave_sol_enc TEXT,\n          client_id TEXT,\n          client_secret_enc TEXT,\n          scope TEXT DEFAULT 'https://api-sire.sunat.gob.pe',\n          seguridad_base_url TEXT DEFAULT 'https://api-seguridad.sunat.gob.pe',\n          sire_base_url TEXT DEFAULT 'https://api-sire.sunat.gob.pe',\n          access_token_enc TEXT,\n          token_expires_at TEXT,\n          estado_conexion TEXT DEFAULT 'NO_CONFIGURADO',\n          updated_at TEXT DEFAULT (datetime('now','localtime')),\n          cuenta_gasto TEXT DEFAULT '',\n          cuenta_ingreso TEXT DEFAULT '',\n          cuenta_igv_compras TEXT DEFAULT '',\n          cuenta_igv_ventas TEXT DEFAULT '',\n          cuenta_cxp TEXT DEFAULT '',\n          cuenta_cxc TEXT DEFAULT ''\n        )",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "ruc",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "usuario_sol",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "clave_sol_enc",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "client_id",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "client_secret_enc",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "scope",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": "'https://api-sire.sunat.gob.pe'",
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "seguridad_base_url",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": "'https://api-seguridad.sunat.gob.pe'",
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "sire_base_url",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": "'https://api-sire.sunat.gob.pe'",
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "access_token_enc",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 10,
+          "name": "token_expires_at",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 11,
+          "name": "estado_conexion",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": "'NO_CONFIGURADO'",
+          "pk": 0
+        },
+        {
+          "cid": 12,
+          "name": "updated_at",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": "datetime('now','localtime')",
+          "pk": 0
+        },
+        {
+          "cid": 13,
+          "name": "cuenta_gasto",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": "''",
+          "pk": 0
+        },
+        {
+          "cid": 14,
+          "name": "cuenta_ingreso",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": "''",
+          "pk": 0
+        },
+        {
+          "cid": 15,
+          "name": "cuenta_igv_compras",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": "''",
+          "pk": 0
+        },
+        {
+          "cid": 16,
+          "name": "cuenta_igv_ventas",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": "''",
+          "pk": 0
+        },
+        {
+          "cid": 17,
+          "name": "cuenta_cxp",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": "''",
+          "pk": 0
+        },
+        {
+          "cid": 18,
+          "name": "cuenta_cxc",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": "''",
+          "pk": 0
+        }
+      ],
+      "indexes": [],
+      "foreignKeys": [],
+      "seed": [
+        {
+          "id": 1,
+          "ruc": null,
+          "usuario_sol": null,
+          "clave_sol_enc": null,
+          "client_id": null,
+          "client_secret_enc": null,
+          "scope": "https://api-sire.sunat.gob.pe",
+          "seguridad_base_url": "https://api-seguridad.sunat.gob.pe",
+          "sire_base_url": "https://api-sire.sunat.gob.pe",
+          "access_token_enc": null,
+          "token_expires_at": null,
+          "estado_conexion": "NO_CONFIGURADO",
+          "updated_at": "2026-10-08 01:47:45",
+          "cuenta_gasto": "",
+          "cuenta_ingreso": "",
+          "cuenta_igv_compras": "",
+          "cuenta_igv_ventas": "",
+          "cuenta_cxp": "",
+          "cuenta_cxc": ""
+        }
+      ]
+    },
+    {
+      "name": "sire_operaciones",
+      "sql": "CREATE TABLE sire_operaciones (\n          id INTEGER PRIMARY KEY AUTOINCREMENT,\n          tipo TEXT NOT NULL,\n          periodo TEXT NOT NULL,\n          operacion TEXT NOT NULL,\n          ticket TEXT,\n          estado TEXT,\n          archivo_nombre TEXT,\n          archivo_path TEXT,\n          mensaje TEXT,\n          created_at TEXT DEFAULT (datetime('now','localtime'))\n        )",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "tipo",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "periodo",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "operacion",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "ticket",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "estado",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "archivo_nombre",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "archivo_path",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "mensaje",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "created_at",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": "datetime('now','localtime')",
+          "pk": 0
+        }
+      ],
+      "indexes": [],
+      "foreignKeys": [],
+      "seed": []
+    },
+    {
+      "name": "sire_logs",
+      "sql": "CREATE TABLE sire_logs (\n          id INTEGER PRIMARY KEY AUTOINCREMENT,\n          fecha TEXT DEFAULT (datetime('now','localtime')),\n          ruc TEXT,\n          tipo TEXT,\n          periodo TEXT,\n          operacion TEXT,\n          metodo TEXT,\n          endpoint TEXT,\n          status_code INTEGER,\n          success INTEGER,\n          mensaje TEXT\n        )",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "fecha",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": "datetime('now','localtime')",
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "ruc",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "tipo",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "periodo",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "operacion",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "metodo",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "endpoint",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "status_code",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "success",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 10,
+          "name": "mensaje",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "indexes": [],
+      "foreignKeys": [],
+      "seed": []
+    },
+    {
+      "name": "config_notas_eeff",
+      "sql": "CREATE TABLE config_notas_eeff (\n          id INTEGER PRIMARY KEY AUTOINCREMENT,\n          numero TEXT NOT NULL,\n          nombre TEXT NOT NULL,\n          categoria TEXT NOT NULL,\n          cuentas TEXT NOT NULL DEFAULT '[]',\n          orden INTEGER DEFAULT 0\n        )",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "numero",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "nombre",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "categoria",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "cuentas",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": "'[]'",
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "orden",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": "0",
+          "pk": 0
+        }
+      ],
+      "indexes": [],
+      "foreignKeys": [],
+      "seed": []
+    },
+    {
+      "name": "config_estado_resultados",
+      "sql": "CREATE TABLE config_estado_resultados (\n          rubro TEXT PRIMARY KEY,\n          nota_numero TEXT DEFAULT '',\n          cuentas TEXT NOT NULL DEFAULT '[]',\n          orden INTEGER NOT NULL DEFAULT 0\n        )",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "rubro",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "nota_numero",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": "''",
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "cuentas",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": "'[]'",
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "orden",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": "0",
+          "pk": 0
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "sqlite_autoindex_config_estado_resultados_1",
+          "unique": 1,
+          "origin": "pk",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "rubro"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [],
+      "seed": []
+    },
+    {
+      "name": "config_notas_er",
+      "sql": "CREATE TABLE config_notas_er (\n          id INTEGER PRIMARY KEY AUTOINCREMENT,\n          numero TEXT NOT NULL DEFAULT '',\n          nombre TEXT NOT NULL,\n          bloque TEXT NOT NULL,\n          cuentas TEXT NOT NULL DEFAULT '[]',\n          orden INTEGER NOT NULL DEFAULT 0,\n          created_at TEXT DEFAULT CURRENT_TIMESTAMP,\n          updated_at TEXT DEFAULT CURRENT_TIMESTAMP\n        , concepto_key TEXT DEFAULT NULL, preestablecida INTEGER NOT NULL DEFAULT 0)",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "numero",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": "''",
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "nombre",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "bloque",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "cuentas",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": "'[]'",
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "orden",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": "0",
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "created_at",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": "CURRENT_TIMESTAMP",
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "updated_at",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": "CURRENT_TIMESTAMP",
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "concepto_key",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": "NULL",
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "preestablecida",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": "0",
+          "pk": 0
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "idx_config_notas_er_numero_unique",
+          "unique": 1,
+          "origin": "c",
+          "partial": 1,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": -2,
+              "name": null
+            }
+          ]
+        },
+        {
+          "seq": 1,
+          "name": "idx_config_notas_er_concepto_unique",
+          "unique": 1,
+          "origin": "c",
+          "partial": 1,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 8,
+              "name": "concepto_key"
+            }
+          ]
+        },
+        {
+          "seq": 2,
+          "name": "idx_config_notas_er_bloque_orden",
+          "unique": 0,
+          "origin": "c",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 3,
+              "name": "bloque"
+            },
+            {
+              "seqno": 1,
+              "cid": 5,
+              "name": "orden"
+            },
+            {
+              "seqno": 2,
+              "cid": 0,
+              "name": "id"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [],
+      "seed": [
+        {
+          "id": 1,
+          "numero": "Nota 1",
+          "nombre": "Ingresos por ventas (operacionales)",
+          "bloque": "BRUTA",
+          "cuentas": "[]",
+          "orden": 10,
+          "created_at": "2026-10-08 06:47:45",
+          "updated_at": "2026-10-08 06:47:45",
+          "concepto_key": "VENTAS_OPERACIONALES",
+          "preestablecida": 1
+        },
+        {
+          "id": 2,
+          "numero": "Nota 2",
+          "nombre": "Costo de ventas o servicios",
+          "bloque": "BRUTA",
+          "cuentas": "[]",
+          "orden": 20,
+          "created_at": "2026-10-08 06:47:45",
+          "updated_at": "2026-10-08 06:47:45",
+          "concepto_key": "COSTO_VENTAS",
+          "preestablecida": 1
+        },
+        {
+          "id": 3,
+          "numero": "Nota 3",
+          "nombre": "Gastos de ventas",
+          "bloque": "OPERATIVA",
+          "cuentas": "[]",
+          "orden": 10,
+          "created_at": "2026-10-08 06:47:45",
+          "updated_at": "2026-10-08 06:47:45",
+          "concepto_key": "GASTOS_VENTAS",
+          "preestablecida": 1
+        },
+        {
+          "id": 4,
+          "numero": "Nota 4",
+          "nombre": "Gastos administrativos",
+          "bloque": "OPERATIVA",
+          "cuentas": "[]",
+          "orden": 20,
+          "created_at": "2026-10-08 06:47:45",
+          "updated_at": "2026-10-08 06:47:45",
+          "concepto_key": "GASTOS_ADMINISTRATIVOS",
+          "preestablecida": 1
+        },
+        {
+          "id": 5,
+          "numero": "Nota 5",
+          "nombre": "Gastos de investigación y desarrollo",
+          "bloque": "OPERATIVA",
+          "cuentas": "[]",
+          "orden": 30,
+          "created_at": "2026-10-08 06:47:45",
+          "updated_at": "2026-10-08 06:47:45",
+          "concepto_key": "GASTOS_INVESTIGACION",
+          "preestablecida": 1
+        },
+        {
+          "id": 6,
+          "numero": "Nota 6",
+          "nombre": "Ganancia / Pérdida por venta de activo fijo (PPE)",
+          "bloque": "OPERATIVA",
+          "cuentas": "[]",
+          "orden": 40,
+          "created_at": "2026-10-08 06:47:45",
+          "updated_at": "2026-10-08 06:47:45",
+          "concepto_key": "RESULTADO_VENTA_PPE",
+          "preestablecida": 1
+        },
+        {
+          "id": 7,
+          "numero": "Nota 7",
+          "nombre": "Ganancia / Pérdida por diferencia de cambio",
+          "bloque": "OPERATIVA",
+          "cuentas": "[]",
+          "orden": 50,
+          "created_at": "2026-10-08 06:47:45",
+          "updated_at": "2026-10-08 06:47:45",
+          "concepto_key": "DIF_CAMBIO_OPERATIVA",
+          "preestablecida": 1
+        },
+        {
+          "id": 8,
+          "numero": "Nota 8",
+          "nombre": "Ingresos por depósitos a plazo",
+          "bloque": "ANTES_FINANCIAMIENTO",
+          "cuentas": "[]",
+          "orden": 10,
+          "created_at": "2026-10-08 06:47:45",
+          "updated_at": "2026-10-08 06:47:45",
+          "concepto_key": "INGRESOS_DEPOSITOS",
+          "preestablecida": 1
+        },
+        {
+          "id": 9,
+          "numero": "Nota 9",
+          "nombre": "Valorización de inversiones financieras",
+          "bloque": "ANTES_FINANCIAMIENTO",
+          "cuentas": "[]",
+          "orden": 20,
+          "created_at": "2026-10-08 06:47:45",
+          "updated_at": "2026-10-08 06:47:45",
+          "concepto_key": "VALORIZACION_INVERSIONES",
+          "preestablecida": 1
+        },
+        {
+          "id": 10,
+          "numero": "Nota 10",
+          "nombre": "Ingreso por arrendamiento de propiedades de inversión",
+          "bloque": "ANTES_FINANCIAMIENTO",
+          "cuentas": "[]",
+          "orden": 30,
+          "created_at": "2026-10-08 06:47:45",
+          "updated_at": "2026-10-08 06:47:45",
+          "concepto_key": "ARRENDAMIENTO_PROPIEDADES_INVERSION",
+          "preestablecida": 1
+        },
+        {
+          "id": 11,
+          "numero": "Nota 11",
+          "nombre": "Valor razonable de propiedades de inversión",
+          "bloque": "ANTES_FINANCIAMIENTO",
+          "cuentas": "[]",
+          "orden": 40,
+          "created_at": "2026-10-08 06:47:45",
+          "updated_at": "2026-10-08 06:47:45",
+          "concepto_key": "VALOR_RAZONABLE_PROPIEDADES",
+          "preestablecida": 1
+        },
+        {
+          "id": 12,
+          "numero": "Nota 12",
+          "nombre": "Participación en resultados de asociadas",
+          "bloque": "ANTES_FINANCIAMIENTO",
+          "cuentas": "[]",
+          "orden": 50,
+          "created_at": "2026-10-08 06:47:45",
+          "updated_at": "2026-10-08 06:47:45",
+          "concepto_key": "PARTICIPACION_ASOCIADAS",
+          "preestablecida": 1
+        },
+        {
+          "id": 13,
+          "numero": "Nota 13",
+          "nombre": "Ganancia / Pérdida por diferencia de cambio",
+          "bloque": "ANTES_FINANCIAMIENTO",
+          "cuentas": "[]",
+          "orden": 60,
+          "created_at": "2026-10-08 06:47:45",
+          "updated_at": "2026-10-08 06:47:45",
+          "concepto_key": "DIF_CAMBIO_NO_OPERATIVA",
+          "preestablecida": 1
+        },
+        {
+          "id": 14,
+          "numero": "Nota 14",
+          "nombre": "Intereses por préstamos bancarios",
+          "bloque": "ANTES_IMPUESTO",
+          "cuentas": "[]",
+          "orden": 10,
+          "created_at": "2026-10-08 06:47:45",
+          "updated_at": "2026-10-08 06:47:45",
+          "concepto_key": "INTERESES_PRESTAMOS",
+          "preestablecida": 1
+        },
+        {
+          "id": 15,
+          "numero": "Nota 15",
+          "nombre": "Intereses por arrendamientos",
+          "bloque": "ANTES_IMPUESTO",
+          "cuentas": "[]",
+          "orden": 20,
+          "created_at": "2026-10-08 06:47:45",
+          "updated_at": "2026-10-08 06:47:45",
+          "concepto_key": "INTERESES_ARRENDAMIENTOS",
+          "preestablecida": 1
+        },
+        {
+          "id": 16,
+          "numero": "Nota 16",
+          "nombre": "Efecto del valor presente de provisiones",
+          "bloque": "ANTES_IMPUESTO",
+          "cuentas": "[]",
+          "orden": 30,
+          "created_at": "2026-10-08 06:47:45",
+          "updated_at": "2026-10-08 06:47:45",
+          "concepto_key": "VALOR_PRESENTE_PROVISIONES",
+          "preestablecida": 1
+        },
+        {
+          "id": 17,
+          "numero": "Nota 17",
+          "nombre": "Ganancia / Pérdida por diferencia de cambio",
+          "bloque": "ANTES_IMPUESTO",
+          "cuentas": "[]",
+          "orden": 40,
+          "created_at": "2026-10-08 06:47:45",
+          "updated_at": "2026-10-08 06:47:45",
+          "concepto_key": "DIF_CAMBIO_FINANCIERA",
+          "preestablecida": 1
+        },
+        {
+          "id": 18,
+          "numero": "Nota 18",
+          "nombre": "Impuesto a las ganancias",
+          "bloque": "NETA",
+          "cuentas": "[]",
+          "orden": 10,
+          "created_at": "2026-10-08 06:47:45",
+          "updated_at": "2026-10-08 06:47:45",
+          "concepto_key": "IMPUESTO_GANANCIAS",
+          "preestablecida": 1
+        }
+      ]
+    }
+  ],
+  "global": [
+    {
+      "name": "plan_cuentas",
+      "sql": "CREATE TABLE plan_cuentas (\n          id INTEGER PRIMARY KEY AUTOINCREMENT,\n          codigo TEXT UNIQUE NOT NULL,\n          descripcion TEXT NOT NULL,\n          tipo TEXT,\n          nivel INTEGER\n        , estado_resultados INTEGER NOT NULL DEFAULT 0)",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "codigo",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "descripcion",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "tipo",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "nivel",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "estado_resultados",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": "0",
+          "pk": 0
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "sqlite_autoindex_plan_cuentas_1",
+          "unique": 1,
+          "origin": "u",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 1,
+              "name": "codigo"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [],
+      "seed": []
+    },
+    {
+      "name": "tipos_documentos",
+      "sql": "CREATE TABLE tipos_documentos (\n          id INTEGER PRIMARY KEY AUTOINCREMENT,\n          codigo TEXT UNIQUE NOT NULL,\n          descripcion TEXT NOT NULL\n        )",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "codigo",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "descripcion",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "sqlite_autoindex_tipos_documentos_1",
+          "unique": 1,
+          "origin": "u",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 1,
+              "name": "codigo"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [],
+      "seed": []
+    },
+    {
+      "name": "entidades",
+      "sql": "CREATE TABLE entidades (\n          id INTEGER PRIMARY KEY AUTOINCREMENT,\n          codigo TEXT UNIQUE NOT NULL,\n          razon_social TEXT NOT NULL,\n          tipo TEXT NOT NULL,\n          tipo_documento TEXT DEFAULT ''\n        )",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "codigo",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "razon_social",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "tipo",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "tipo_documento",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": "''",
+          "pk": 0
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "sqlite_autoindex_entidades_1",
+          "unique": 1,
+          "origin": "u",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 1,
+              "name": "codigo"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [],
+      "seed": []
+    },
+    {
+      "name": "monedas",
+      "sql": "CREATE TABLE monedas (\n          fecha TEXT NOT NULL,\n          nombre TEXT NOT NULL,\n          tipo_cambio REAL NOT NULL,\n          compra REAL DEFAULT 0,\n          venta REAL DEFAULT 0,\n          fuente TEXT DEFAULT '',\n          fecha_fuente TEXT DEFAULT '',\n          PRIMARY KEY (fecha, nombre)\n        )",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "fecha",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "nombre",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 2
+        },
+        {
+          "cid": 2,
+          "name": "tipo_cambio",
+          "type": "REAL",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "compra",
+          "type": "REAL",
+          "notnull": 0,
+          "dflt_value": "0",
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "venta",
+          "type": "REAL",
+          "notnull": 0,
+          "dflt_value": "0",
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "fuente",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": "''",
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "fecha_fuente",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": "''",
+          "pk": 0
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "sqlite_autoindex_monedas_1",
+          "unique": 1,
+          "origin": "pk",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "fecha"
+            },
+            {
+              "seqno": 1,
+              "cid": 1,
+              "name": "nombre"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [],
+      "seed": []
+    }
+  ]
+}

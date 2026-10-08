@@ -7,7 +7,7 @@ COPY --chown=node:node src ./src
 COPY --chown=node:node server ./server
 RUN mkdir -p /app/data && chown node:node /app/data
 USER node
-ENV NODE_ENV=production HOST=0.0.0.0 PORT=4180 ANSORITO_DATA_DIR=/app/data
+ENV NODE_ENV=production HOST=0.0.0.0 PORT=4180 ANSORITO_DATA_DIR=/app/data ANSORITO_DB_ENGINE=postgres PG_CA_FILE=/app/server/postgres/supabase-ca.crt
 VOLUME ["/app/data"]
 EXPOSE 4180
 CMD ["node", "server/index.cjs"]

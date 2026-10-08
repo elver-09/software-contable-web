@@ -3,17 +3,28 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "node server/index.cjs",
+    "start": "node --env-file-if-exists=.env server/index.cjs",
     "test": "node --test server/*.test.cjs",
     "test:original": "node src/tests/run-tests.js",
-    "start:configured": "node --env-file=.env server/index.cjs"
+    "start:configured": "node --env-file=.env server/index.cjs",
+    "db:schema": "node tools/build-postgres-schema.cjs",
+    "db:migrate": "node --env-file=.env tools/apply-postgres-schema.cjs",
+    "test:postgres": "node --test server/postgres/*.test.cjs",
+    "db:import-local": "node --env-file=.env tools/import-local-workspaces.cjs",
+    "test:runtime": "node --env-file=.env tools/verify-postgres-runtime.cjs",
+    "start:demo": "node server/index.cjs",
+    "test:storage": "node --env-file=.env tools/verify-storage-policy.cjs"
   },
   "engines": {
     "node": ">=24.0.0"
   },
   "dependencies": {
     "pdfmake": "0.3.9",
+    "pg": "^8.23.1",
     "xlsx": "0.18.5",
     "xlsx-js-style": "1.2.0"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.3.16"
   }
 }

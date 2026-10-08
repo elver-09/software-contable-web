@@ -494,7 +494,7 @@ function getDashboardData() {
     FROM vouchers
     WHERE periodo = ?
     GROUP BY origen
-    ORDER BY cantidad DESC
+    ORDER BY cantidad DESC, origen DESC
   `).all(periodoActual);
 
   // ─────────────────────────────────────────────────────────────────────────────

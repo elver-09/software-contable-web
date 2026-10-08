@@ -1,3 +1,30 @@
+# Validación de PostgreSQL — 8 de octubre de 2026
+
+Motor activo: PostgreSQL de Supabase. Catálogo global y una empresa de la versión web anterior importados, sin sobrescribir las copias locales.
+
+## Evidencia
+
+- 45 pruebas originales y 25 pruebas web pasan.
+- 5 pruebas del esquema y repositorio PostgreSQL pasan: campos/semillas, aislamiento, relaciones, certificados y creación de empresas.
+- 3 pruebas de traducción de consultas pasan. Total automatizado: **78 pruebas**.
+- Comparación contra PostgreSQL real: resultados idénticos a SQLite para nueve familias de reportes, cartera, dashboard y documentos pendientes usando un conjunto controlado de asientos.
+- Verificación real de creación/búsqueda de asientos, totales, correlativos, respaldo SQLite, reimportación y creación posterior sin colisión de identificadores.
+- Verificación real de Storage: bucket privado; acceso del propietario permitido, acceso de otro usuario y anónimo bloqueado. Los objetos de esa prueba se revirtieron.
+- Verificación en Chrome: ingreso real, apertura de la empresa migrada y dashboard conectado a PostgreSQL. La consulta automática del tipo de cambio guardó datos correctamente.
+- Respaldo solicitado desde Chrome: objeto real de 167.936 bytes guardado en Storage privado, descargado al equipo y comprobado con `integrity_check = ok`.
+
+Las pruebas reales usan una cuenta confirmada existente y transacciones revertidas. Las semillas del escritorio conservan sus identificadores. Los empates de cantidades por origen se ordenan de forma explícita para obtener el mismo orden en ambos motores.
+
+## Límites
+
+Esta evidencia cubre los casos de prueba, no certifica equivalencia integral de toda contabilidad posible. Faltan datos históricos reales del escritorio, validación de todos los formatos PDF/Excel, escenarios completos del asistente, SIRE con credenciales y respuestas reales, pruebas de volumen/carga y recuperación ante fallos. Los archivos SIRE históricos solo existentes en el escritorio requieren traslado separado; los generados en la web se sincronizan con Storage.
+
+El alojamiento público y las copias automáticas siguen pendientes. La interfaz se comprueba en el navegador por separado. El escritorio original permanece intacto.
+
+---
+
+## Evidencia anterior de la adaptación web (SQLite)
+
 # Validación de la conversión web
 
 Fecha: 7 de octubre de 2026. Estado: base completa de módulos disponible para revisión local; producción y equivalencia integral pendientes.

@@ -130,7 +130,7 @@
     {
       "archivo": "src/main/database/db.js",
       "sha256_escritorio": "2c51a761eab7b7fcdd7b373af8e883439e6e35b28ffc25a444620471a2955361",
-      "sha256_web": "2566e40256b4646e3f9a5faf58f3964b8cdeb42362df49809620816a7be25097",
+      "sha256_web": "9bba83cca71377dbc6ae71f064606e7aa894546d4ddf1f8b16007184ed1d61c9",
       "identico": false
     },
     {
@@ -160,8 +160,8 @@
     {
       "archivo": "src/main/controllers/dashboardController.js",
       "sha256_escritorio": "810fedb13944fad7c86067fa11c9b64a516c0bf044d262abb57622517090c158",
-      "sha256_web": "810fedb13944fad7c86067fa11c9b64a516c0bf044d262abb57622517090c158",
-      "identico": true
+      "sha256_web": "2846aa5d58248913848f3296670d600652c405d1706a954d87477e19998d4b78",
+      "identico": false
     },
     {
       "archivo": "src/main/controllers/tiposDocumentosController.js",
@@ -226,7 +226,7 @@
     {
       "archivo": "src/main/controllers/reportesController.js",
       "sha256_escritorio": "f7ec063063545b4eb2061c4ec91957f1be1b4f4f9655e46ea89ef247e09bb90a",
-      "sha256_web": "f6693d7838e95752cf02e6aec8cd3b74bc85e12c61bac6968ad5ffac37ecb97e",
+      "sha256_web": "c2e9e4519c314c0d530550eebec48005476894549a6531638dfca7f2d40caa1d",
       "identico": false
     },
     {
@@ -421,5 +421,7 @@
       "sha256_web": "3e9b423b0d540d0e313fe52c74f3935fef903be0ac598e244f4f314b4f5e0429",
       "identico": true
     }
-  ]
+  ],
+  "motor_activo": "PostgreSQL de Supabase",
+  "infraestructura_postgres": "server/postgres"
 }
