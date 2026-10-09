@@ -11,6 +11,8 @@ contextBridge.exposeInMainWorld('api', {
     conectarRutaDirecta: (ruta) => ipcRenderer.invoke('empresa:conectar-directa', ruta),
 
     // --- DATOS INTERNOS DE LA EMPRESA ACTIVA ---
+    getPeriodoTrabajo: () => ipcRenderer.invoke('empresa:get-periodo'),
+    setPeriodoTrabajo: (data) => ipcRenderer.invoke('empresa:set-periodo', data),
     getEmpresaInfo: () => ipcRenderer.invoke('empresa:get-info'),
     updateEmpresaInfo: (data) => ipcRenderer.invoke('empresa:update-info', data),
 

@@ -18,4 +18,8 @@ function prepararGuardadoPerfil(db) {
         logo=excluded.logo
     `);
 }
-module.exports = { obtenerPerfil, prepararGuardadoPerfil };
+function guardarPeriodo(db, periodo) {
+  return db.prepare(`INSERT INTO config_empresa (id, periodo_contable) VALUES (1, ?)
+    ON CONFLICT(id) DO UPDATE SET periodo_contable=excluded.periodo_contable`).run(periodo);
+}
+module.exports = { obtenerPerfil, prepararGuardadoPerfil, guardarPeriodo };

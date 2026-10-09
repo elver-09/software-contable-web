@@ -1,6 +1,6 @@
 # Ansorito web con Supabase
 
-La instancia configurada utiliza PostgreSQL de Supabase para la contabilidad, Supabase Auth para el ingreso y el bucket privado `ansorito-files` para los archivos. Se conservan la interfaz, los 15 controladores y las 73 operaciones del escritorio. El programa original permanece en `/Volumes/Elver-DSC/ELVER/Software-Contable/`.
+La instancia configurada utiliza PostgreSQL de Supabase para la contabilidad, Supabase Auth para el ingreso y el bucket privado `ansorito-files` para los archivos. Se conservan la interfaz, los 15 controladores y las 73 operaciones del escritorio, más dos operaciones para guardar y consultar el período de trabajo. El programa original permanece en `/Volumes/Elver-DSC/ELVER/Software-Contable/`.
 
 ## Organización
 
@@ -80,3 +80,13 @@ Estas pruebas generan datos temporales y los revierten. La comparación real pro
 El servidor actual solo está disponible en este equipo. Publicarlo requiere alojar Node detrás de HTTPS y configurar las variables privadas. Supabase almacena datos y archivos, pero no aloja este servidor Node. Las sesiones y referencias están en memoria: se requiere afinidad de sesiones para más de una instancia o sustituir ese almacenamiento. Todavía no se configuraron copias automáticas, recuperación operativa ni el alojamiento público. Mantener el escritorio hasta validar casos reales y SIRE con credenciales autorizadas.
 
 En Editar Registros, el detalle tributario se presenta como resumen. Las operaciones simples en PEN con base, IGV (4011) y contrapartida identificables (42 en compras, 12 en ventas) sincronizan sus importes al editar las líneas, conservando la clasificación original. Las distribuciones mixtas, monedas extranjeras o cambios de cuentas/documento requieren revisión manual en «Datos especiales y clasificación tributaria». Activar la edición manual mantiene la marca de revisión; las referencias y detracciones se conservan. El guardado sigue exigiendo cuadre y consistencia tributaria.
+
+El Balance de Comprobación traslada ambos lados de los saldos patrimoniales (elementos 1 a 5) a sus columnas de Cuentas, incluyendo la cuenta 40 cuando tiene saldo deudor. Pantalla, PDF y Excel comparten el mismo cálculo. La clasificación de gastos/ingresos y la configuración del Estado de Situación Financiera siguen sus reglas propias.
+
+## Período de trabajo
+
+Debajo de Dashboard, «Período de trabajo» permite seleccionar mes y ejercicio por empresa. Se guarda en `config_empresa.periodo_contable` de PostgreSQL y permanece al volver a ingresar; no requiere tablas nuevas. Una barra superior muestra siempre el período activo. Voucher abre directamente en ese mes, con fecha inicial de hoy si corresponde al mes actual o del primer día del mes elegido. Editar Registros y los reportes toman el período como filtro inicial; los reportes permiten otras fechas y ofrecen «Mes de trabajo» para regresar a la selección. Dashboard usa el período guardado para sus indicadores mensuales y gráficos, manteniendo la fecha de hoy para vencimientos y actividad reciente.
+
+El cambio se bloquea mientras haya líneas de un voucher sin guardar o cambios pendientes en Editar Registros. Al regresar a la edición se conserva el borrador. Los perfiles anteriores que solo guardaban un año siguen siendo compatibles. Editar los datos de empresa sin enviar período conserva la selección existente.
+
+El período de trabajo permite años anteriores y el año actual. En el año actual, el selector ofrece solo hasta el mes actual; en años anteriores, los doce meses. El servidor también rechaza meses y ejercicios futuros. Un período futuro guardado previamente se interpreta como el mes actual al cargar el sistema.

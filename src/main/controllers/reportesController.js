@@ -472,10 +472,13 @@ function queryBalanceComprobacion(desde, hasta, nivel) {
   return rows.map(c => {
     const elem = c.cuenta.charAt(0);
     let activo = 0, pasivo = 0, nat_perdida = 0, nat_ganancia = 0;
-    // Activo: elementos 1,2,3 → saldo deudor
-    if (['1','2','3'].includes(elem)) activo = c.saldo_deudor;
-    // Pasivo+Patrimonio: elementos 4,5 → saldo acreedor
-    if (['4','5'].includes(elem)) pasivo = c.saldo_acreedor;
+    // En la hoja de comprobación, las cuentas patrimoniales se trasladan
+    // según su saldo efectivo; no se descarta un saldo por su prefijo.
+    // La presentación del Estado de Situación Financiera usa su propia configuración.
+    if (['1','2','3','4','5'].includes(elem)) {
+      activo = c.saldo_deudor;
+      pasivo = c.saldo_acreedor;
+    }
     // Naturaleza: gastos (6) → pérdida, ingresos (7) → ganancia
     if (elem === '6') nat_perdida = c.saldo_deudor;
     if (elem === '7') nat_ganancia = c.saldo_acreedor;

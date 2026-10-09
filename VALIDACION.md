@@ -5,8 +5,8 @@ Motor activo: PostgreSQL de Supabase. Catálogo global y una empresa de la versi
 ## Evidencia
 
 - 50 pruebas de la suite original y 31 pruebas web pasan.
-- 5 pruebas del esquema y repositorio PostgreSQL pasan: campos/semillas, aislamiento, relaciones, certificados y creación de empresas.
-- 3 pruebas de traducción de consultas y 3 pruebas de separación de repositorios pasan. 6 pruebas de sincronización y presentación del editor pasan. Total automatizado: **98 pruebas**.
+- 6 pruebas del esquema y repositorio PostgreSQL pasan: campos/semillas, aislamiento, relaciones, certificados, creación de empresas y guardado del período.
+- 3 pruebas de traducción de consultas y 3 pruebas de separación de repositorios pasan. 6 pruebas de sincronización y presentación del editor pasan. 5 pruebas de regresión del balance pasan. 6 pruebas de período de trabajo pasan. Total automatizado: **110 pruebas**.
 - Comparación contra PostgreSQL real: resultados idénticos a SQLite para nueve familias de reportes, cartera, dashboard y documentos pendientes usando un conjunto controlado de asientos.
 - Verificación real de creación/búsqueda de asientos, totales, correlativos, respaldo SQLite, reimportación y creación posterior sin colisión de identificadores.
 - Verificación real de Storage: bucket privado; acceso del propietario permitido, acceso de otro usuario y anónimo bloqueado. Los objetos de esa prueba se revirtieron.
@@ -106,3 +106,17 @@ La carpeta fuente del escritorio se mantiene intacta. PROVENIENCIA.json registra
 Comprobación visual en datos locales aislados: compra de base 100 / IGV 18 / total 118 editada a 200 / 36 / 236. El resumen tributario se actualizó sin una segunda entrada de montos, mantuvo G1 y se guardó junto con las tres líneas. Los campos especiales permanecen cerrados por defecto y su edición de importes requiere activar el modo manual. Las pruebas cubren G2/G3, ventas exoneradas, notas negativas, conservación de detracciones, reversión de líneas y bloqueo de cambios ambiguos aunque el total coincida. La sincronización se limita a estructuras simples identificables en PEN; no infiere la clasificación de operaciones mixtas.
 
 La verificación visual detectó y corrigió un falso conflicto de versión al buscar por período/factura: sus columnas adicionales de presentación producían una versión diferente a la búsqueda por ID. Ahora ambas utilizan la representación canónica, conservando el rechazo de versiones antiguas.
+
+## Balance de comprobación y cuenta 40
+
+Las cuentas patrimoniales de elementos 1 a 5 trasladan su saldo deudor a Activo y su saldo acreedor a Pasivo/Patrimonio en la hoja de comprobación, independientemente del prefijo. Los elementos 6 a 9 conservan el tratamiento previo de resultados y cuentas de destino. No se modifica la configuración ni la presentación del Estado de Situación Financiera.
+
+Se reprodujeron los movimientos de la observación en un espacio local aislado: cuenta 40, débito 2 409.80 y crédito 988.48, saldo deudor 1 421.32. Activo corregido 27 447.92; Pasivo/Patrimonio 35 392.00; pérdida 7 944.08 coincidente en Cuentas, Naturaleza y Función. La pantalla, la estructura de la tabla PDF y el archivo Excel se verificaron contra esos importes; además se probaron saldos contrarios al prefijo a dos dígitos y al detalle. No se modificó información de Supabase ni movimientos reales.
+
+## Período de trabajo por empresa
+
+Se verifica la persistencia en el perfil, el aislamiento entre dos empresas, la conservación del período al editar datos de empresa, rechazo de meses/años inválidos, febrero bisiesto y compatibilidad con perfiles que guardaban solo el año. La prueba PostgreSQL utiliza el SQL real del repositorio, su traducción con clave de ámbito y RLS para comprobar que el upsert conserva nombre y RUC y no altera otra empresa.
+
+Comprobación visual local aislada: guardar Julio 2026; barra superior y Voucher muestran julio; la fecha inicial del voucher es 2026-07-01; Editar Registros inicia con 2026-07; reportes inician entre 2026-07-01 y 2026-07-31 y disponen de «Mes de trabajo»; recargar conserva julio y Dashboard consulta el mes seleccionado. Cambiar a agosto con una línea editada sin guardar queda bloqueado y volver a Editar Registros conserva el importe del borrador. No se modificaron preferencias ni movimientos reales en Supabase.
+
+El selector limita el ejercicio al año actual y muestra, en ese año, únicamente los meses transcurridos incluyendo el actual. En ejercicios anteriores ofrece los doce meses. Volver de diciembre de un ejercicio anterior al año actual ajusta el mes al último disponible. El servidor rechaza períodos futuros aunque se envíen directamente a la API. Si se había guardado un período futuro, se utiliza el mes actual al leerlo, sin modificar movimientos ni reescribir silenciosamente el perfil. Se probaron enero, diciembre y el caso octubre de 2026 en la función compartida, el rechazo HTTP y el selector real en Chrome.

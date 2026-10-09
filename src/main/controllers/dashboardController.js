@@ -1,3 +1,4 @@
+const { getPeriodoTrabajo } = require('./empresaController');
 const dashboardRepository = require('../repositories/dashboardRepository.js');
 // src/main/controllers/dashboardController.js
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -31,8 +32,9 @@ const { getDB } = require('../database/db');
  * Genera array de strings 'YYYY-MM' para los últimos N meses
  * (incluye el mes actual).
  */
-function _ultimos_n_meses(n) {
-  const hoy = new Date();
+function _ultimos_n_meses(n, periodo) {
+  const [anio,mes] = periodo.split('-').map(Number);
+  const hoy = new Date(anio, mes-1, 1);
   const result = [];
   for (let i = n - 1; i >= 0; i--) {
     const d = new Date(hoy.getFullYear(), hoy.getMonth() - i, 1);
@@ -73,11 +75,10 @@ function getDashboardData() {
   }
 
   const hoy          = new Date();
-  const anio         = hoy.getFullYear();
-  const mes          = String(hoy.getMonth() + 1).padStart(2, '0');
-  const periodoActual = `${anio}-${mes}`;
+  const periodoActual = getPeriodoTrabajo().periodo;
+  const [anio, mes] = periodoActual.split('-');
   const periodoAnt   = _mes_anterior(periodoActual);
-  const ultimos12    = _ultimos_n_meses(12);
+  const ultimos12    = _ultimos_n_meses(12, periodoActual);
   const ultimos6     = ultimos12.slice(-6);
 
   // ─────────────────────────────────────────────────────────────────────────────

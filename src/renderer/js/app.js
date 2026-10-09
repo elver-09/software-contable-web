@@ -1,14 +1,16 @@
+import { cargarPeriodoTrabajo, obtenerPeriodoTrabajo, initPeriodoTrabajo } from './modules/periodoTrabajo.js';
+import { nombrePeriodo } from './utils/periodoTrabajo.mjs';
 // src/renderer/js/app.js
 
 import { initRouter } from './router.js';
 import { initPlanCuentas } from './modules/planCuentas.js';
 import { initTiposDocumentos } from './modules/tiposDocumentos.js';
 import { initEntidades } from './modules/entidades.js';
-import { initVoucher } from './modules/voucher.js';
+import { initVoucher, hayBorradorVoucher } from './modules/voucher.js';
 import { initMonedas } from './modules/monedas.js';
 import { initAmarres } from './modules/amarres.js';
 import { initReportes } from './modules/reportes.js';
-import { initEditarRegistros } from './modules/editarRegistros.js';
+import { initEditarRegistros, hayCambiosEditarRegistros } from './modules/editarRegistros.js';
 import { initDashboard } from './modules/dashboard.js';
 import { initCartera } from './modules/cartera.js';
 import { initSire } from './modules/sire.js';
@@ -42,6 +44,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.warn('Empresa: error comprobando la última empresa:', error);
   }
 
+  await cargarPeriodoTrabajo();
+
   // Configurar el botón de contraer / expandir sidebar
   document.getElementById('sidebar-toggle').addEventListener('click', () => {
     document.querySelector('.sidebar').classList.toggle('collapsed');
@@ -51,6 +55,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   initRouter((targetId) => {
       if (targetId === 'view-dashboard') {
           initDashboard();
+      } else if (targetId === 'view-periodo') {
+          initPeriodoTrabajo(() => hayBorradorVoucher() || hayCambiosEditarRegistros());
       } else if (targetId === 'view-cartera') {
           initCartera();
       } else if (targetId === 'view-empresa-gestion') {
@@ -67,41 +73,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       } else if (targetId === 'view-amarres') {
           initAmarres();
       } else if (targetId === 'view-voucher') {
-          // El router ya hizo visible 'view-voucher', lo ocultamos para mostrar el modal de mes.
-          const voucherView = document.getElementById('view-voucher');
-          if (voucherView) voucherView.classList.remove('active');
-          
-          const modal = document.getElementById('modalSeleccionarMes');
-          const anoInput = document.getElementById('select_ano_trabajo');
-          const mesSelect = document.getElementById('select_mes_trabajo');
-          
-          const currentDate = new Date();
-          const currentYear = currentDate.getFullYear();
-          const currentMonth = currentDate.getMonth() + 1; // 1-12
-          
-          anoInput.value = currentYear;
-          anoInput.max = currentYear;
-          mesSelect.value = String(currentMonth).padStart(2, '0'); // Preseleccionar el mes actual
-
-          // Lógica para limitar los meses según el año ingresado
-          anoInput.oninput = () => {
-              const yearSeleccionado = parseInt(anoInput.value, 10);
-              Array.from(mesSelect.options).forEach(opt => {
-                  const mesOpcion = parseInt(opt.value, 10);
-                  // Ocultar meses futuros si es el año actual
-                  const esInvalido = yearSeleccionado === currentYear && mesOpcion > currentMonth;
-                  opt.disabled = esInvalido;
-                  opt.style.display = esInvalido ? 'none' : '';
-              });
-              
-              // Si el usuario cambia al año actual y tenía seleccionado un mes futuro, corregirlo al actual
-              if (yearSeleccionado === currentYear && parseInt(mesSelect.value, 10) > currentMonth) {
-                  mesSelect.value = String(currentMonth).padStart(2, '0');
-              }
-          };
-
-          anoInput.oninput(); // Aplicar el filtro de meses inmediatamente al abrir
-          modal.style.display = 'flex';
+          const periodo = obtenerPeriodoTrabajo();
+          const [anio, mes] = periodo.split('-');
+          document.getElementById('voucher_mes_trabajo').textContent = `PERÍODO: ${nombrePeriodo(periodo).toUpperCase()}`;
+          initVoucher(mes, anio);
       } else if (targetId === 'view-reportes') {
           initReportes({ rootId: 'reportes-root', categorias: ['Libros Obligatorios'], titulo: 'Centro de Reportes', subtitulo: 'Seleccione un reporte para configurar, previsualizar y exportar' });
       } else if (targetId === 'view-estados-financieros') {
@@ -117,28 +92,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
   });
 
-  // Lógica para el modal de selección de mes
-  document.getElementById('formSeleccionarMes').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const modal = document.getElementById('modalSeleccionarMes');
-    const selectMes = document.getElementById('select_mes_trabajo');
-    const inputAno = document.getElementById('select_ano_trabajo');
-
-    const mesSeleccionado = selectMes.value;
-    const anoSeleccionado = inputAno.value;
-    const nombreMesSeleccionado = selectMes.options[selectMes.selectedIndex].text;
-
-    if (!anoSeleccionado || anoSeleccionado.length !== 4) {
-      alert('Por favor, ingrese un año válido de 4 dígitos.');
-      return;
-    }
-
-    modal.style.display = 'none'; // Ocultar modal
-    document.getElementById('view-voucher').classList.add('active'); // Mostrar vista de voucher
-    document.getElementById('voucher_mes_trabajo').textContent = `PERÍODO: ${nombreMesSeleccionado.toUpperCase()} ${anoSeleccionado}`;
-    
-    initVoucher(mesSeleccionado, anoSeleccionado); // Inicializar el módulo de voucher con el mes y año
-  });
+  document.getElementById('periodo-cambiar').addEventListener('click', () => document.getElementById('periodo-menu').click());
 
   renderListaEmpresas();
   initEmpresaConfig();
@@ -216,6 +170,7 @@ function initEmpresaConfig() {
       // Actualizar título del sidebar
       const nombreCarpeta = result.folderPath.split(/[/\\]/).pop();
       document.getElementById('sidebar-title').textContent = nombreCarpeta;
+      await cargarPeriodoTrabajo();
       renderListaEmpresas();
       loadEmpresaInfo();
     }

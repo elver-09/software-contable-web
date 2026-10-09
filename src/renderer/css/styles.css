@@ -1930,3 +1930,15 @@ body.dark-mode { color-scheme: dark; }
 .assistant-tax-check { display: flex; align-items: center; gap: 8px; margin: 10px 0; font-size: 11px; }
 
 body.web-session .main-content { padding-bottom: 64px; }
+
+/* Shared working period, visible throughout the company workspace. */
+.work-period-banner{position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:10px 14px;margin-bottom:16px;background:var(--bg-card);color:var(--tx2);border:1px solid var(--brd);border-radius:8px;font-size:12px;}
+.work-period-banner strong{color:var(--tx);}
+.work-period-banner button{background:var(--accent-lt);color:var(--accent);border:1px solid var(--brd);border-radius:5px;padding:5px 12px;cursor:pointer;}
+.periodo-card{max-width:700px;padding:24px;background:var(--bg-card);color:var(--tx);border:1px solid var(--brd);border-radius:12px;}
+.periodo-card h2{margin:0 0 12px;}
+.periodo-card p{line-height:1.6;color:var(--tx2);}
+.periodo-campos{display:flex;gap:20px;flex-wrap:wrap;margin:20px 0;}
+.periodo-campos label{display:flex;flex-direction:column;gap:8px;flex:1;min-width:180px;font-weight:600;}
+.periodo-campos input,.periodo-campos select{width:100%;}
+#periodo-estado{min-height:24px;}

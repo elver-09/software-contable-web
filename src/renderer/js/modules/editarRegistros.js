@@ -1,3 +1,4 @@
+import { obtenerPeriodoTrabajo } from './periodoTrabajo.js';
 import { evaluarDetalleTributario, resumirTributarioAsistente, sincronizarTributarioLineas } from '../utils/tributario.mjs';
 import { escapeHTML, escapeAttr } from '../utils/security.js';
 // src/renderer/js/modules/editarRegistros.js
@@ -78,11 +79,17 @@ function _calcularTotales(detalles = []) {
   return { debe, haber, diferencia: debe - haber, cuadrado: Math.abs(debe - haber) <= 0.01 };
 }
 
+export function hayCambiosEditarRegistros() { return _hayCambiosPendientes(); }
 export function initEditarRegistros() {
+  if (_hayCambiosPendientes() && _root?.isConnected) {
+    _renderResultado(_voucherActual.cabecera, _voucherActual.detalles);
+    return;
+  }
   _root = document.getElementById('editar-registros-root');
   if (!_root) return;
   _limpiarEdicion();
   _root.innerHTML = _buildHTML();
+  document.getElementById('er-periodo').value = obtenerPeriodoTrabajo();
   _bindEvents();
 }
 

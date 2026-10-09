@@ -289,6 +289,8 @@ function registrarRutasIPC() {
     });
 
     // DATOS DEL PERFIL DE EMPRESA (Configuración Interna)
+    ipcMain.handle('empresa:get-periodo', () => empresaController.getPeriodoTrabajo());
+    ipcMain.handle('empresa:set-periodo', (event, data) => empresaController.setPeriodoTrabajo(data));
     ipcMain.handle('empresa:get-info', () => empresaController.getInfoEmpresa());
     ipcMain.handle('empresa:update-info', (event, data) => empresaController.updateInfoEmpresa(data));
 

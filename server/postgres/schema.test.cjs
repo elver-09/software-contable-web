@@ -220,3 +220,19 @@ test("Repository creates complete companies and preserves seed IDs without seque
     await db.close();
   }
 });
+
+test('Working period upsert preserves the profile and company isolation in PostgreSQL', async()=>{
+ const db=await fixture();const {translate}=require('./sql.cjs');const repo=require('../../src/main/repositories/empresaRepository');
+ const calls=[];const adapter={prepare(sql){return {run(...params){calls.push({sql,params});}};}};
+ try {
+  await db.exec('SET search_path TO ansorito, public');
+  await scope(db,alice,companyA);
+  await db.query("INSERT INTO ansorito.config_empresa(id,nombre_comercial,ruc) VALUES(1,$1,$2)",['Perfil A','20111111111']);
+  repo.guardarPeriodo(adapter,'2024-02');await db.query(translate(calls[0].sql),calls[0].params);
+  const a=(await db.query('SELECT nombre_comercial,ruc,periodo_contable FROM ansorito.config_empresa WHERE id=1')).rows[0];
+  assert.deepEqual(a,{nombre_comercial:'Perfil A',ruc:'20111111111',periodo_contable:'2024-02'});
+  await scope(db,bob,companyB);repo.guardarPeriodo(adapter,'2025-12');await db.query(translate(calls[1].sql),calls[1].params);
+  assert.equal((await db.query('SELECT periodo_contable FROM ansorito.config_empresa WHERE id=1')).rows[0].periodo_contable,'2025-12');
+  await scope(db,alice,companyA);assert.equal((await db.query('SELECT periodo_contable FROM ansorito.config_empresa WHERE id=1')).rows[0].periodo_contable,'2024-02');
+ } finally {await db.close();}
+});

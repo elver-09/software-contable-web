@@ -40,6 +40,9 @@
       <button class="menu-btn active" data-target="view-dashboard" title="Dashboard">
         <i class="fa-solid fa-house"></i> <span class="menu-text">Dashboard</span>
       </button>
+      <button id="periodo-menu" class="menu-btn" data-target="view-periodo" title="Período de trabajo">
+        <i class="fa-solid fa-calendar-days"></i> <span class="menu-text">Período de trabajo</span>
+      </button>
       <button class="menu-btn" data-target="view-cartera" title="Cartera y Vencimientos">
         <i class="fa-solid fa-wallet"></i> <span class="menu-text">Cartera y Vencimientos</span>
       </button>
@@ -121,6 +124,8 @@
     </aside>
 
     <main class="main-content">
+      <div class="work-period-banner"><span><i class="fa-solid fa-calendar-days"></i> Período de trabajo: <strong id="periodo-activo">Seleccione una empresa</strong></span><button type="button" id="periodo-cambiar">Cambiar</button></div>
+      <section id="view-periodo" class="view-section"><div id="periodo-trabajo-root" class="view-root"></div></section>
       <!-- ══════════════════════════════════════════════════════════════
       DASHBOARD — PORTADA PRINCIPAL
       ══════════════════════════════════════════════════════════════ -->
@@ -1465,57 +1470,6 @@
       </section>
 
       <!-- Modal para Seleccionar Mes de Trabajo -->
-      <div id="modalSeleccionarMes" class="modal-overlay">
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="modalSeleccionarMes-title"
-          class="modal-shell modal-shell--period"
-        >
-          <div class="modal-header modal-header--roomy">
-            <h3 class="modal-title modal-title--icon" id="modalSeleccionarMes-title">
-              <i class="fa-solid fa-calendar-day"></i> Período de Trabajo
-            </h3>
-          </div>
-
-          <form id="formSeleccionarMes" class="modal-form">
-            <div class="modal-body modal-body--period">
-              <div class="form-grid form-grid--2 form-grid--flush">
-                <div>
-                  <label for="select_mes_trabajo" class="field-label">Mes</label>
-                  <select id="select_mes_trabajo" required>
-                    <option value="01">Enero</option>
-                    <option value="02">Febrero</option>
-                    <option value="03">Marzo</option>
-                    <option value="04">Abril</option>
-                    <option value="05">Mayo</option>
-                    <option value="06">Junio</option>
-                    <option value="07">Julio</option>
-                    <option value="08">Agosto</option>
-                    <option value="09">Septiembre</option>
-                    <option value="10">Octubre</option>
-                    <option value="11">Noviembre</option>
-                    <option value="12">Diciembre</option>
-                  </select>
-                </div>
-                <div>
-                  <label for="select_ano_trabajo" class="field-label">Año</label>
-                  <input type="number" id="select_ano_trabajo" required />
-                </div>
-              </div>
-            </div>
-            <div class="modal-footer modal-footer--period">
-              <button
-                type="submit"
-                class="btn-primary modal-button modal-button--icon modal-button--continue"
-              >
-                <i class="fa-solid fa-arrow-right"></i> Continuar
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-
       <!-- ══════════════════════════════════════════════════════════════
        MÓDULO: REPORTES — LIBRO DIARIO
        ══════════════════════════════════════════════════════════════ -->

@@ -1,3 +1,4 @@
+import { fechaInicialPeriodo } from '../utils/periodoTrabajo.mjs';
 import { evaluarDetalleTributario, resumirTributarioAsistente } from '../utils/tributario.mjs';
 // src/renderer/js/modules/voucher.js
 import { initEntidades } from './entidades.js';
@@ -650,18 +651,17 @@ function _leerTributarioAsistente() {
   return tipo==='VENTA'?{tipo_registro:tipo,comprobante,venta:datos}:{tipo_registro:tipo,comprobante,compra:datos};
 }
 
+export function hayBorradorVoucher() {
+  return !!document.getElementById('tabla-voucher-detalle')?.children.length;
+}
 export function initVoucher(mesSeleccionado, anoSeleccionado) {
+  const previo = _periodoTrabajo();
   mesDeTrabajo  = mesSeleccionado;
   anoDeTrabajo  = anoSeleccionado;
 
-  // Establecer la fecha contable con la fecha de hoy al entrar a la vista
   const fechaInput = document.getElementById('voucher_fecha');
-  if (fechaInput && !fechaInput.value) {
-    const now   = new Date();
-    const y     = now.getFullYear();
-    const m     = String(now.getMonth() + 1).padStart(2, '0');
-    const d     = String(now.getDate()).padStart(2, '0');
-    fechaInput.value = `${y}-${m}-${d}`;
+  if (fechaInput && (!fechaInput.value || (previo !== _periodoTrabajo() && !hayBorradorVoucher()))) {
+    fechaInput.value = fechaInicialPeriodo(_periodoTrabajo());
   }
   // Actualizar número estimado al entrar a la vista (con origen y fecha actuales)
   actualizarNumeroVoucher();

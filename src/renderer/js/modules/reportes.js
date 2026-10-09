@@ -1,3 +1,5 @@
+import { obtenerPeriodoTrabajo } from './periodoTrabajo.js';
+import { rangoPeriodo } from '../utils/periodoTrabajo.mjs';
 // src/renderer/js/modules/reportes.js
 // ═══════════════════════════════════════════════════════════════════════════════
 // Centro de Reportes Contables — Ansorito
@@ -230,12 +232,7 @@ function _renderReporte(tipo) {
   _vistaActual = tipo;
   _previewData = null;
   const r = REPORTES[tipo];
-  const hoy = new Date();
-  const anio = hoy.getFullYear();
-  const mes = String(hoy.getMonth() + 1).padStart(2, '0');
-  const ultimoDia = new Date(anio, hoy.getMonth() + 1, 0).getDate();
-  const desde = `${anio}-${mes}-01`;
-  const hasta = `${anio}-${mes}-${String(ultimoDia).padStart(2, '0')}`;
+  const {desde, hasta} = rangoPeriodo(obtenerPeriodoTrabajo());
 
   let parametrosExtraHTML = '';
 
@@ -294,7 +291,8 @@ function _renderReporte(tipo) {
     <!-- Presets de período -->
     <div class="rpt-presets-bar">
       <span class="rpt-presets-label"><i class="fa-solid fa-clock-rotate-left"></i> Período rápido:</span>
-      <button class="rpt-preset active" data-preset="este-mes">Este Mes</button>
+      <button class="rpt-preset active" data-preset="periodo-trabajo">Mes de trabajo</button>
+      <button class="rpt-preset" data-preset="este-mes">Este Mes</button>
       <button class="rpt-preset" data-preset="hoy">Hoy</button>
       <button class="rpt-preset" data-preset="semana">Esta Semana</button>
       <button class="rpt-preset" data-preset="quincena">Quincena</button>
@@ -463,6 +461,10 @@ function _aplicarPreset(preset) {
   const iso = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 
   switch (preset) {
+    case 'periodo-trabajo': {
+      ({desde, hasta} = rangoPeriodo(obtenerPeriodoTrabajo()));
+      break;
+    }
     case 'hoy': {
       desde = iso(hoy);
       hasta = iso(hoy);
