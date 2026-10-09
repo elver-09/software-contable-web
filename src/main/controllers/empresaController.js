@@ -1,6 +1,6 @@
 const { normalizarPeriodo, esPeriodoValido, esPeriodoDisponible } = require('../../renderer/js/utils/periodoTrabajo.mjs');
 const empresaRepository = require('../repositories/empresaRepository.js');
-const { getDB } = require('../database/db');
+const { getDB, renombrarEmpresa } = require('../database/db');
 
 function getInfoEmpresa() {
   // getDB() lanza si no existe una empresa conectada. No ocultamos ese estado
@@ -11,12 +11,21 @@ function getInfoEmpresa() {
 }
 
 function updateInfoEmpresa(data) {
+  let restaurarDirectorio;
   try {
+    const nombre=String(data?.nombre||'').trim();
+    if(!nombre || nombre.length>200 || /[\/\\\x00-\x1f]/.test(nombre)) throw new Error('Ingrese un nombre de empresa válido de hasta 200 caracteres, sin barras.');
     const db = getDB();
-    const stmt = empresaRepository.prepararGuardadoPerfil(db);
-    stmt.run(data.nombre, data.ruc, data.direccion, data.telefono, data.correo, data.periodo ?? empresaRepository.obtenerPerfil(db)?.periodo_contable ?? null, data.logo);
+    db.transaction(()=>{
+      const stmt = empresaRepository.prepararGuardadoPerfil(db);
+      stmt.run(nombre, data.ruc ?? null, data.direccion ?? null, data.telefono ?? null, data.correo ?? null, data.periodo ?? empresaRepository.obtenerPerfil(db)?.periodo_contable ?? null, data.logo ?? null);
+      restaurarDirectorio=renombrarEmpresa(nombre);
+    })();
     return { success: true };
-  } catch (error) { return { success: false, error: error.message }; }
+  } catch (error) {
+    if(restaurarDirectorio) restaurarDirectorio();
+    return { success: false, error: error.message };
+  }
 }
 
 function getPeriodoTrabajo() {

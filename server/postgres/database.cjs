@@ -31,7 +31,7 @@ function getGlobalDB() {
   return database(current().userId);
 }
 function conectarEmpresa(value) {
-  const p = companies().find((x) => x.id === value || x.publicPath === value);
+  const p = companies().find((x) => x.id === value || x.publicPath === value || String(value).startsWith('/empresas/'+x.id+'/'));
   if (!p) throw Error("Empresa no registrada en este espacio");
   current().companyId = p.id;
   return { success: true, ...getEstadoEmpresa() };
@@ -56,7 +56,11 @@ function createCompany(name) {
     return { success: true, ...getEstadoEmpresa() };
   })();
 }
+function renombrarEmpresa(nombre) {
+ require('../../src/main/repositories/empresaRepository').renombrarDirectorio(getDB(),current().companyId,nombre);
+}
 module.exports = {
+  renombrarEmpresa,
   companies,
   getEstadoEmpresa,
   getDB,

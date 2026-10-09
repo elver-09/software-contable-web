@@ -50,3 +50,14 @@ test('El servidor rechaza meses y ejercicios futuros sin alterar el período gua
  if(hoy.getMonth()<11){const mesFuturo=`${hoy.getFullYear()}-${String(hoy.getMonth()+2).padStart(2,'0')}`;assert.equal((await rpc('empresa:set-periodo',[{periodo:mesFuturo}])).success,false);}
  assert.equal((await rpc('empresa:get-periodo')).periodo,'2024-02');
 });
+
+test('Editar nombre actualiza directorio y perfil, conserva identidad y rechaza nombres inválidos',async()=>{
+ const listaAnterior=await rpc('empresa:get-list');const rutaAnterior=listaAnterior.find(p=>p.includes(company));
+ const antes=await rpc('empresa:get-info');const renombrar=await rpc('empresa:update-info',[{nombre:'Empresa renombrada',ruc:antes.ruc,direccion:antes.direccion_fiscal,telefono:antes.telefono,correo:antes.correo,logo:antes.logo}]);assert.equal(renombrar.success,true,renombrar.error);
+ const lista=await rpc('empresa:get-list');assert.equal(lista.length,listaAnterior.length);assert.ok(lista.includes('/empresas/'+company+'/Empresa renombrada'));assert.equal(lista.includes(rutaAnterior),false);
+ assert.equal((await rpc('empresa:get-info')).nombre_comercial,'Empresa renombrada');assert.equal((await rpc('empresa:get-info')).periodo_contable,antes.periodo_contable);
+ assert.equal((await rpc('empresa:conectar-directa',[rutaAnterior])).success,true);
+ for(const nombre of ['', 'Empresa/otra'])assert.equal((await rpc('empresa:update-info',[{nombre}])).success,false);
+ assert.equal((await rpc('empresa:get-info')).nombre_comercial,'Empresa renombrada');assert.deepEqual(await rpc('empresa:get-list'),lista);
+ assert.equal((await rpc('empresa:update-info',[{nombre:'Empresa sin logo'}])).success,true);assert.equal((await rpc('empresa:get-info')).logo,null);
+});

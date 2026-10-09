@@ -22,4 +22,8 @@ function guardarPeriodo(db, periodo) {
   return db.prepare(`INSERT INTO config_empresa (id, periodo_contable) VALUES (1, ?)
     ON CONFLICT(id) DO UPDATE SET periodo_contable=excluded.periodo_contable`).run(periodo);
 }
-module.exports = { obtenerPerfil, prepararGuardadoPerfil, guardarPeriodo };
+function renombrarDirectorio(db,id,nombre) {
+  const info=db.prepare('UPDATE empresas SET nombre=? WHERE id=?').run(nombre,id);
+  if(info.changes!==1) throw Error('Empresa no encontrada.');
+}
+module.exports = { renombrarDirectorio, obtenerPerfil, prepararGuardadoPerfil, guardarPeriodo };

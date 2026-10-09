@@ -46,7 +46,8 @@ function createCompany(name) {
     throw Error("Nombre de empresa inválido");
   if (postgres) return db.createCompany(name);
   const list = db.companies(),
-    item = { id: id(), name, publicPath: "/empresas/" + id() + "/" + name };
+    companyId=id(),
+    item = { id: companyId, name, publicPath: "/empresas/" + companyId + "/" + name };
   list.push(item);
   fs.writeFileSync(
     path.join(c.workspace, "companies.json"),

@@ -14,6 +14,7 @@ const planCuentasController = require('./controllers/planCuentasController');
 const tiposDocumentosController = require('./controllers/tiposDocumentosController');
 const entidadesController = require('./controllers/entidadesController');
 const voucherController = require('./controllers/voucherController');
+const automaticosController = require('./controllers/asientosAutomaticosController');
 const amarresController = require('./controllers/amarresController');
 const { getSiguienteNumero } = require('./controllers/voucherController');
 const { getMonedas, addMoneda, updateMoneda, deleteMoneda, fetchAndSaveTipoCambio, fetchTipoCambioRango } = require('./controllers/monedasController');
@@ -352,6 +353,10 @@ function registrarRutasIPC() {
     ipcMain.handle('voucher:get-siguiente-numero', (event, data) => getSiguienteNumero(data));
 
     // AMARRES DEL ASISTENTE
+    ipcMain.handle('automaticos:get', () => automaticosController.listar());
+    ipcMain.handle('automaticos:guardar', (_,data) => automaticosController.guardar(data));
+    ipcMain.handle('automaticos:eliminar', (_,id) => automaticosController.eliminar(id));
+    ipcMain.handle('automaticos:preview', (_,data) => automaticosController.previsualizar(data));
     ipcMain.handle('amarres:get', () => amarresController.getAmarres());
     ipcMain.handle('amarres:add', (event, data) => amarresController.addAmarre(data));
     ipcMain.handle('amarres:update', (event, data) => amarresController.updateAmarre(data));

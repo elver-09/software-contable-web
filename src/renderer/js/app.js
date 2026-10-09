@@ -1,3 +1,4 @@
+import { initAutomaticos } from './modules/asientosAutomaticos.js';
 import { cargarPeriodoTrabajo, obtenerPeriodoTrabajo, initPeriodoTrabajo } from './modules/periodoTrabajo.js';
 import { nombrePeriodo } from './utils/periodoTrabajo.mjs';
 // src/renderer/js/app.js
@@ -70,6 +71,8 @@ document.addEventListener('DOMContentLoaded', async () => {
           initEntidades();
       } else if (targetId === 'view-monedas') {
           initMonedas();
+      } else if (targetId === 'view-automaticos') {
+          initAutomaticos();
       } else if (targetId === 'view-amarres') {
           initAmarres();
       } else if (targetId === 'view-voucher') {
@@ -245,8 +248,8 @@ function initEmpresaConfig() {
     });
     if (result.success) {
       cerrarModal();
-      // Recargar datos en la sección de solo lectura
-      loadEmpresaInfo();
+      // Refresh the profile and directory together after a successful rename.
+      await Promise.all([loadEmpresaInfo(), renderListaEmpresas()]);
     } else {
       alert('Error: ' + result.error);
     }

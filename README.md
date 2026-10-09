@@ -90,3 +90,15 @@ Debajo de Dashboard, «Período de trabajo» permite seleccionar mes y ejercicio
 El cambio se bloquea mientras haya líneas de un voucher sin guardar o cambios pendientes en Editar Registros. Al regresar a la edición se conserva el borrador. Los perfiles anteriores que solo guardaban un año siguen siendo compatibles. Editar los datos de empresa sin enviar período conserva la selección existente.
 
 El período de trabajo permite años anteriores y el año actual. En el año actual, el selector ofrece solo hasta el mes actual; en años anteriores, los doce meses. El servidor también rechaza meses y ejercicios futuros. Un período futuro guardado previamente se interpreta como el mes actual al cargar el sistema.
+
+### Amarres de asientos automáticos
+
+En **Contabilidad → Amarres de destino** se configuran por empresa las cuentas o prefijos de origen, las cuentas de destino al Debe y Haber, el porcentaje (hasta dos decimales), los orígenes aplicables y el estado activo. Las reglas se almacenan en Supabase, sin cuentas de destino fijas en el motor. No se crean reglas predeterminadas: cada empresa debe configurar sus cuentas.
+
+El motor agrega pares balanceados al guardar vouchers manuales, del asistente o importados de SIRE. El prefijo más específico tiene prioridad; dentro de ese prefijo las reglas para un origen concreto prevalecen sobre «Todos». Varias reglas del mismo prefijo/origen permiten distribuir hasta el 100 %. El importe se toma del neto Debe menos Haber de cada línea original; los reversos invierten el destino, y se conservan moneda, tipo de cambio y documento. Las líneas generadas no disparan otras reglas.
+
+«Destinos del asiento» aparece como sección desplegable cuando hay líneas y un amarre aplicable; su vista previa se actualiza automáticamente antes de guardar. En Editar Registros se identifican y recalculan desde sus líneas originales; no se editan por separado. El comprobante tributario se concilia con las líneas originales, mientras que los totales contables incluyen los destinos. Cabecera, líneas, destinos y datos tributarios se guardan en la misma transacción.
+
+Los vouchers guardados conservan una copia de su regla. Editar, desactivar o eliminar una configuración no cambia asientos anteriores. Un voucher antiguo sin destinos no recibe reglas nuevas al editarse. Si cambia la cuenta original a otra fuera del prefijo histórico, su destino anterior deja de generarse. Las reglas nuevas se usan en nuevos vouchers.
+
+La migración `202610080005_asientos_automaticos.sql` crea `ansorito.asientos_automaticos` y `ansorito.asientos_automaticos_lineas`, con aislamiento de usuario y empresa. Los respaldos web incluyen reglas y trazabilidad de líneas; SQLite local dispone de tablas equivalentes para revisión y pruebas. «Cuenta contrapartida» en Plantillas de compras y ventas distingue la cuenta por pagar/cobrar de estos destinos.

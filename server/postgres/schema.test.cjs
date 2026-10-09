@@ -236,3 +236,32 @@ test('Working period upsert preserves the profile and company isolation in Postg
   await scope(db,alice,companyA);assert.equal((await db.query('SELECT periodo_contable FROM ansorito.config_empresa WHERE id=1')).rows[0].periodo_contable,'2024-02');
  } finally {await db.close();}
 });
+
+test('Automatic destinations persist snapshots in PostgreSQL and isolate companies and owners',async()=>{
+ const db=await fixture();try{
+  await db.exec('RESET ROLE');await db.exec(fs.readFileSync(path.join(__dirname,'../../supabase/migrations/202610080005_asientos_automaticos.sql'),'utf8'));await db.exec('SET ROLE authenticated');await db.exec('SET search_path=ansorito,public');
+  await scope(db,alice,companyA);
+  const repo=require('../../src/main/repositories/asientosAutomaticosRepository');const {translate}=require('./sql.cjs');
+  const rule={nombre:'Destino compra',prefijo:'6011',origen:'8',cuenta_debe:'2011',cuenta_haber:'6111',porcentaje:100,activo:1};
+  const tasks=[];repo.guardar({prepare(sql){return {run(...p){tasks.push([translate(sql),p]);return {changes:1};}}}},rule);
+  await db.query(...tasks[0]);
+  assert.equal((await db.query('SELECT nombre FROM asientos_automaticos')).rows[0].nombre,rule.nombre);
+  await db.query("INSERT INTO vouchers(id,origen,numero_voucher,fecha,periodo,total_debe,total_haber) VALUES(900,'8',900,'2026-10-08','2026-10',200,200)");
+  await db.query("INSERT INTO voucher_detalles(id,voucher_id,cuenta,debe,haber) VALUES(900,900,'6011',100,0),(901,900,'2011',100,0)");
+  await db.query('INSERT INTO asientos_automaticos_lineas(detalle_id,voucher_id,fuente_id,regla_json,lado) VALUES($1,$2,$3,$4,$5)',[901,900,900,JSON.stringify(rule),'DEBE']);
+  await scope(db,alice,companyB);assert.equal((await db.query('SELECT * FROM asientos_automaticos')).rows.length,0);
+  await scope(db,bob,companyB);assert.equal((await db.query('SELECT * FROM asientos_automaticos_lineas')).rows.length,0);
+  await assert.rejects(db.query('INSERT INTO asientos_automaticos(owner_id,scope_id,nombre,prefijo,cuenta_debe,cuenta_haber,porcentaje,activo) VALUES($1,$2,$3,$4,$5,$6,$7,$8)',[alice,companyA,'Ajeno','6','2011','6111',100,1]),{code:'42501'});
+  await scope(db,alice,companyA);assert.equal((await db.query('SELECT fuente_id FROM asientos_automaticos_lineas')).rows[0].fuente_id,900);
+  await db.query('DELETE FROM vouchers WHERE id=900');assert.equal((await db.query('SELECT * FROM asientos_automaticos_lineas')).rows.length,0);
+ }finally{await db.close();}
+});
+
+test('Renombrar el directorio en PostgreSQL preserva el ID y no modifica empresas de otro usuario',async()=>{
+ const db=await fixture();try{await scope(db,alice,companyA);await db.exec('SET search_path=ansorito,public');
+ const {renombrarDirectorio}=require('../../src/main/repositories/empresaRepository');const {translate}=require('./sql.cjs');const tasks=[];
+ renombrarDirectorio({prepare(sql){return {run(...p){tasks.push([translate(sql),p]);return {changes:1};}}}},companyA,'Empresa renombrada');await db.query(...tasks[0]);
+ assert.equal((await db.query('SELECT nombre FROM empresas WHERE id=$1',[companyA])).rows[0].nombre,'Empresa renombrada');
+ await scope(db,bob,companyB);const changed=await db.query(...tasks[0]);assert.equal(changed.affectedRows,0);assert.equal((await db.query('SELECT nombre FROM empresas WHERE id=$1',[companyB])).rows[0].nombre,'Empresa B');
+ }finally{await db.close();}
+});

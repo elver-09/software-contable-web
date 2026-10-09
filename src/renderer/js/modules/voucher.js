@@ -4,6 +4,7 @@ import { evaluarDetalleTributario, resumirTributarioAsistente } from '../utils/t
 import { initEntidades } from './entidades.js';
 import { escapeHTML, escapeAttr } from '../utils/security.js';
 
+let refrescarDestinos = () => {};
 let voucherInitialized = false;
 let mesDeTrabajo = null;
 let anoDeTrabajo = null;
@@ -666,6 +667,7 @@ export function initVoucher(mesSeleccionado, anoSeleccionado) {
   // Actualizar número estimado al entrar a la vista (con origen y fecha actuales)
   actualizarNumeroVoucher();
 
+  refrescarDestinos();
   if (voucherInitialized) return; // No re-adjuntar listeners
   voucherInitialized = true;
 
@@ -1159,7 +1161,7 @@ export function initVoucher(mesSeleccionado, anoSeleccionado) {
       };
 
       // ── Buscar el AMARRE configurado que coincide con la cuenta ingresada ──
-      // Los amarres se definen en "Tablas → Amarres del Asistente". Se elige el
+      // Los amarres se definen en "Tablas → Plantillas de compras y ventas". Se elige el
       // amarre ACTIVO cuyo prefijo calce con el inicio de la cuenta; si varios
       // calzan, gana el prefijo más largo (el más específico).
       let amarres = [];
@@ -1170,7 +1172,7 @@ export function initVoucher(mesSeleccionado, anoSeleccionado) {
         .sort((a, b) => String(b.prefijo).length - String(a.prefijo).length)[0];
 
       if (aplicaTrib && (!amarre || (origenActual==='8' ? 'COMPRA' : 'VENTA') !== amarre.tipo)) {
-        return alert('Configure un amarre de Compra/Venta para esta cuenta en Tablas → Amarres del Asistente.');
+        return alert('Configure una plantilla de compra o venta para esta cuenta en Tablas → Plantillas de compras y ventas.');
       }
       if (amarre) {
         const allCuentas = await window.api.getPlanCuentas();
@@ -1189,7 +1191,7 @@ export function initVoucher(mesSeleccionado, anoSeleccionado) {
         // La línea de IGV sólo se crea si HAY IGV (> 0) y hay una cuenta configurada
         // para esa afectación. Si está exonerado/inafecto (igv = 0) NO se genera la
         // línea de la cuenta 40 → se evita la fila en blanco.
-        if (aplicaTrib && igv > 0 && !cuentaIgvAmarre) return alert('Configure la cuenta de IGV del amarre antes de generar el asiento.');
+        if (aplicaTrib && igv > 0 && !cuentaIgvAmarre) return alert('Configure la cuenta de IGV de la plantilla antes de generar el asiento.');
         const aplicaIgv  = igv > 0 && !!cuentaIgvAmarre;
         const nomIgv     = nombreDe(cuentaIgvAmarre,       'IGV');
         const nomDestino = nombreDe(amarre.cuenta_destino, 'CUENTA DESTINO');
@@ -1233,6 +1235,34 @@ export function initVoucher(mesSeleccionado, anoSeleccionado) {
   // 5. Envía al backend; el número de voucher lo asigna el servidor
   // 6. Muestra el número asignado y limpia el formulario
   // ─────────────────────────────────────────────────────────────────────────
+  const panelDestinos = document.getElementById('voucher-destinos');
+  const boxDestinos = document.getElementById('voucher-automaticos-preview');
+  let revisionDestinos = 0;
+  let timerDestinos;
+  refrescarDestinos = () => {
+    const revision = ++revisionDestinos;
+    clearTimeout(timerDestinos);
+    const detalles = leerDetallesDesdeTabla();
+    const origen = document.getElementById('voucher_origen').value;
+    panelDestinos.hidden = true;
+    boxDestinos.replaceChildren();
+    if (!detalles.length || !origen) { panelDestinos.open = false; return; }
+    timerDestinos = setTimeout(async () => {
+      try {
+        const result = await window.api.previewAutomaticos({origen, detalles});
+        if (revision !== revisionDestinos) return;
+        if (!result.success || !result.lineas.length) { panelDestinos.open = false; return; }
+        boxDestinos.innerHTML = '<table class="voucher-destinos-table"><thead><tr><th>Cuenta</th><th>Denominación</th><th>Debe</th><th>Haber</th><th>Amarre</th></tr></thead><tbody>' + result.lineas.map(l => `<tr><td>${escapeHTML(l.cuenta)}</td><td>${escapeHTML(l.nombre_cuenta)}</td><td>${Number(l.debe).toFixed(2)}</td><td>${Number(l.haber).toFixed(2)}</td><td>${escapeHTML(l.automatico_regla.nombre)}</td></tr>`).join('') + '</tbody></table>';
+        panelDestinos.hidden = false;
+      } catch (error) {
+        if (revision === revisionDestinos) panelDestinos.open = false;
+        console.warn('No se pudo actualizar la vista previa de destinos.');
+      }
+    }, 160);
+  };
+  new MutationObserver(refrescarDestinos).observe(document.getElementById('tabla-voucher-detalle'), {childList:true, subtree:true, characterData:true});
+  origenSelect.addEventListener('change', refrescarDestinos);
+  refrescarDestinos();
   const btnGuardarVoucher = document.getElementById('btnGuardarVoucher');
   if (btnGuardarVoucher) {
     btnGuardarVoucher.addEventListener('click', async () => {

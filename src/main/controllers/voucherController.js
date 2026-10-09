@@ -1,3 +1,5 @@
+const automaticos = require('./asientosAutomaticosController');
+const automaticosRepo = require('../repositories/asientosAutomaticosRepository');
 const voucherRepository = require('../repositories/voucherRepository.js');
 // src/main/controllers/voucherController.js
 const { getDB } = require('../database/db');
@@ -66,12 +68,23 @@ function addVoucher(data) {
       numeroAsignado = (maximo || 0) + 1;
       const info = stmtCab.run(origen, numeroAsignado, fechaContable, per, glosa || null, totalDebe, totalHaber);
       idInsertado = info.lastInsertRowid;
+      const fuentesIds = [];
+      const generadas = automaticos.preparar(db, origen, detalles);
       for (const l of detalles) {
-        stmtDet.run(idInsertado, l.cuenta||'', l.nombre_cuenta||'', parseFloat(l.debe)||0, parseFloat(l.haber)||0,
+        const insertada = stmtDet.run(idInsertado, l.cuenta||'', l.nombre_cuenta||'', parseFloat(l.debe)||0, parseFloat(l.haber)||0,
           l.moneda||'PEN', parseFloat(l.tc)||1, parseFloat(l.equivalente)||0,
           l.doc_tipo||null, l.doc_numero||null, l.fecha_doc||null, l.fecha_venc||null,
           l.codigo||null, l.razon_social||null, l.glosa||null);
+        fuentesIds.push(insertada.lastInsertRowid);
       }
+      for (const l of generadas) {
+        const insertada = stmtDet.run(idInsertado,l.cuenta,l.nombre_cuenta,l.debe,l.haber,l.moneda||'PEN',Number(l.tc)||1,l.equivalente,
+          l.doc_tipo||null,l.doc_numero||null,l.fecha_doc||null,l.fecha_venc||null,l.codigo||null,l.razon_social||null,l.glosa||null);
+        automaticosRepo.marcar(db,insertada.lastInsertRowid,idInsertado,fuentesIds[l.fuente_index],l.automatico_regla,l.automatico_lado);
+      }
+      const todos = calcularTotales([...detalles,...generadas]);
+      validarCuadre(todos.debe,todos.haber);
+      voucherRepository.updateVoucherCompleto_run_vouchers(db,todos.debe,todos.haber,idInsertado);
       // El comprobante tributario se guarda dentro de la MISMA transacción que
       // cabecera y líneas. Si su total no concilia con el asiento, todo hace rollback.
       if (tributario) {
@@ -107,7 +120,7 @@ function buscarVoucher({ origen, numeroVoucher, id, periodo, numero_voucher }) {
 
     if (!cabecera) return { success: false, error: `No se encontró el voucher.` };
 
-    const detalles = voucherRepository.buscarVoucher_all_voucher_detalles(db, cabecera.id);
+    const detalles = automaticos.decorar(db,cabecera.id,voucherRepository.buscarVoucher_all_voucher_detalles(db, cabecera.id));
 
     const tributario = obtenerTributario(db, cabecera.id);
     return { success: true, cabecera, detalles, tributario };
@@ -130,7 +143,7 @@ function buscarVoucherPorFactura({ periodo, docNumero, origen }) {
       const cabeceras = voucherRepository.buscarVoucherPorFactura_all_voucher_detalles(db, { periodo, origen });
       if (!cabeceras.length) return { success: false, error: 'No hay asientos en el período ' + periodo + '.' };
       const cabecera = cabeceras[0];
-      const detalles = voucherRepository.buscarVoucherPorFactura_all_voucher_detalles_2(db, cabecera.id);
+      const detalles = automaticos.decorar(db,cabecera.id,voucherRepository.buscarVoucherPorFactura_all_voucher_detalles_2(db, cabecera.id));
       const tributario = obtenerTributario(db, cabecera.id);
       return { success: true, cabecera, detalles, tributario, multiples: cabeceras.length, listaVouchers: cabeceras };
     }
@@ -139,7 +152,7 @@ function buscarVoucherPorFactura({ periodo, docNumero, origen }) {
     const cabeceras = voucherRepository.buscarVoucherPorFactura_all_vouchers(db, { docNumero, periodo, origen });
     if (!cabeceras.length) return { success: false, error: 'No se encontró un asiento con la factura "' + docNumero + '"' + (periodo ? ' en el período ' + periodo : '') + '.' };
     const cabecera = cabeceras[0];
-    const detalles = voucherRepository.buscarVoucherPorFactura_all_voucher_detalles_3(db, cabecera.id);
+    const detalles = automaticos.decorar(db,cabecera.id,voucherRepository.buscarVoucherPorFactura_all_voucher_detalles_3(db, cabecera.id));
     const tributario = obtenerTributario(db, cabecera.id);
     return { success: true, cabecera, detalles, tributario, multiples: cabeceras.length };
   } catch (error) {
@@ -184,7 +197,9 @@ function updateVoucherCompleto(data) {
       let totalDebe = 0;
       let totalHaber = 0;
 
-      const preparados = detalles.map(d => {
+      const marcas = automaticosRepo.metadata(db,voucherId);
+      const generadosIds = new Set(marcas.map(m=>Number(m.detalle_id)));
+      const preparados = detalles.filter(d=>!generadosIds.has(Number(d.id))).map(d => {
         const id = Number.parseInt(d.id, 10);
         const debe = montoEditable(d.debe, 'Debe', id);
         const haber = montoEditable(d.haber, 'Haber', id);
@@ -229,6 +244,14 @@ function updateVoucherCompleto(data) {
         if (info.changes !== 1) throw new Error(`No se pudo actualizar la línea ${d.id}.`);
       }
 
+      const generadas = automaticos.preparar(db,voucher.origen,preparados,marcas,true);
+      automaticosRepo.borrarGeneradas(db,voucherId);
+      const stmtDet = voucherRepository.prepararInsercionDetalle(db);
+      for(const l of generadas) {
+        const insertada=stmtDet.run(voucherId,l.cuenta,l.nombre_cuenta,l.debe,l.haber,l.moneda||'PEN',Number(l.tc)||1,l.equivalente,
+          l.doc_tipo||null,l.doc_numero||null,l.fecha_doc||null,l.fecha_venc||null,l.codigo||null,l.razon_social||null,l.glosa||null);
+        automaticosRepo.marcar(db,insertada.lastInsertRowid,voucherId,preparados[l.fuente_index].id,l.automatico_regla,l.automatico_lado);
+      }
       // Comprobación defensiva con los valores realmente persistidos antes del COMMIT.
       const totalesPersistidos = voucherRepository.updateVoucherCompleto_get_voucher_detalles(db, voucherId);
       const finales = validarCuadre(totalesPersistidos.td, totalesPersistidos.th);
@@ -240,13 +263,13 @@ function updateVoucherCompleto(data) {
       if (data?.tributario) {
         guardarTributario(
           db, voucherId, data?.origen || voucher.origen,
-          data.tributario, preparados, data?.fechaContable || voucher.fecha || '', finales.debe, finales.haber
+          data.tributario, preparados, data?.fechaContable || voucher.fecha || '', cuadrados.debe, cuadrados.haber
         );
       } else if (existenteTrib) {
         // Mantiene sincronizados tipo/número/fecha/entidad/moneda con las líneas editadas.
         // Los importes tributarios explícitos se conservan y se revalidan contra el asiento.
         guardarTributario(
-          db, voucherId, voucher.origen, existenteTrib, preparados, voucher.fecha || '', finales.debe, finales.haber
+          db, voucherId, voucher.origen, existenteTrib, preparados, voucher.fecha || '', cuadrados.debe, cuadrados.haber
         );
       }
 
@@ -256,7 +279,7 @@ function updateVoucherCompleto(data) {
         voucher_id: voucherId,
         total_debe: finales.debe,
         total_haber: finales.haber,
-        lineas_actualizadas: preparados.length,
+        lineas_actualizadas: preparados.length + generadas.length,
       };
     })();
 

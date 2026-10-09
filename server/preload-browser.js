@@ -45,6 +45,10 @@ contextBridge.exposeInMainWorld('api', {
     getSiguienteNumeroVoucher: (data) => ipcRenderer.invoke('voucher:get-siguiente-numero', data),
 
     // --- AMARRES DEL ASISTENTE ---
+    getAutomaticos: () => ipcRenderer.invoke('automaticos:get'),
+    guardarAutomatico: (data) => ipcRenderer.invoke('automaticos:guardar', data),
+    eliminarAutomatico: (id) => ipcRenderer.invoke('automaticos:eliminar', id),
+    previewAutomaticos: (data) => ipcRenderer.invoke('automaticos:preview', data),
     getAmarres: () => ipcRenderer.invoke('amarres:get'),
     addAmarre: (data) => ipcRenderer.invoke('amarres:add', data),
     updateAmarre: (data) => ipcRenderer.invoke('amarres:update', data),

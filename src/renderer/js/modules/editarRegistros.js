@@ -1,3 +1,4 @@
+import { recalcularDestinos } from '../utils/asientosAutomaticos.mjs';
 import { obtenerPeriodoTrabajo } from './periodoTrabajo.js';
 import { evaluarDetalleTributario, resumirTributarioAsistente, sincronizarTributarioLineas } from '../utils/tributario.mjs';
 import { escapeHTML, escapeAttr } from '../utils/security.js';
@@ -397,7 +398,7 @@ function _evaluarTributarioEditor(t = _voucherActual?.tributario) {
   if (!detalle.ok) return detalle;
   const datos = t.tipo_registro === 'VENTA' ? t.venta : t.compra;
   const totalTrib = Number(datos.importe_total);
-  const tot = _calcularTotales(_voucherActual?.detalles||[]);
+  const tot = _calcularTotales((_voucherActual?.detalles||[]).filter(d=>!d.automatico));
   const totalAsiento = Math.max(Math.abs(tot.debe),Math.abs(tot.haber));
   if (Math.abs(Math.abs(totalTrib) - totalAsiento) > 0.010001) return { estado:'DIFERENCIA', ok:false, texto:'El total del comprobante no coincide con el asiento', totalTrib };
   if(Number(t.comprobante?.requiere_revision||0)===1) return {estado:'REVISION',ok:true,texto:'Datos completados, pendientes de revisión'};
@@ -428,7 +429,7 @@ function _tributarioEditorHTML() {
         ['icbper','ICBPER','Impuesto al consumo de bolsas plásticas.'],['otros_tributos','Otros tributos','Otros tributos o cargos.'],['importe_total','Importe total','Debe coincidir en valor absoluto con el total del asiento.']
       ];
   const simple = resumirTributarioAsistente(t);
-  const automatico = !_tributarioManual && sincronizarTributarioLineas(_voucherOriginal?.tributario, _voucherOriginal?.detalles || [], _voucherActual.detalles).ok;
+  const automatico = !_tributarioManual && sincronizarTributarioLineas(_voucherOriginal?.tributario, (_voucherOriginal?.detalles || []).filter(d=>!d.automatico), _voucherActual.detalles.filter(d=>!d.automatico)).ok;
   const fuente = t.comprobante?.fuente || 'MANUAL';
   const rev = Number(t.comprobante?.requiere_revision || 0) === 1;
   const comp = t.comprobante || {};
@@ -492,7 +493,7 @@ function _bindTributarioEditor() {
   });
   document.getElementById('er-btn-crear-tributario')?.addEventListener('click', () => {
     const origen=String(_voucherActual?.cabecera?.origen||'');
-    const total=_calcularTotales(_voucherActual?.detalles||[]).debe;
+    const total=_calcularTotales((_voucherActual?.detalles||[]).filter(d=>!d.automatico)).debe;
     const comprobante={fuente:'MANUAL',requiere_revision:1};
     _voucherActual.tributario = origen==='14'
       ? {tipo_registro:'VENTA',comprobante,venta:{valor_exportacion:0,base_gravada:0,descuento_base:0,igv:0,descuento_igv:0,importe_exonerado:0,importe_inafecto:0,isc:0,base_ivap:0,ivap:0,icbper:0,otros_tributos:0,importe_total:total}}
@@ -591,19 +592,20 @@ function _renderResultado(cab, det) {
           <tr class="er-row ${mod?'er-row-dirty':''}" data-id="${escapeAttr(d.id)}">
             <td style="text-align:center;color:var(--tx3)">${mod?'<i class="fa-solid fa-pen" title="Cambio pendiente" style="color:var(--warn);font-size:9px;"></i>':i+1}</td>
             <td style="font-weight:700;color:var(--accent);font-size:11px;">${escapeHTML(d.cuenta)}</td>
-            <td>${escapeHTML(d.nombre_plan||d.nombre_cuenta||'')}</td>
+            <td>${escapeHTML(d.nombre_plan||d.nombre_cuenta||'')}${d.automatico ? '<br><small>Automático · se recalcula desde la línea de origen</small>' : ''}</td>
             <td style="text-align:right;color:var(--ok);font-weight:${d.debe>0?'700':'400'}">${d.debe>0?fmt(d.debe):''}</td>
             <td style="text-align:right;color:var(--err);font-weight:${d.haber>0?'700':'400'}">${d.haber>0?fmt(d.haber):''}</td>
             <td style="text-align:center;font-size:10px">${escapeHTML(d.moneda||'PEN')}</td>
             <td style="font-size:10px">${escapeHTML(d.doc_numero||'')}</td>
             <td style="font-size:10px;color:var(--tx3)">${escapeHTML(d.glosa||'')}</td>
             <td style="text-align:center">
-              <button class="er-btn-edit" data-id="${escapeAttr(d.id)}" title="Editar"><i class="fa-solid fa-pencil"></i></button>
+              ${d.automatico ? '<span title="Edite la línea de origen">↻</span>' : `<button class="er-btn-edit" data-id="${escapeAttr(d.id)}" title="Editar"><i class="fa-solid fa-pencil"></i></button>`}
             </td>
           </tr>`; }).join('')}
         </tbody>
       </table>
     </div>
+    ${det.some(d=>d.automatico) ? '<div style="padding:10px 22px;font-size:12px;color:var(--tx2)">El total contable incluye las líneas de destino. El importe tributario corresponde únicamente al comprobante original.</div>' : ''}
     ${_tributarioEditorHTML()}
     ${cambios ? `
     <div class="er-savebar">
@@ -633,6 +635,7 @@ function _renderResultado(cab, det) {
 function _abrirModal(id) {
   if (!_voucherActual) return;
   const d = _voucherActual.detalles.find(x => x.id === id);
+  if(d?.automatico) return; // Derived lines follow their source; they cannot be edited independently.
   if (!d) return;
 
   document.getElementById('er-edit-id').value       = d.id;
@@ -689,6 +692,7 @@ function _guardar() {
   };
 
   _actualizarEstadoLinea(id);
+  _voucherActual.detalles = recalcularDestinos(_voucherActual.detalles);
   _sincronizarTributarioEditor();
   _cerrarModal();
   _renderResultado(_voucherActual.cabecera, _voucherActual.detalles);
@@ -717,7 +721,7 @@ function _sincronizarTributarioEditor() {
       if (/^(g[123]_(base|igv)|valor_no_gravado|valor_exportacion|base_gravada|descuento_base|igv|descuento_igv|importe_exonerado|importe_inafecto|isc|base_ivap|ivap|icbper|otros_tributos|importe_total)$/.test(k)) _voucherActual.tributario[tipo][k] = v;
     }
   } else {
-    const resultado = sincronizarTributarioLineas(_voucherOriginal.tributario, _voucherOriginal.detalles, _voucherActual.detalles);
+    const resultado = sincronizarTributarioLineas(_voucherOriginal.tributario, _voucherOriginal.detalles.filter(d=>!d.automatico), _voucherActual.detalles.filter(d=>!d.automatico));
     _tributarioAviso = resultado.ok ? null : resultado.texto;
     if (resultado.ok) {
       const tipo = resultado.tributario.tipo_registro === 'COMPRA' ? 'compra' : 'venta';

@@ -1942,3 +1942,15 @@ body.web-session .main-content { padding-bottom: 64px; }
 .periodo-campos label{display:flex;flex-direction:column;gap:8px;flex:1;min-width:180px;font-weight:600;}
 .periodo-campos input,.periodo-campos select{width:100%;}
 #periodo-estado{min-height:24px;}
+
+.voucher-automaticos-preview { font-size:13px; overflow-x:auto; }
+
+.sidebar:not(.collapsed) .submenu-item[data-target="view-amarres"] { white-space: normal; }
+.sidebar:not(.collapsed) .submenu-item[data-target="view-amarres"] .menu-text { min-width: 0; line-height: 1.4; }
+
+.web-question-actions { display:flex; gap:12px; margin-top:16px; flex-wrap:wrap; }
+
+.voucher-destinos { margin-top:16px; border-top:1px solid var(--brd); padding-top:12px; }
+.voucher-destinos summary { cursor:pointer; color:var(--tx2); font-size:13px; width:fit-content; }
+.voucher-destinos-table { width:100%; border-collapse:collapse; margin-top:12px; }
+.voucher-destinos-table th,.voucher-destinos-table td { padding:8px 10px; border-bottom:1px solid var(--brd); text-align:left; }

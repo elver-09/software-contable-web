@@ -3,7 +3,9 @@ const path = require("node:path");
 const SQLite = require("../sqlite.cjs");
 const { current } = require("../context.cjs");
 const cloud = require("./database.cjs");
-const schema = require("./schema-original.json");
+const original = require("./schema-original.json");
+const {ensureAutomaticosSchema,tables:automaticosTables}=require("../legacy/automaticos.cjs");
+const schema={...original,empresa:[...original.empresa,...automaticosTables]};
 const { runMigrations } = require("../../src/main/database/migrationRunner");
 const {
   EMPRESA_MIGRATIONS,
@@ -51,12 +53,13 @@ function backupDatabase(kind) {
     runMigrations(sqlite, migrations(kind), {
       logger: { log() {}, warn() {}, error() {} },
     });
+    if(kind!=="global") ensureAutomaticosSchema(sqlite);
     source.transaction(() => {
       source
         .prepare("SELECT pg_advisory_xact_lock(hashtext(?))")
         .get(kind === "global" ? c.userId : c.companyId);
       sqlite.transaction(() => {
-        for (const t of schema[kind]) sqlite.exec("DELETE FROM " + t.name);
+        for (const t of [...schema[kind]].reverse()) sqlite.exec("DELETE FROM " + t.name);
         copyRows(source, sqlite, schema[kind]);
       })();
     })();
@@ -104,6 +107,7 @@ function importDatabase(input) {
     runMigrations(sqlite, migrations(kind), {
       logger: { log() {}, warn() {}, error() {} },
     });
+    if(kind!=="global") ensureAutomaticosSchema(sqlite);
     return cloud.getGlobalDB().transaction(() => {
       if (kind === "global") {
         if (cloud.companies().length)
@@ -121,7 +125,7 @@ function importDatabase(input) {
       target
         .prepare("SELECT pg_advisory_xact_lock(hashtext(?))")
         .get(kind === "global" ? c.userId : c.companyId);
-      for (const t of schema[kind]) target.exec("DELETE FROM " + t.name);
+      for (const t of [...schema[kind]].reverse()) target.exec("DELETE FROM " + t.name);
       copyRows(sqlite, target, schema[kind]);
       return {
         success: true,

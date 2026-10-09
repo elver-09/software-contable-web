@@ -120,3 +120,19 @@ Se verifica la persistencia en el perfil, el aislamiento entre dos empresas, la 
 Comprobación visual local aislada: guardar Julio 2026; barra superior y Voucher muestran julio; la fecha inicial del voucher es 2026-07-01; Editar Registros inicia con 2026-07; reportes inician entre 2026-07-01 y 2026-07-31 y disponen de «Mes de trabajo»; recargar conserva julio y Dashboard consulta el mes seleccionado. Cambiar a agosto con una línea editada sin guardar queda bloqueado y volver a Editar Registros conserva el importe del borrador. No se modificaron preferencias ni movimientos reales en Supabase.
 
 El selector limita el ejercicio al año actual y muestra, en ese año, únicamente los meses transcurridos incluyendo el actual. En ejercicios anteriores ofrece los doce meses. Volver de diciembre de un ejercicio anterior al año actual ajusta el mes al último disponible. El servidor rechaza períodos futuros aunque se envíen directamente a la API. Si se había guardado un período futuro, se utiliza el mes actual al leerlo, sin modificar movimientos ni reescribir silenciosamente el perfil. Se probaron enero, diciembre y el caso octubre de 2026 en la función compartida, el rechazo HTTP y el selector real en Chrome.
+
+## Amarres de destino configurables
+
+Validación adicional: CRUD por empresa, cuentas existentes en catálogo efectivo, porcentaje y distribución, prioridad de prefijo/origen, redondeo y moneda, vista previa, reintentos sin duplicados, preservación de reglas históricas, actualización de importes, líneas automáticas independientes del total tributario, importación SIRE con nota de crédito, rollback completo y respaldo/restauración con amarres. PostgreSQL/PGlite confirma migración, trazabilidad, borrado por cascada y aislamiento por usuario y empresa. Revisión visual realizada en una empresa SQLite desechable; no se agregaron reglas ni vouchers de prueba a empresas reales de Supabase.
+
+Resultado de esta revisión: 68 pruebas web/PostgreSQL y 50 pruebas originales (118 en total). La migración de tablas nuevas se aplicó al proyecto Supabase configurado. Reiniciar el servidor y recargar la página para cargar las rutas nuevas.
+
+## Creación y edición de empresas
+
+Los botones de los diálogos web tienen 12 px de separación. Guardar el nombre comercial actualiza el directorio y perfil en PostgreSQL dentro de una transacción, conservando el ID de empresa y los registros. La revisión SQLite sincroniza su directorio por escritura atómica y conserva rutas anteriores para conexiones existentes. La pantalla refresca lista, perfil y menú lateral al guardar; permite perfiles sin logo.
+
+Pruebas: 70 web/PostgreSQL y 50 originales aprobadas; regresión adicional del perfil sin logo aprobada. Revisiones visuales hechas en una empresa desechable. Reiniciar el servidor para cargar la sincronización del directorio y recargar la página.
+
+### Vista previa discreta de destinos
+
+Se retiró el botón de la barra del voucher. «Destinos del asiento» aparece cerrado cuando existen líneas con un amarre aplicable. La vista previa se actualiza al agregar, editar o quitar líneas, cambiar el origen o volver al voucher. Se ignoran respuestas antiguas para evitar mostrar destinos de un borrador anterior. Comprobado visualmente: voucher vacío sin sección, compra con destinos calculados automáticamente y cambio a un origen sin amarre que oculta la sección. El guardado continúa generando los destinos en el servidor.

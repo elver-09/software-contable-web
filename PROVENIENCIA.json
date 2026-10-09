@@ -4,13 +4,13 @@
     {
       "archivo": "src/preload.js",
       "sha256_escritorio": "eeec2cf76ddf6778d861dbb4bf750616442e16ef119b78d5635f06702520cbed",
-      "sha256_web": "6b53b3f469a87450d9772129bc2b3d4eea0956045a66c3762f69d0918d9087c3",
+      "sha256_web": "aa0029d80f5f9f03a8c927fa7cef1f0cd0c350dfd243d01537462d4c3165c4c8",
       "identico": false
     },
     {
       "archivo": "src/renderer/index.html",
       "sha256_escritorio": "00c520f1ca0dae2357267d2d97b05e8de2350f61c537e97cf6a2ecf8d46a155b",
-      "sha256_web": "b94f1032a20f14d2bf21d23000ad21c4f1fe0fc00ee9216c6558d8836bfa6f94",
+      "sha256_web": "b51a767caf455038556c37ee75874d435065258849167b39ad961b0ec2b61a91",
       "identico": false
     },
     {
@@ -118,7 +118,7 @@
     {
       "archivo": "src/main/main.js",
       "sha256_escritorio": "92a906edaacd930f9999167edb8c3796d021bac5615fca5cfd02562d5b610f1c",
-      "sha256_web": "a18e499da6af1c66c8b48ab80c4d4bbedb270ecd894e734d207da8bff21ee6ee",
+      "sha256_web": "da2c08ed14e4e18546d42a69da3bcd4a72ef137e6d117b427a8afde3911b5852",
       "identico": false
     },
     {
@@ -190,7 +190,7 @@
     {
       "archivo": "src/main/controllers/voucherController.js",
       "sha256_escritorio": "876995c19a7680ec967d51c8a532323ed6eb2b7a8445e09243cb35edc6bdce3d",
-      "sha256_web": "97dcdd26e7f645127881e89d8ce8d0849f5fa61ab54ff1759e8e60e5f9d2de96",
+      "sha256_web": "8696a07ebba6deb6c576cb1fd1702df352ded3e5985b5d9a79aa397688003eca",
       "identico": false
     },
     {
@@ -208,7 +208,7 @@
     {
       "archivo": "src/main/controllers/empresaController.js",
       "sha256_escritorio": "80096d9846d58bcff84e5a51d94f28626d4ff3261cd32c6e5f6796eb49b42876",
-      "sha256_web": "48042062a860e0f43d2ac7482c3c832f945bab052c728c35fd48749d57ffb95b",
+      "sha256_web": "bd4b0b89302dfba45e4a9f00a91e400d9caa65bb2fa58876242d79510ab01248",
       "identico": false
     },
     {
@@ -322,7 +322,7 @@
     {
       "archivo": "src/renderer/css/styles.css",
       "sha256_escritorio": "e0c878bb5c177866682add84f10a9ecfacd2a4c57a7e3ee52f56721b4e32181b",
-      "sha256_web": "a651648fe67de9b6c49d6325783e5fc7f6bb20824df44401d0dd641be35d8d92",
+      "sha256_web": "4c0f08321729014987da6006582a155f0dc6070606ab48f10a89d1793bba025f",
       "identico": false
     },
     {
@@ -340,7 +340,7 @@
     {
       "archivo": "src/renderer/js/app.js",
       "sha256_escritorio": "676a49efaeb326b9e5c96dd714fa29a340f00194dc562ed9bf341b993577e6f1",
-      "sha256_web": "93e1aa5b2f36b4227cc0c497b9fa42c7b7ef4f1b933c23299ff4538f3abd4e88",
+      "sha256_web": "4fc5bb903de23b9486287f32fafb9053d5489cbf7373817b2dee99688b060a79",
       "identico": false
     },
     {
@@ -370,19 +370,19 @@
     {
       "archivo": "src/renderer/js/modules/amarres.js",
       "sha256_escritorio": "fefa03ddd5a2db480853945dc22f383a6ccb54d8c8e7c85083124b082e59c59b",
-      "sha256_web": "fefa03ddd5a2db480853945dc22f383a6ccb54d8c8e7c85083124b082e59c59b",
-      "identico": true
+      "sha256_web": "47d89d6363c55b74f33e81e7b182d6ba9dd12e4c07780f98d7f54aff389c871b",
+      "identico": false
     },
     {
       "archivo": "src/renderer/js/modules/voucher.js",
       "sha256_escritorio": "7ca2b8f0c7e4546fd4f2cf5c9929f3874b87d04f491f1f75e4cfb9e5b92b5e13",
-      "sha256_web": "4159248a79f93d9d55b3e7879bd0b523da0ad4f5d72510b43ee3e4d9b246dae8",
+      "sha256_web": "311a6c21e21de73089d0d750d54a89fdd659bd6311fbc15f2d8264e1ad3a1c03",
       "identico": false
     },
     {
       "archivo": "src/renderer/js/modules/editarRegistros.js",
       "sha256_escritorio": "2a3dbb9e53303ad4d5bf49f88d68c4a08875bf941fecec775f2681398b8dcc10",
-      "sha256_web": "60be287d95fcc0bc933f23ac5771b1993e851942e20e9b0f2a69d63aa0343eee",
+      "sha256_web": "8a9b5fc1f66824bef327e8ab85044e202ff9a1c27751f29c00dc01a9ac2436ad",
       "identico": false
     },
     {

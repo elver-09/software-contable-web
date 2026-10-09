@@ -68,8 +68,8 @@
           <button class="submenu-item" data-target="view-monedas" title="Monedas y T.C.">
             <i class="fa-solid fa-coins"></i> <span class="menu-text">Monedas y T.C.</span>
           </button>
-          <button class="submenu-item" data-target="view-amarres" title="Amarres del Asistente">
-            <i class="fa-solid fa-link"></i> <span class="menu-text">Amarres del Asistente</span>
+          <button class="submenu-item" data-target="view-amarres" title="Plantillas de compras y ventas">
+            <i class="fa-solid fa-link"></i> <span class="menu-text">Plantillas de compras y ventas</span>
           </button>
         </div>
       </div>
@@ -82,6 +82,7 @@
           <button class="submenu-item" data-target="view-voucher" title="Voucher">
             <i class="fa-solid fa-file-invoice-dollar"></i> <span class="menu-text">Voucher</span>
           </button>
+          <button class="submenu-item" data-target="view-automaticos" title="Amarres de destino"><i class="fa-solid fa-link"></i><span class="menu-text">Amarres de destino</span></button>
           <button class="submenu-item" data-target="view-editar-registros" title="Editar Registros">
             <i class="fa-solid fa-pen-to-square"></i>
             <span class="menu-text">Editar Registros</span>
@@ -141,6 +142,7 @@
       <!-- ══════════════════════════════════════════════════════════════
       MÓDULO: EDITAR REGISTROS (contenido dinámico)
       ══════════════════════════════════════════════════════════════ -->
+      <section id="view-automaticos" class="view-section"><div id="automaticos-root" class="view-root"></div></section>
       <section id="view-editar-registros" class="view-section">
         <div id="editar-registros-root" class="view-root"></div>
       </section>
@@ -676,16 +678,16 @@
       <section id="view-amarres" class="view-section">
         <div class="card catalog-panel">
           <div class="catalog-toolbar catalog-toolbar--with-note">
-            <h2>Amarres del Asistente</h2>
+            <h2>Plantillas de compras y ventas</h2>
             <div class="catalog-actions">
               <div class="field-icon-wrap">
                 <i class="fa-solid fa-search field-search-icon"></i>
                 <input
                   type="text"
                   id="inputBuscarAmarre"
-                  placeholder="Buscar amarre..."
+                  placeholder="Buscar plantilla..."
                   class="catalog-search"
-                  aria-label="Buscar amarre..."
+                  aria-label="Buscar plantilla..."
                 />
               </div>
               <button id="btnEditarAmarre" class="btn-secondary">
@@ -703,7 +705,7 @@
             Define cómo el Asistente arma cada asiento. Cuando escribas una cuenta cuyo inicio
             coincida con el
             <b>prefijo</b>, se generarán las líneas según el <b>tipo</b>. La línea de IGV sólo se
-            crea si el switch "Aplicar IGV" está activado. Si varios amarres calzan, gana el de
+            crea si el switch "Aplicar IGV" está activado. Si varias plantillas coinciden, se utiliza la de
             prefijo más largo.
           </p>
           <div class="table-container">
@@ -715,7 +717,7 @@
                   <th>Prefijo</th>
                   <th>Moneda</th>
                   <th>IGV Gravado</th>
-                  <th>Cuenta Destino</th>
+                  <th>Cuenta Contrapartida</th>
                   <th class="text-center">Activo</th>
                 </tr>
               </thead>
@@ -735,7 +737,7 @@
             class="modal-shell modal-shell--amarre"
           >
             <div class="modal-header modal-header--compact">
-              <h3 id="modalAmarreTitle" class="modal-title">Nuevo Amarre</h3>
+              <h3 id="modalAmarreTitle" class="modal-title">Nueva plantilla</h3>
             </div>
             <div class="modal-body modal-body--catalog">
               <form id="formAmarre">
@@ -783,14 +785,14 @@
                   <select
                     id="amarre_doc_tipo"
                     class="initially-hidden"
-                    aria-label="Tipo de documento del amarre"
+                    aria-label="Tipo de documento de la plantilla"
                   >
                     <option value="">—</option>
                   </select>
                   <div class="initially-hidden"></div>
                   <div>
                     <label for="amarre_cuenta_destino" class="field-label--amarre"
-                      >Cuenta Destino</label
+                      >Cuenta Contrapartida</label
                     >
                     <input
                       type="text"
@@ -1108,6 +1110,10 @@
                   <i class="fa-solid fa-save"></i> Guardar Asiento
                 </button>
               </div>
+              <details id="voucher-destinos" class="voucher-destinos" hidden>
+                <summary>Destinos del asiento</summary>
+                <div id="voucher-automaticos-preview" class="voucher-automaticos-preview"></div>
+              </details>
             </div>
           </div>
         </div>

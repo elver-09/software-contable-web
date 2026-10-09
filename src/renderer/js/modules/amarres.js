@@ -32,7 +32,7 @@ export async function initAmarres() {
   // Nuevo
   document.getElementById('btnNuevoAmarre').addEventListener('click', async () => {
     document.getElementById('formAmarre').reset();
-    document.getElementById('modalAmarreTitle').textContent = 'Nuevo Amarre';
+    document.getElementById('modalAmarreTitle').textContent = 'Nueva plantilla';
     document.getElementById('amarre_is_edit').value = 'false';
     document.getElementById('amarre_id').value = '';
     document.getElementById('amarre_activo').checked = true;
@@ -43,8 +43,8 @@ export async function initAmarres() {
 
   // Editar
   document.getElementById('btnEditarAmarre').addEventListener('click', async () => {
-    if (!selectedAmarre) return alert('Seleccione un amarre primero.');
-    document.getElementById('modalAmarreTitle').textContent = 'Editar Amarre';
+    if (!selectedAmarre) return alert('Seleccione una plantilla primero.');
+    document.getElementById('modalAmarreTitle').textContent = 'Editar plantilla';
     document.getElementById('amarre_is_edit').value = 'true';
     document.getElementById('amarre_id').value = selectedAmarre.id;
     document.getElementById('amarre_nombre').value = selectedAmarre.nombre;
@@ -67,7 +67,7 @@ export async function initAmarres() {
 
   // Eliminar
   document.getElementById('btnEliminarAmarre').addEventListener('click', async () => {
-    if (!selectedAmarre) return alert('Seleccione un amarre primero.');
+    if (!selectedAmarre) return alert('Seleccione una plantilla primero.');
     if (confirm(`¿Eliminar el amarre "${selectedAmarre.nombre}"?`)) {
       const result = await window.api.deleteAmarre(selectedAmarre.id);
       if (result.success) await renderTablaAmarres();
@@ -161,7 +161,7 @@ async function renderTablaAmarres() {
   const tbody = document.getElementById('tabla-amarres');
 
   if (amarres.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" style="text-align: center;">No hay amarres registrados.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align: center;">No hay plantillas registradas.</td></tr>`;
     return;
   }
 

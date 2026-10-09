@@ -12,6 +12,7 @@ const ids = new Set(
     .filter((t) => t.columns.some((c) => c.name === "id"))
     .map((t) => t.name),
 );
+ids.add("asientos_automaticos");
 class Bridge {
   constructor() {
     const { port1, port2 } = new MessageChannel();
