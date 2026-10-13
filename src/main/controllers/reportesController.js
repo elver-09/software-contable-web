@@ -1398,6 +1398,7 @@ function _construirPDFESFNotas(empresa, notas, desde, hasta, headerColor) {
 
 async function generarPDF(params) {
   try {
+    if (params.tipo === 'cartera') return await require('../services/carteraExport').exportar(params, 'pdf');
     const { tipo, desde, hasta, cuentaDesde, cuentaHasta, nivel } = params;
     if (!desde || !hasta) return { success: false, error: 'Indique período.' };
     if (desde > hasta)   return { success: false, error: 'Período inválido.' };
@@ -1553,6 +1554,7 @@ async function generarPDF(params) {
  */
 function exportarExcel(params) {
   try {
+    if (params.tipo === 'cartera') return require('../services/carteraExport').exportar(params, 'excel');
     // Intentar xlsx-js-style (soporta bordes/colores), si no, xlsx estándar
     let xlsx;
     try { xlsx = require('xlsx-js-style'); } catch (_) { xlsx = require('xlsx'); }

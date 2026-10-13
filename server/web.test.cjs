@@ -67,3 +67,23 @@ test('Ficha tributaria inconsistente rechaza el guardado completo sin crear asie
  assert.equal((await rpc('voucher:update-completo',[params])).value.success,true);
  assert.equal((await rpc('voucher:update-completo',[params])).value.success,false);
  });
+
+test('Cartera descarga todos los documentos filtrados, con importes numéricos y aislamiento', async()=>{
+ const selected=(await rpc('empresa:seleccionar',[],{companyName:'Cartera exportación',companyId:null})).companyId;
+ const detalles=Array.from({length:65},(_,i)=>({cuenta:'1212',nombre_cuenta:'Facturas',debe:10,haber:0,doc_tipo:'01',doc_numero:`F010-${i}`,codigo:'20123456789',razon_social:i<58?'Entidad objetivo':'Otra entidad',fecha_doc:'2026-10-01',fecha_venc:'2026-10-08'}));
+ detalles.push({cuenta:'7011',nombre_cuenta:'Ventas',debe:0,haber:650});
+ assert.equal((await rpc('voucher:add',[{origen:'5',fechaContable:'2026-10-01',periodo:'2026-10',glosa:'Prueba cartera',detalles}],{companyId:selected})).value.success,true);
+ const params={tipo:'cartera',carteraTipo:'CXC',buscar:'objetivo',desde:'2026-10-01',hasta:'2026-10-31',page:2,pageSize:50};
+ const screen=(await rpc('cartera:get-vencimientos',[{...params,tipo:'CXC'}],{companyId:selected})).value;
+ assert.equal(screen.paginacion.total,58);assert.equal(screen.documentos.length,8);
+ for(const channel of ['reportes:exportar-excel','reportes:generar-pdf']){
+  const value=(await rpc(channel,[params],{companyId:selected})).value;assert.equal(value.success,true,value.error);
+  const response=await fetch(`${base}/download/${value.download}?company=${selected}`,{headers:{Cookie:cookie}});assert.equal(response.status,200);
+  const bytes=Buffer.from(await response.arrayBuffer());
+  if(channel.endsWith('excel')){const xlsx=require('xlsx');const book=xlsx.read(bytes,{type:'buffer'});const rows=xlsx.utils.sheet_to_json(book.Sheets.Cartera,{header:1});assert.equal(rows.slice(8,66).length,58);assert.ok(rows.slice(8,66).every(r=>r[3]==='Entidad objetivo'&&r[7]===10));assert.equal(rows.at(-2)[7],580);assert.equal(rows.at(-1)[7],0);}
+  else assert.equal(bytes.subarray(0,4).toString(),'%PDF');
+  assert.equal((await fetch(`${base}/download/${value.download}?company=${company}`,{headers:{Cookie:cookie}})).status,404);
+ }
+ const empty=(await rpc('reportes:exportar-excel',[{...params,buscar:'inexistente'}],{companyId:selected})).value;assert.equal(empty.success,false);assert.match(empty.error,/No hay documentos/);
+ const invalid=(await rpc('reportes:generar-pdf',[{...params,desde:'2026-11-01'}],{companyId:selected})).value;assert.equal(invalid.success,false);
+});

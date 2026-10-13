@@ -15,7 +15,7 @@ function _obtenerDocumentosBase(db) {
   return carteraRepository._obtenerDocumentosBase_all_voucher_detalles(db);
 }
 
-function getCarteraVencimientos(params = {}) {
+function getCarteraVencimientos(params = {}, completo = false) {
   const db = getDB();
   const hoyISO = _isoLocal();
   const pageSize = Math.max(10, Math.min(100, Number(params.pageSize) || 50));
@@ -99,7 +99,7 @@ function getCarteraVencimientos(params = {}) {
     resumen,
     filtros: { tipo, estado, buscar: params.buscar || '', desde, hasta },
     paginacion: { page: safePage, pageSize, total, totalPages },
-    documentos: filtrados.slice(offset, offset + pageSize),
+    documentos: completo ? filtrados : filtrados.slice(offset, offset + pageSize),
   };
 }
 

@@ -142,7 +142,7 @@
     {
       "archivo": "src/main/controllers/carteraController.js",
       "sha256_escritorio": "1f509b715773eacc1448ee4b924c906ebc577d92e46fcff207d6a985f88a4eff",
-      "sha256_web": "3535ee13a025aba3dae41c772e11ab48cb9ed50087d941948ce5d4b8ea2decac",
+      "sha256_web": "548c0896a06f4a25d5d06dc1c91c4daf9cd8465ef3c4c509f5ac182bde9e6d2f",
       "identico": false
     },
     {
@@ -226,7 +226,7 @@
     {
       "archivo": "src/main/controllers/reportesController.js",
       "sha256_escritorio": "f7ec063063545b4eb2061c4ec91957f1be1b4f4f9655e46ea89ef247e09bb90a",
-      "sha256_web": "a6311d66a74aedee1cdb8ef34748b7d3525bdb02275f0a4a6b716e1953f8db48",
+      "sha256_web": "19aac057622d930531828b81065bebbe8567472f11ae846f5fdf86db8a59dae5",
       "identico": false
     },
     {
@@ -358,8 +358,8 @@
     {
       "archivo": "src/renderer/js/modules/cartera.js",
       "sha256_escritorio": "9bdc6355641c36821fd52ec378784ce165bde38cb7323416124eaa86201d3ba9",
-      "sha256_web": "9bdc6355641c36821fd52ec378784ce165bde38cb7323416124eaa86201d3ba9",
-      "identico": true
+      "sha256_web": "edff09750834dd7ab6af6a28a22774c4024f9d532c77cc91091abc28cfb35046",
+      "identico": false
     },
     {
       "archivo": "src/renderer/js/modules/configEEFF.js",

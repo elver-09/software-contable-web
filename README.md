@@ -102,3 +102,5 @@ El motor agrega pares balanceados al guardar vouchers manuales, del asistente o 
 Los vouchers guardados conservan una copia de su regla. Editar, desactivar o eliminar una configuración no cambia asientos anteriores. Un voucher antiguo sin destinos no recibe reglas nuevas al editarse. Si cambia la cuenta original a otra fuera del prefijo histórico, su destino anterior deja de generarse. Las reglas nuevas se usan en nuevos vouchers.
 
 La migración `202610080005_asientos_automaticos.sql` crea `ansorito.asientos_automaticos` y `ansorito.asientos_automaticos_lineas`, con aislamiento de usuario y empresa. Los respaldos web incluyen reglas y trazabilidad de líneas; SQLite local dispone de tablas equivalentes para revisión y pruebas. «Cuenta contrapartida» en Plantillas de compras y ventas distingue la cuenta por pagar/cobrar de estos destinos.
+
+Cartera y Vencimientos permite descargar Excel y PDF con todos los documentos de los filtros actuales, datos de la empresa, fecha de corte y totales por cobrar y pagar.

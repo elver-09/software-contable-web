@@ -44,9 +44,10 @@ function _shell() {
         <div>
           <h2>Documentos pendientes</h2>
         </div>
-        <button id="crt-limpiar" class="crt-btn crt-btn--secondary" type="button"><i class="fa-solid fa-rotate-left"></i> Limpiar</button>
+        <div class="crt-actions"><button id="crt-excel" class="crt-btn crt-btn--secondary" type="button"><i class="fa-solid fa-file-excel"></i> Excel</button><button id="crt-pdf" class="crt-btn crt-btn--secondary" type="button"><i class="fa-solid fa-file-pdf"></i> PDF</button><button id="crt-limpiar" class="crt-btn crt-btn--secondary" type="button"><i class="fa-solid fa-rotate-left"></i> Limpiar</button></div>
       </div>
 
+      <p id="crt-export-status" role="status" hidden></p>
       <div class="crt-filters">
         <label><span>TIPO</span><select id="crt-tipo"><option value="TODOS">Todos</option><option value="CXC">Por cobrar</option><option value="CXP">Por pagar</option></select></label>
         <label><span>ESTADO</span><select id="crt-estado"><option value="TODOS">Todos</option><option value="VENCIDO">Vencidos</option><option value="PROXIMO">Próximos 7 días</option><option value="HOY">Vencen hoy</option><option value="PENDIENTE">Pendientes</option></select></label>
@@ -74,6 +75,7 @@ function _skeletonKpis() {
 }
 
 function _bindEvents() {
+  for (const formato of ['excel', 'pdf']) root.querySelector(`#crt-${formato}`).addEventListener('click', () => _exportar(formato));
   root.querySelector('#crt-tipo')?.addEventListener('change', e => { state.tipo = e.target.value; state.page = 1; _cargar(); });
   root.querySelector('#crt-estado')?.addEventListener('change', e => { state.estado = e.target.value; state.page = 1; _cargar(); });
   root.querySelector('#crt-desde')?.addEventListener('change', e => { state.desde = e.target.value; state.page = 1; _cargar(); });
@@ -99,6 +101,23 @@ function _bindEvents() {
     state.page = Number(btn.dataset.page) || 1;
     _cargar().then(() => root.querySelector('.crt-card--table')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
   });
+}
+
+async function _exportar(formato) {
+  const buttons = root.querySelectorAll('#crt-excel, #crt-pdf');
+  const status = root.querySelector('#crt-export-status');
+  const params = { ...state, tipo: 'cartera', carteraTipo: state.tipo };
+  buttons.forEach(b => b.disabled = true);
+  status.hidden = false;
+  status.textContent = 'Preparando descarga…';
+  try {
+    const result = await (formato === 'pdf' ? window.api.generarReportePDF(params) : window.api.exportarReporteExcel(params));
+    if (!result.success) throw new Error(result.error);
+    const guardar = await (formato === 'pdf' ? window.api.guardarPDF({filePath: result.filePath, defaultName: result.fileName}) : window.api.guardarExcel({filePath: result.filePath, defaultName: result.fileName}));
+    if (!guardar.success && !guardar.canceled) throw new Error(guardar.error || 'No se pudo descargar.');
+    status.textContent = guardar.canceled ? 'Descarga cancelada.' : 'Reporte descargado.';
+  } catch (err) { status.textContent = err.message || 'No se pudo descargar el reporte.'; }
+  finally { buttons.forEach(b => b.disabled = false); }
 }
 
 async function _cargar() {
@@ -176,7 +195,7 @@ function _styles() {
     .crt-kpi__label{font-size:9px;text-transform:uppercase;letter-spacing:0;font-weight:800;color:var(--tx3)}.crt-kpi__value{font-size:14px;font-weight:800;margin-top:2px;line-height:1.1;color:var(--tx)}.crt-kpi__sub{font-size:10px;margin-top:2px;color:var(--tx2)}
     .crt-card{background:var(--bg-card);border:1px solid var(--brd);border-radius:8px;box-shadow:var(--shd);padding:18px 20px;}.crt-card--table{padding:0;overflow:hidden;}
     .crt-card__head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding-bottom:10px;margin-bottom:10px;border-bottom:1px solid var(--brd-lt)}.crt-card__head h2{font-size:14px;margin:0;color:var(--tx)}.crt-card__head p{font-size:10.5px;color:var(--tx3);margin:3px 0 0}
-    .crt-btn{border:none;border-radius:9px;padding:9px 13px;display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:700;cursor:pointer}.crt-btn--secondary{background:var(--bg-ro);border:1px solid var(--brd-in);color:var(--tx2)}
+    .crt-actions{display:flex;gap:8px;flex-wrap:wrap}.crt-btn:disabled{opacity:.5;cursor:wait}#crt-export-status{font-size:12px;color:var(--tx2)}.crt-btn{border:none;border-radius:9px;padding:9px 13px;display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:700;cursor:pointer}.crt-btn--secondary{background:var(--bg-ro);border:1px solid var(--brd-in);color:var(--tx2)}
     .crt-filters{display:grid;grid-template-columns:150px 170px 150px 150px minmax(220px,1fr);gap:12px;align-items:end}.crt-filters label{display:flex;flex-direction:column;gap:6px}.crt-filters label>span{font-size:9.5px;letter-spacing:0;font-weight:800;color:var(--tx3)}
     .crt-filters input,.crt-filters select{height:38px;background:var(--bg-input);color:var(--tx);border:1px solid var(--brd-in);border-radius:8px;padding:0 11px;font-size:11px;min-width:0}.crt-search>div{position:relative}.crt-search i{position:absolute;left:12px;top:12px;color:var(--tx3);font-size:12px}.crt-search input{width:100%;padding-left:34px}
     .crt-table-meta{display:flex;justify-content:space-between;gap:12px;padding:13px 18px;background:var(--bg-block);border-bottom:1px solid var(--brd-lt);font-size:11px;color:var(--tx2)}.crt-table-wrap{overflow:auto;max-height:55vh}.crt-table{width:100%;border-collapse:collapse;min-width:900px}.crt-table thead{position:sticky;top:0;z-index:2}.crt-table th{background:var(--bg-mhdr);color:#fff;text-align:left;padding:11px 13px;font-size:9.5px;letter-spacing:0;text-transform:uppercase}.crt-table th.num,.crt-table td.num{text-align:right}.crt-table td{padding:12px 13px;border-bottom:1px solid var(--brd-lt);font-size:12px;color:var(--tx2);vertical-align:middle}.crt-table tbody tr:hover{background:var(--bg-ro)}

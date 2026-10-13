@@ -136,3 +136,9 @@ Pruebas: 70 web/PostgreSQL y 50 originales aprobadas; regresión adicional del p
 ### Vista previa discreta de destinos
 
 Se retiró el botón de la barra del voucher. «Destinos del asiento» aparece cerrado cuando existen líneas con un amarre aplicable. La vista previa se actualiza al agregar, editar o quitar líneas, cambiar el origen o volver al voucher. Se ignoran respuestas antiguas para evitar mostrar destinos de un borrador anterior. Comprobado visualmente: voucher vacío sin sección, compra con destinos calculados automáticamente y cambio a un origen sin amarre que oculta la sección. El guardado continúa generando los destinos en el servidor.
+
+## Cartera y Vencimientos — descargas
+
+Se incorporaron botones Excel y PDF que respetan tipo, estado, fechas de vencimiento y búsqueda, exportando todos los resultados filtrados sin limitarse a la página visible. Los reportes incluyen empresa, RUC, dirección, fecha de corte y totales separados por cobrar/pagar. Excel conserva saldos numéricos con dos decimales; PDF repite la cabecera de columnas y numera páginas. Se reutilizan los canales de reportes y las descargas protegidas por sesión/empresa. No requiere migración de base de datos.
+
+Verificación: 26 pruebas web/cartera y 8 de límites SQL/esquema PostgreSQL aprobadas. Caso de 65 documentos: filtro devuelve 58, segunda página muestra 8 y Excel exporta los 58 con total por cobrar de 580. PDF válido, descarga de otra empresa rechazada, búsqueda sin resultados y fechas invertidas informadas. Interfaz revisada en empresa local de prueba; Supabase no recibió datos de prueba.
