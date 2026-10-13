@@ -1,3 +1,4 @@
+process.env.ANSORITO_DB_ENGINE='sqlite';process.env.ANSORITO_SQLITE_MODE='test';
 const {test,before,after}=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs'),os=require('node:os'),path=require('node:path');
 process.env.ANSORITO_DATA_DIR=fs.mkdtempSync(path.join(os.tmpdir(),'ansorito-auth-test-'));process.env.SUPABASE_URL='https://mock-project.supabase.co';process.env.SUPABASE_PUBLISHABLE_KEY='sb_publishable_test';process.env.SIRE_MASTER_KEY='only-test-master-key-at-least-32-characters';process.env.AUTO_EXCHANGE_RATE='0';
 const nativeFetch=global.fetch;let revoked=false,calls=[];

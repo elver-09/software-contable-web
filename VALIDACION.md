@@ -142,3 +142,9 @@ Se retiró el botón de la barra del voucher. «Destinos del asiento» aparece c
 Se incorporaron botones Excel y PDF que respetan tipo, estado, fechas de vencimiento y búsqueda, exportando todos los resultados filtrados sin limitarse a la página visible. Los reportes incluyen empresa, RUC, dirección, fecha de corte y totales separados por cobrar/pagar. Excel conserva saldos numéricos con dos decimales; PDF repite la cabecera de columnas y numera páginas. Se reutilizan los canales de reportes y las descargas protegidas por sesión/empresa. No requiere migración de base de datos.
 
 Verificación: 26 pruebas web/cartera y 8 de límites SQL/esquema PostgreSQL aprobadas. Caso de 65 documentos: filtro devuelve 58, segunda página muestra 8 y Excel exporta los 58 con total por cobrar de 580. PDF válido, descarga de otra empresa rechazada, búsqueda sin resultados y fechas invertidas informadas. Interfaz revisada en empresa local de prueba; Supabase no recibió datos de prueba.
+
+## PostgreSQL obligatorio al iniciar — 12/10/2026
+
+Se eliminó el motor SQLite implícito. La configuración se valida antes de cargar controladores, crear workers o directorios. El inicio normal exige PostgreSQL, Auth y cifrado SIRE; verifica conexión y checksums de migraciones antes de escuchar. SQLite se conserva para demo/pruebas explícitas y formatos de respaldo. La demo usa puerto y carpeta separados.
+
+127 pruebas aprobadas (77 servidor/PostgreSQL y 50 originales), incluyendo rechazo sin configuración y sin crear archivos, SQLite accidental, credenciales incompletas, base inaccesible, restricción de producción y aislamiento del comando demo. Se verificaron conexión/migraciones reales mediante transacción de solo lectura y un inicio HTTP temporal en puerto aleatorio; se cerró al terminar. No se alteraron datos remotos.

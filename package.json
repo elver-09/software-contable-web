@@ -12,7 +12,7 @@
     "test:postgres": "node --test server/postgres/*.test.cjs",
     "db:import-local": "node --env-file=.env tools/import-local-workspaces.cjs",
     "test:runtime": "node --env-file=.env tools/verify-postgres-runtime.cjs",
-    "start:demo": "node server/index.cjs",
+    "start:demo": "node server/demo.cjs",
     "test:storage": "node --env-file=.env tools/verify-storage-policy.cjs"
   },
   "engines": {

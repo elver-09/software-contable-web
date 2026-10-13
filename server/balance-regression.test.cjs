@@ -1,3 +1,4 @@
+process.env.ANSORITO_DB_ENGINE='sqlite';process.env.ANSORITO_SQLITE_MODE='test';
 const {test,before,after}=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs'),os=require('node:os'),path=require('node:path'),vm=require('node:vm');

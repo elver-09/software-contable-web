@@ -1,3 +1,5 @@
+const { validateServerConfig, verifyPostgresStartup } = require('./runtime-config.cjs');
+const postgres = validateServerConfig() === 'postgres';
 const http = require("node:http"),
   fs = require("node:fs"),
   path = require("node:path"),
@@ -6,7 +8,6 @@ const { storage, current } = require("./context.cjs");
 const { handlers } = require("./electron.cjs");
 const desktop = require("../src/main/main.js");
 const exchangeStarted = new Map();
-const postgres = process.env.ANSORITO_DB_ENGINE === "postgres";
 const { isMainThread } = require("node:worker_threads");
 const routes =
   postgres && isMainThread
@@ -451,14 +452,25 @@ function makeServer() {
     }
   });
 }
-module.exports = { makeServer, handlers, storage, data, createCompany, routes };
-if (require.main === module) {
+async function start() {
+  try {
+    if (postgres) await verifyPostgresStartup();
   const host = process.env.HOST || "127.0.0.1";
   if (!supabaseUrl && host !== "127.0.0.1")
     throw Error("Configura Supabase antes de exponer el servidor");
-  makeServer().listen(Number(process.env.PORT || 4180), host, () =>
+  const server = makeServer();
+  await new Promise((resolve, reject) => {
+    server.once('error', reject);
+    server.listen(Number(process.env.PORT || 4180), host, resolve);
+  });
     console.log(
       `Ansorito web: http://${host}:${process.env.PORT || 4180} (${supabaseUrl ? "Supabase" : "revisión local"})`,
-    ),
-  );
+    );
+  return server;
+  } catch (error) {
+    if (routes) await routes.close();
+    throw error;
+  }
 }
+module.exports = { makeServer, handlers, storage, data, createCompany, routes, start };
+if (require.main === module) start().catch(error => { console.error(error.message); process.exitCode = 1; });

@@ -176,7 +176,8 @@ if (passed) {
         },
       ]),
     );
-    delete process.env.ANSORITO_DB_ENGINE;
+    process.env.ANSORITO_DB_ENGINE = 'sqlite';
+    process.env.ANSORITO_SQLITE_MODE = 'test';
     for (const file of Object.keys(require.cache))
       if (file.includes(path.join("src", "main"))) delete require.cache[file];
     const reference = storage.run(context, () =>

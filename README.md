@@ -29,13 +29,13 @@ pnpm install --frozen-lockfile
 pnpm start
 ```
 
-Abrir http://127.0.0.1:4181/. `pnpm start` carga `.env` cuando existe. El modo sin `.env` es exclusivamente revisión local con SQLite; no usarlo para trabajar con la contabilidad de Supabase.
+Abrir http://127.0.0.1:4181/. `pnpm start` carga `.env` cuando existe y exige PostgreSQL, Supabase Auth y la clave maestra SIRE. Si las variables se proporcionan desde el alojamiento, no hace falta un archivo `.env`. Sin configuración válida, el inicio se detiene: no cambia a SQLite. Antes de abrir el servidor se comprueban la conexión PostgreSQL y las migraciones aplicadas mediante consultas de solo lectura.
 
 `.env` es privado y está excluido de Git. Incluye URL y clave pública de Supabase, `DATABASE_URL`, `PG_CA_FILE`, `ANSORITO_DB_ENGINE=postgres` y `SIRE_MASTER_KEY`. Nunca colocar la conexión PostgreSQL o la clave maestra SUNAT en el navegador. La conexión remota verifica el certificado oficial incluido. La contraseña debe codificarse como parte de una URL si contiene caracteres especiales.
 
 ## Migraciones y datos existentes
 
-Las cuatro migraciones ya se aplicaron al proyecto `mjpqbyenuexvjksnskml`. Se importaron el catálogo global y la empresa existente de la versión web anterior, conservando el identificador y comprobando los conteos de cada tabla. Las bases locales anteriores se conservan.
+Las cinco migraciones ya se aplicaron al proyecto `mjpqbyenuexvjksnskml`. Se importaron el catálogo global y la empresa existente de la versión web anterior, conservando el identificador y comprobando los conteos de cada tabla. Las bases locales anteriores se conservan.
 
 ```sh
 pnpm db:migrate
@@ -104,3 +104,9 @@ Los vouchers guardados conservan una copia de su regla. Editar, desactivar o eli
 La migración `202610080005_asientos_automaticos.sql` crea `ansorito.asientos_automaticos` y `ansorito.asientos_automaticos_lineas`, con aislamiento de usuario y empresa. Los respaldos web incluyen reglas y trazabilidad de líneas; SQLite local dispone de tablas equivalentes para revisión y pruebas. «Cuenta contrapartida» en Plantillas de compras y ventas distingue la cuenta por pagar/cobrar de estos destinos.
 
 Cartera y Vencimientos permite descargar Excel y PDF con todos los documentos de los filtros actuales, datos de la empresa, fecha de corte y totales por cobrar y pagar.
+
+## Inicio obligatorio con PostgreSQL
+
+El comando normal sigue siendo `pnpm start`. El motor predeterminado es PostgreSQL; seleccionar SQLite requiere un modo explícito y se rechaza en producción. Si la base no responde, faltan migraciones o sus checksums no coinciden, el servidor no acepta conexiones. La comprobación no crea ni modifica tablas; los cambios de estructura se aplican con `pnpm db:migrate`.
+
+La demostración se inicia únicamente con `pnpm start:demo`. Usa SQLite en `data/demo/`, escucha en `127.0.0.1:4182` y elimina del proceso las variables de conexión/autenticación Supabase heredadas. No utiliza los archivos de contabilidad anteriores ni el espacio de trabajo normal. Se puede elegir otro puerto mediante `ANSORITO_DEMO_PORT`. Las pruebas que usan SQLite declaran expresamente `ANSORITO_SQLITE_MODE=test`; este modo tampoco se permite en producción. Los respaldos SQLite desde PostgreSQL siguen disponibles sin cambiar el motor activo.

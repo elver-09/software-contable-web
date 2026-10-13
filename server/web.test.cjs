@@ -1,3 +1,4 @@
+process.env.ANSORITO_DB_ENGINE='sqlite';process.env.ANSORITO_SQLITE_MODE='test';
 const {test,before,after}=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs'),os=require('node:os'),path=require('node:path');
 process.env.AUTO_EXCHANGE_RATE='0';
 process.env.ANSORITO_DATA_DIR=fs.mkdtempSync(path.join(os.tmpdir(),'ansorito-web-test-'));
